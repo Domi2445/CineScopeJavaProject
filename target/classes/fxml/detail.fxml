@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.DetailController"
+      spacing="10" style="-fx-padding: 20; -fx-background-color: white;">
+
+    <HBox spacing="10">
+        <ImageView fx:id="imgPoster" fitWidth="160" fitHeight="240" preserveRatio="true" />
+        <VBox spacing="5">
+            <Label fx:id="lblTitle" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <HBox spacing="10">
+                <Label text="Jahr:" />
+                <Label fx:id="lblYear" />
+                <Label text=" | Autor:" />
+                <Label fx:id="lblWriter" />
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <Label text="Inhalt:" style="-fx-font-weight: bold;" />
+    <TextArea fx:id="txtPlot" wrapText="true" editable="false" prefRowCount="8" />
+
+    <HBox spacing="10">
+        <Button text="Schließen" onAction="#handleClose" />
+    </HBox>
+</VBox>

@@ -6,18 +6,20 @@
 <?import javafx.scene.control.TextField?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SearchController"
       spacing="15" style="-fx-padding: 20;">
 
     <HBox spacing="10">
-        <TextField promptText="Filmtitel eingeben..." />
-        <Button text="Suchen" />
+        <TextField fx:id="txtSearch" promptText="Filmtitel eingeben..." />
+        <Button text="Suchen" onAction="#handleSearch" />
     </HBox>
 
-    <TableView>
+    <TableView fx:id="tableResults">
         <columns>
-            <TableColumn text="Titel" />
-            <TableColumn text="Jahr" />
-            <TableColumn text="Typ" />
+            <TableColumn fx:id="colTitle" text="Titel" />
+            <TableColumn fx:id="colYear" text="Jahr" />
+            <TableColumn fx:id="colWriter" text="Autor" />
+            <TableColumn fx:id="colPlot" text="Inhalt" />
         </columns>
     </TableView>
 </VBox>

@@ -11,8 +11,12 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.net.http;
+    requires com.google.gson;
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;
+    opens com.filmeverwaltung.javaprojektfilmverwaltung.model to com.google.gson;
+
     exports com.filmeverwaltung.javaprojektfilmverwaltung;
 }

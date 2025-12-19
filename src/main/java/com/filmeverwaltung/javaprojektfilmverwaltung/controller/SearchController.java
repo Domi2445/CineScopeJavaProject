@@ -1,5 +1,6 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import javafx.application.Platform;
@@ -38,7 +39,7 @@ public class SearchController {
     @FXML
     private TableColumn<Filmmodel, String> colPlot;
 
-    private final OmdbService omdbService = new OmdbService("2c918cab");
+    private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
 
     @FXML
     private void initialize() {
@@ -135,6 +136,10 @@ public class SearchController {
                 Task<Filmmodel> task = new Task<>() {
                     @Override
                     protected Filmmodel call() {
+                        // Bevorzuge imdbID, da exakter
+                        if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                            return omdbService.getFilmById(film.getImdbID());
+                        }
                         return omdbService.getFilmByTitle(film.getTitle());
                     }
                 };

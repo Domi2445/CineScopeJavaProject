@@ -1,8 +1,12 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
+import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -32,6 +36,8 @@ public class WatchlistController
 
     @FXML
     private Button btnExport;
+
+    private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
 
     @FXML
     private void initialize() {
@@ -81,7 +87,31 @@ public class WatchlistController
             ctrl.setFilm(film);
             dialog.show();
 
-            // Bei Watchlist brauchen wir keine weitere Ergänzung durch Service, da hier die Daten aus der lokalen Watchlist kommen
+            // Wenn Einträge unvollständig, lade Details nach (bevorzugt über imdbID)
+            if (film.getPlot() == null || film.getWriter() == null) {
+                Task<Filmmodel> task = new Task<>() {
+                    @Override
+                    protected Filmmodel call() {
+                        if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                            return omdbService.getFilmById(film.getImdbID());
+                        }
+                        return omdbService.getFilmByTitle(film.getTitle());
+                    }
+                };
+                task.setOnSucceeded(ev -> {
+                    Filmmodel full = task.getValue();
+                    if (full != null) {
+                        Platform.runLater(() -> ctrl.setFilm(full));
+                    }
+                });
+                task.setOnFailed(ev -> {
+                    Throwable ex = task.getException();
+                    ex.printStackTrace();
+                });
+                Thread th = new Thread(task, "omdb-detail-watchlist");
+                th.setDaemon(true);
+                th.start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

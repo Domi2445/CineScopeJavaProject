@@ -1,13 +1,22 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Filmmodel {
 
+    @SerializedName("Title")
     private String title;
+    @SerializedName("Year")
     private String year;
+    @SerializedName("Writer")
     private String writer;
+    @SerializedName("Plot")
     private String plot;
+    @SerializedName("Response")
     private String response; // wichtig für Fehlerprüfung
+    @SerializedName("imdbID")
     private String imdbID; // OMDb imdbID
+    @SerializedName("Poster")
     private String poster; // OMDb Poster-URL
 
     public Filmmodel() {

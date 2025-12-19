@@ -1,0 +1,23 @@
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="15" style="-fx-padding: 20;">
+
+    <HBox spacing="10">
+        <TextField promptText="Filmtitel eingeben..." />
+        <Button text="Suchen" />
+    </HBox>
+
+    <TableView>
+        <columns>
+            <TableColumn text="Titel" />
+            <TableColumn text="Jahr" />
+            <TableColumn text="Typ" />
+        </columns>
+    </TableView>
+</VBox>

@@ -1,0 +1,25 @@
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="15" style="-fx-padding: 20;">
+
+    <Label text="Watchlist" style="-fx-font-size: 22;" />
+
+    <TableView>
+        <columns>
+            <TableColumn text="Titel" />
+            <TableColumn text="Jahr" />
+            <TableColumn text="Bewertung" />
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button text="Entfernen" />
+        <Button text="Exportieren" />
+    </HBox>
+</VBox>

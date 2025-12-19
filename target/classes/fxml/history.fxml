@@ -1,0 +1,10 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="15" style="-fx-padding: 20;">
+
+    <Label text="Suchverlauf" style="-fx-font-size: 22;" />
+    <ListView />
+</VBox>

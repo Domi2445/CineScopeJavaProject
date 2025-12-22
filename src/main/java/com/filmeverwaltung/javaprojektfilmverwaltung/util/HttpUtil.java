@@ -10,6 +10,8 @@ public class HttpUtil
 {
     private static final HttpClient client = HttpClient.newHttpClient();
 
+    public HttpUtil(){}
+
     public static String get(String url) throws IOException, InterruptedException, IOException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))

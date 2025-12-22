@@ -19,6 +19,8 @@ public class OmdbCliTest {
         Filmmodel single = s.getFilmByTitle(q);
         if (single != null) {
             System.out.println("\nDetails (getFilmByTitle):\n" + single);
+            System.out.println("Poster URL: " + single.getPoster());
+            System.out.println(single.getImdbID());
         } else {
             System.out.println("Kein exaktes Ergebnis gefunden.");
         }

@@ -13,6 +13,7 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires com.almasb.fxgl.all;
     requires java.net.http;
     requires com.google.gson;
+    requires annotations;
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;

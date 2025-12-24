@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +28,11 @@ public class SearchController {
 
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
 
+    /** Initialisiert die Suchansicht und setzt die Tabellenkonfiguration.
+     * @Param void
+     * @Return void
+     *
+     */
     @FXML
     private void initialize() {
         colTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
@@ -45,6 +51,11 @@ public class SearchController {
         });
     }
 
+    /** Führt eine Suche nach Filmen basierend auf dem eingegebenen Titel durch.
+     * @Param void
+     * @Return void
+     *
+     */
     @FXML
     private void handleSearch() {
         String query = txtSearch.getText().trim();
@@ -74,7 +85,12 @@ public class SearchController {
         new Thread(task).start();
     }
 
-    private void openDetail(Filmmodel film) {
+    /** Öffnet das Detailfenster für den ausgewählten Film.
+     * @Param film Der Film, dessen Details angezeigt werden sollen.
+     * @Return void
+     *
+     */
+    private void openDetail(@NotNull Filmmodel film) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
             Scene scene = new Scene(loader.load());

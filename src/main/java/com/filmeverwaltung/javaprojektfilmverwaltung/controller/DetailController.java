@@ -34,19 +34,19 @@ public class DetailController implements Initializable {
 
     public void setFilm(Filmmodel film) {
         this.film = film;
-        updateUI();
-        loadPoster();
+        aktualisiereUI();
+        ladePoster();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (film != null) {
-            updateUI();
-            loadPoster();
+            aktualisiereUI();
+            ladePoster();
         }
     }
 
-    private void updateUI() {
+    private void aktualisiereUI() {
         if (film == null) return;
 
         lblTitle.setText(valueOrDash(film.getTitle()));
@@ -59,7 +59,7 @@ public class DetailController implements Initializable {
         return (s == null || s.isBlank()) ? "-" : s;
     }
 
-    private void loadPoster() {
+    private void ladePoster() {
         if (film == null) return;
 
         String url = film.getPoster();

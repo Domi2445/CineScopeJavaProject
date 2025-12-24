@@ -9,6 +9,14 @@ public class TranslationUtil
 
         private static final Gson gson = new Gson();
 
+        /**
+         * Übersetzt den gegebenen Text von der Quellsprache in die Zielsprache.
+         *
+         * @param text       Der zu übersetzende Text.
+         * @param sourceLang Die Quellsprache (z.B. "de" für Deutsch).
+         * @param targetLang Die Zielsprache (z.B. "en" für Englisch).
+         * @return Der übersetzte Text.
+         */
         public String translate(String text, String sourceLang, String targetLang)
         {
             try

@@ -10,9 +10,14 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 
-
+/** * Hauptklasse der JavaFX-Anwendung
+ */
 public class Main extends Application
 {
+    /** Startmethode der JavaFX-Anwendung
+     * @param stage Primäre Bühne der Anwendung
+     * @throws Exception Bei Fehlern beim Laden der FXML-Datei
+     */
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/root.fxml")));
@@ -23,6 +28,9 @@ public class Main extends Application
         stage.show();
     }
 
+    /** Hauptmethode der Anwendung
+     * @param args Kommandozeilenargumente
+     */
      public static void main(String[] args) {
         launch();
     }

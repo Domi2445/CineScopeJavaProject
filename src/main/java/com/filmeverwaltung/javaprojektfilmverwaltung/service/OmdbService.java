@@ -56,7 +56,7 @@ public class OmdbService {
     }
 
     /**
-     * Suche: mehrere Treffer anhand einer Query (OMDb 's=' Parameter).
+     * Suche Filme anhand eines Titels (s=)
      */
     public List<Filmmodel> searchByTitle(String query) {
         try {

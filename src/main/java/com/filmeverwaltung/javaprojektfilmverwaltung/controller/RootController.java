@@ -8,6 +8,10 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 
+
+/** Controller für die Root-Ansicht der Anwendung.
+ * Verwaltet die Navigation zwischen verschiedenen Ansichten wie Suche, Watchlist, Verlauf und Einstellungen.
+ */
 public class RootController {
 
     @FXML

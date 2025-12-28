@@ -1,4 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler;
 
-public class DateihandlerSer {
+public class DateihandlerSer  extends  Dateihandler{
+
+
+
 }

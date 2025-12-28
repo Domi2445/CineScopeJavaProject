@@ -14,6 +14,7 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires java.net.http;
     requires com.google.gson;
     requires annotations;
+    requires java.logging;
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;

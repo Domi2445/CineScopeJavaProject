@@ -10,6 +10,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -94,4 +95,18 @@ public class DetailController implements Initializable {
     private void handleClose() {
         if (dialogStage != null) dialogStage.close();
     }
+
+    @FXML
+    private void handleAddToWatchlist()
+    {
+        System.out.println("Watchlist-Button funktioniert!");
+    }
+
+    @FXML
+    private void handleTranslatePlot() {
+        if (film == null) return;
+        txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
+    }
+
+
 }

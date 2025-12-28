@@ -1,6 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.DateihandlerIO;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import javafx.application.Platform;
@@ -19,9 +20,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
-public class WatchlistController
-{
+public class WatchlistController {
+
     @FXML
     private TableView<Filmmodel> tableWatchlist;
 
@@ -41,24 +43,32 @@ public class WatchlistController
 
     @FXML
     private void initialize() {
-        // CellValueFactory an Filmmodel binden
+
+        // Spalten binden
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-        colRating.setCellValueFactory(new PropertyValueFactory<>("writer")); // falls rating nicht vorhanden, temporär writer anzeigen
+        colRating.setCellValueFactory(new PropertyValueFactory<>("writer")); // falls Rating fehlt
 
-        // Beispiel-Daten, damit beim Öffnen etwas sichtbar ist (später durch echte Daten ersetzen)
-        Filmmodel f1 = new Filmmodel("Der Pate", "1972", "Mario Puzo", "Mafiasaga");
-        f1.setImdbID("tt0068646");
-        Filmmodel f2 = new Filmmodel("Inception", "2010", "Christopher Nolan", "Traum-in-Traum");
-        f2.setImdbID("tt1375666");
+        // -----------------------------------------
+        // WATCHLIST AUS JSON LADEN
+        // -----------------------------------------
+        DateihandlerIO handler = new DateihandlerIO();
+        List<String> ids = handler.leseWatchlist();
 
-        ObservableList<Filmmodel> sample = FXCollections.observableArrayList(
-                f1,
-                f2
-        );
-        tableWatchlist.setItems(sample);
+        ObservableList<Filmmodel> filme = FXCollections.observableArrayList();
 
-        // Row factory für Doppelklick
+        for (String id : ids) {
+            Filmmodel film = omdbService.getFilmById(id);
+            if (film != null) {
+                filme.add(film);
+            }
+        }
+
+        tableWatchlist.setItems(filme);
+
+        // -----------------------------------------
+        // Doppelklick für Details
+        // -----------------------------------------
         tableWatchlist.setRowFactory(tv -> {
             TableRow<Filmmodel> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -77,17 +87,21 @@ public class WatchlistController
             Scene scene = new Scene(loader.load());
             Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);
+
             if (tableWatchlist != null && tableWatchlist.getScene() != null) {
                 dialog.initOwner(tableWatchlist.getScene().getWindow());
             }
+
             dialog.setTitle(film.getTitle() == null ? "Details" : film.getTitle());
             dialog.setScene(scene);
+
             DetailController ctrl = loader.getController();
             ctrl.setDialogStage(dialog);
             ctrl.setFilm(film);
+
             dialog.show();
 
-            // Wenn Einträge unvollständig, lade Details nach (bevorzugt über imdbID)
+            // Falls Daten unvollständig → nachladen
             if (film.getPlot() == null || film.getWriter() == null) {
                 Task<Filmmodel> task = new Task<>() {
                     @Override
@@ -98,20 +112,21 @@ public class WatchlistController
                         return omdbService.getFilmByTitle(film.getTitle());
                     }
                 };
+
                 task.setOnSucceeded(ev -> {
                     Filmmodel full = task.getValue();
                     if (full != null) {
                         Platform.runLater(() -> ctrl.setFilm(full));
                     }
                 });
-                task.setOnFailed(ev -> {
-                    Throwable ex = task.getException();
-                    ex.printStackTrace();
-                });
+
+                task.setOnFailed(ev -> task.getException().printStackTrace());
+
                 Thread th = new Thread(task, "omdb-detail-watchlist");
                 th.setDaemon(true);
                 th.start();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

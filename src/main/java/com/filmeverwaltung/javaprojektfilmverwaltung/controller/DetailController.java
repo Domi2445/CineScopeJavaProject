@@ -11,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.DateihandlerIO;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -28,6 +29,7 @@ public class DetailController implements Initializable {
 
     private Stage dialogStage;
     private Filmmodel film;
+
 
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
@@ -97,16 +99,15 @@ public class DetailController implements Initializable {
     }
 
     @FXML
-    private void handleAddToWatchlist()
-    {
-        System.out.println("Watchlist-Button funktioniert!");
-    }
-
-    @FXML
     private void handleTranslatePlot() {
         if (film == null) return;
         txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
     }
 
+    @FXML
+    private void handleAddToWatchList() {
+        DateihandlerIO handler = new DateihandlerIO();
+        handler.fuegeFilmHinzu(film.getImdbID());
+    }
 
 }

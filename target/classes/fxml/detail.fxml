@@ -26,7 +26,7 @@
 
     <HBox spacing="10">
         <Button text="Schließen" onAction="#handleClose" />
-        <Button fx:id="btnWatchlist" text="Zur Watchlist hinzufügen" onAction="#handleAddToWatchlist" />
+        <Button fx:id="btnWatchlist" text="Zur Watchlist hinzufügen" onAction="#handleAddToWatchList" />
         <Button fx:id="btnTranslate" text="Auf Deutsch übersetzen" onAction="#handleTranslatePlot" />
     </HBox>
 </VBox>

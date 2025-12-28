@@ -35,9 +35,8 @@ public class TranslationUtil
                         jsonBody,
                         "application/json"
                 );
-
                 Map<?, ?> json = gson.fromJson(response, Map.class);
-                return json.get("translatedText").toString();
+               return json.get("translatedText").toString();
 
             } catch (Exception e) {
                 e.printStackTrace();

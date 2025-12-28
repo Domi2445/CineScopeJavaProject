@@ -1,4 +1,8 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler;
 
-public class Dateihandler {
+public abstract  class Dateihandler
+{
+
+
+
 }

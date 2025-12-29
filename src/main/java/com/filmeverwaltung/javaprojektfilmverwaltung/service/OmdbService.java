@@ -56,50 +56,55 @@ public class OmdbService {
     }
 
     /**
-     * Suche Filme anhand eines Titels (s=)
+     * Suche Filme anhand eines Titels (s=) mit Pagination (bis zu 3 Seiten = 30 Ergebnisse)
      */
     public List<Filmmodel> searchByTitle(String query) {
-        try {
-            String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            String url = BASE_URL + "?s=" + encoded + "&apikey=" + apiKey + "&type=movie";
+        List<Filmmodel> allResults = new ArrayList<>();
 
-            String json = HttpUtil.get(url);
-            Map<?, ?> root = gson.fromJson(json, Map.class);
+        // Abrufen von bis zu 3 Seiten (OMDB gibt max. 10 pro Seite)
+        for (int page = 1; page <= 6; page++) {
+            try {
+                String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
+                String url = BASE_URL + "?s=" + encoded + "&page=" + page + "&apikey=" + apiKey + "&type=movie";
 
-            if (root == null || !"True".equalsIgnoreCase(String.valueOf(root.get("Response")))) {
-                return Collections.emptyList();
-            }
+                String json = HttpUtil.get(url);
+                Map<?, ?> root = gson.fromJson(json, Map.class);
 
-            Object searchObj = root.get("Search");
-            if (!(searchObj instanceof List<?> list)) return Collections.emptyList();
-
-            List<Filmmodel> results = new ArrayList<>();
-
-            for (Object o : list) {
-                if (o instanceof Map<?, ?> m) {
-                    Filmmodel fm = new Filmmodel(
-                            Objects.toString(m.get("Title"), ""),
-                            Objects.toString(m.get("Year"), ""),
-                            null,
-                            null
-                    );
-
-                    String imdbID = Objects.toString(m.get("imdbID"), "");
-                    String poster = Objects.toString(m.get("Poster"), "");
-
-                    if (!imdbID.isBlank()) fm.setImdbID(imdbID);
-                    if (!poster.equalsIgnoreCase("N/A")) fm.setPoster(poster);
-
-                    results.add(fm);
+                if (root == null || !"True".equalsIgnoreCase(String.valueOf(root.get("Response")))) {
+                    break; // Keine weiteren Ergebnisse
                 }
+
+                Object searchObj = root.get("Search");
+                if (!(searchObj instanceof List<?> list) || list.isEmpty()) {
+                    break; // Keine Ergebnisse auf dieser Seite
+                }
+
+                for (Object o : list) {
+                    if (o instanceof Map<?, ?> m) {
+                        Filmmodel fm = new Filmmodel(
+                                Objects.toString(m.get("Title"), ""),
+                                Objects.toString(m.get("Year"), ""),
+                                null,
+                                null
+                        );
+
+                        String imdbID = Objects.toString(m.get("imdbID"), "");
+                        String poster = Objects.toString(m.get("Poster"), "");
+
+                        if (!imdbID.isBlank()) fm.setImdbID(imdbID);
+                        if (!poster.equalsIgnoreCase("N/A")) fm.setPoster(poster);
+
+                        allResults.add(fm);
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                break; // Bei Fehler abbrechen
             }
-
-            return results;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Collections.emptyList();
         }
+
+        return allResults;
     }
 
     /**

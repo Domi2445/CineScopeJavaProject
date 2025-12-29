@@ -4,17 +4,16 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.model.TranslationResponse;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Utility-Klasse für Übersetzungen mit der MyMemory Translation API
  * <a href="https://mymemory.translated.net/doc/spec.php">API-Dokumentation</a>
  */
-public class TranslationUtil {
+public class TranslationUtil
+{
 
     private static final Gson gson = new Gson();
     private static final Logger LOGGER = Logger.getLogger(TranslationUtil.class.getName());
@@ -31,100 +30,76 @@ public class TranslationUtil {
      * @param targetLang Zielsprache (z.B. "de", "en")
      * @return Der übersetzte Text oder der Originaltext bei Fehlern
      */
-    public String translate(String text, String sourceLang, String targetLang) {
-        if (text == null || text.isBlank()) {
+    public String translate(String text, String sourceLang, String targetLang)
+    {
+        // Überprüfe auf leeren Text oder gleiche Sprachen
+        if (text == null || text.isBlank() || (sourceLang != null && sourceLang.equals(targetLang)))
+        {
             return text;
         }
 
-        // Wenn Sprachen gleich sind, nicht übersetzen
-        if (sourceLang != null && sourceLang.equals(targetLang)) {
+        if (!apiAvailable && (System.currentTimeMillis() - lastFailTime) < RETRY_INTERVAL)
+        {
             return text;
         }
 
-        // API Cooldown: Wenn API nicht antwortet, für 1 Minute nicht versuchen
-        if (!apiAvailable && (System.currentTimeMillis() - lastFailTime) < RETRY_INTERVAL) {
-            LOGGER.fine("Übersetzungs-API ist derzeit nicht verfügbar (Cooldown). Verwende Originaltext.");
-            return text;
-        }
 
-        // MyMemory API verwendet URL-Parameter statt JSON-Body
         String langPair = (sourceLang != null ? sourceLang : "en") + "|" + (targetLang != null ? targetLang : "de");
-
-        // Kodiere nur den Text, nicht das gesamte URL
-        String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
-        String encodedLangPair = URLEncoder.encode(langPair, StandardCharsets.UTF_8);
-
-        // Baue URL mit kodierten Parametern
-        String url = TRANSLATE_URL + "?q=" + encodedText + "&langpair=" + encodedLangPair;
+        String url = TRANSLATE_URL + "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) + "&langpair=" + URLEncoder.encode(langPair, StandardCharsets.UTF_8);
 
         String responseBody;
-        try {
-            // Erstelle URI direkt aus dem String - HttpClient kümmert sich um die Validierung
-            URI uri = URI.create(url);
-            responseBody = HttpUtil.get(uri.toString());
-            apiAvailable = true; // API antwortet wieder
-        } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.WARNING, "Ungültige URI erstellt: {0}", e.getMessage());
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
-            return text;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Fehler beim HTTP-GET zur Übersetzungs-API: {0}", e.getMessage());
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
-            return text;
-        }
-
-        if (responseBody == null || responseBody.isBlank()) {
-            LOGGER.warning("Leere API-Antwort von MyMemory");
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
+        // Führe die HTTP-GET-Anfrage aus
+        try
+        {
+            responseBody = HttpUtil.get(url);
+            if (responseBody == null || responseBody.isBlank())
+            {
+                handleApiError("Leere API-Antwort");
+                return text;
+            }
+            apiAvailable = true;
+        } catch (Exception e)
+        {
+            handleApiError("HTTP-GET Fehler: " + e.getMessage());
             return text;
         }
 
-        // Kurzes Logging (bei langen Antworten nur die Länge)
-        LOGGER.fine(() -> "MyMemory API Antwortlänge: " + responseBody.length() + " Zeichen");
-
+        // Parse die JSON-Antwort
         TranslationResponse response;
-        try {
+        try
+        {
             response = gson.fromJson(responseBody, TranslationResponse.class);
-        } catch (JsonSyntaxException e) {
-            LOGGER.log(Level.WARNING, "Ungültiges JSON von MyMemory API: {0}", e.getMessage());
-            LOGGER.fine(() -> "Rohantwort: " + (responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody));
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
+        } catch (JsonSyntaxException e)
+        {
+            handleApiError("Ungültiges JSON: " + e.getMessage());
             return text;
         }
 
-        if (response == null || response.getResponseData() == null) {
-            LOGGER.warning("Keine responseData in MyMemory-Antwort");
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
+        // Überprüfe die API-Antwort auf Fehler
+        if (response == null || response.getResponseData() == null || (response.getResponseStatus() != null && !response.getResponseStatus().equals("200")))
+        {
+            handleApiError("Ungültige Response oder Status-Fehler");
             return text;
         }
 
-        // Prüfe Response-Status
-        if (response.getResponseStatus() != null && !response.getResponseStatus().equals("200")) {
-            LOGGER.log(Level.WARNING, "MyMemory API Fehler: Status={0}, Details={1}",
-                    new Object[]{response.getResponseStatus(), response.getResponseDetails()});
-            apiAvailable = false;
-            lastFailTime = System.currentTimeMillis();
-            return text;
-        }
-
+        // Extrahiere die übersetzte Zeichenkette
         String translatedText = response.getResponseData().getTranslatedText();
-
-        if (translatedText == null || translatedText.isBlank()) {
-            LOGGER.warning("Keine Übersetzung in MyMemory-Antwort erhalten");
+        if (translatedText == null || translatedText.isBlank())
+        {
+            handleApiError("Keine Übersetzung erhalten");
             return text;
         }
 
-        apiAvailable = true; // Erfolgreiche Übersetzung
-        LOGGER.fine(() -> String.format("Übersetzung erfolgreich: '%s' -> '%s' (Match: %.2f)",
-                text.substring(0, Math.min(50, text.length())),
-                translatedText.substring(0, Math.min(50, translatedText.length())),
-                response.getResponseData().getMatch()));
-
+        apiAvailable = true;
+        LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + response.getResponseData().getMatch());
         return translatedText;
+    }
+    // Behandle API-Fehler und setze den Status
+    private void handleApiError(String message)
+    {
+        LOGGER.warning("MyMemory API: " + message);
+        apiAvailable = false;
+        lastFailTime = System.currentTimeMillis();
+
     }
 }

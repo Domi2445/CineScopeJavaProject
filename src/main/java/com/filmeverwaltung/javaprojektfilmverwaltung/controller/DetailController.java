@@ -55,7 +55,14 @@ public class DetailController implements Initializable {
         lblTitle.setText(valueOrDash(film.getTitle()));
         lblYear.setText(valueOrDash(film.getYear()));
         lblWriter.setText(valueOrDash(film.getWriter()));
-        txtPlot.setText(film.getPlot() == null ? "Keine Beschreibung" : film.getPlot());
+
+        if("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
+            txtPlot.setText("No Description Available");
+        } else
+        {
+            txtPlot.setText(film.getPlot());
+        }
+
     }
 
     private String valueOrDash(String s) {
@@ -102,6 +109,8 @@ public class DetailController implements Initializable {
     private void handleTranslatePlot() {
         if (film == null) return;
         txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
+        lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", "de"));
+
     }
 
     @FXML

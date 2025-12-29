@@ -16,7 +16,7 @@
     </TableView>
 
     <HBox spacing="10">
-        <Button text="Entfernen" />
+        <Button fx:id="btnDelete" text="Entfernen" />
         <Button fx:id="btnExport" text="Exportieren" />
     </HBox>
 </VBox>

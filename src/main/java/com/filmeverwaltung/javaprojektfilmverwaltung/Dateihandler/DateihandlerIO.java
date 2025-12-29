@@ -35,34 +35,7 @@ public class DateihandlerIO extends Dateihandler {
     // WATCHLIST JSON METHODEN
     // -------------------------------
 
-    public List<String> leseWatchlist() {
-        try (BufferedReader br = new BufferedReader(new FileReader(WATCHLIST_PATH))) {
-            return gson.fromJson(br, LIST_TYPE);
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
-    }
 
-    public void speichereWatchlist(List<String> ids) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(WATCHLIST_PATH))) {
-            gson.toJson(ids, bw);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void fuegeFilmHinzu(String imdbID) {
-        List<String> liste = leseWatchlist();
-        if (!liste.contains(imdbID)) {
-            liste.add(imdbID);
-            speichereWatchlist(liste);
-        }
-    }
 
-    public void entferneFilm(String imdbID) {
-        List<String> liste = leseWatchlist();
-        if (liste.remove(imdbID)) {
-            speichereWatchlist(liste);
-        }
-    }
 }

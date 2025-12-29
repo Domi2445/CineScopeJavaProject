@@ -1,6 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.Dateihandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.DateihandlerIO;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
@@ -86,7 +87,8 @@ public class WatchlistController {
     }
 
     // Film-Detailansicht öffnen
-    private void openDetail(Filmmodel film) {
+    private void openDetail(Filmmodel film)
+    {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
             Scene scene = new Scene(loader.load());
@@ -134,6 +136,16 @@ public class WatchlistController {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public void entferneFilm(String imdbID)
+    {
+        Dateihandler dh = new DateihandlerIO();
+        List<String> liste = leseWatchlist();
+        if (liste.remove(imdbID)) {
+            speichereWatchlist(liste);
         }
     }
 }

@@ -18,7 +18,8 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;
-    opens com.filmeverwaltung.javaprojektfilmverwaltung.model to com.google.gson;
+    opens com.filmeverwaltung.javaprojektfilmverwaltung.model to com.google.gson, javafx.base;
+
 
     exports com.filmeverwaltung.javaprojektfilmverwaltung;
 }

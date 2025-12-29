@@ -22,6 +22,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 
+import static javafx.collections.FXCollections.observableArrayList;
+
 public class WatchlistController {
 
     @FXML
@@ -47,16 +49,17 @@ public class WatchlistController {
         // Spalten binden
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
-        colRating.setCellValueFactory(new PropertyValueFactory<>("writer")); // falls Rating fehlt
+
+
 
         // -----------------------------------------
         // WATCHLIST AUS JSON LADEN
         // -----------------------------------------
         DateihandlerIO handler = new DateihandlerIO();
         List<String> ids = handler.leseWatchlist();
-
-        ObservableList<Filmmodel> filme = FXCollections.observableArrayList();
-
+        ObservableList<Filmmodel> filme = observableArrayList();
+        tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating));
+        tableWatchlist.setItems(filme);
         for (String id : ids) {
             Filmmodel film = omdbService.getFilmById(id);
             if (film != null) {
@@ -65,6 +68,7 @@ public class WatchlistController {
         }
 
         tableWatchlist.setItems(filme);
+
 
         // -----------------------------------------
         // Doppelklick für Details
@@ -81,6 +85,7 @@ public class WatchlistController {
         });
     }
 
+    // Film-Detailansicht öffnen
     private void openDetail(Filmmodel film) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));

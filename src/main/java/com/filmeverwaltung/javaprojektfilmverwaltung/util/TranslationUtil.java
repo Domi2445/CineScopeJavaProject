@@ -94,6 +94,7 @@ public class TranslationUtil
         LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + response.getResponseData().getMatch());
         return translatedText;
     }
+
     // Behandle API-Fehler und setze den Status
     private void handleApiError(String message)
     {

@@ -1,21 +1,22 @@
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Label?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="15" alignment="CENTER" style="-fx-padding: 40;"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.LoginController">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-    <Label text="Login" style="-fx-font-size: 24;" />
+<VBox alignment="CENTER" spacing="15" style="-fx-padding: 40;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.LoginController">
+
+    <Label style="-fx-font-size: 24;" text="Login" />
 
     <TextField fx:id="txtUsername" promptText="Benutzername" />
     <PasswordField fx:id="txtPassword" promptText="Passwort" />
 
-    <Label fx:id="lblError" text="" style="-fx-text-fill: red;" visible="false"/>
-
-    <Button text="Anmelden" onAction="#handleLogin" />
+    <Label fx:id="lblError" style="-fx-text-fill: red;" text="" visible="false" />
+   <Pane prefHeight="31.0" prefWidth="214.0">
+      <children>
+      
+                <Button layoutX="107.0" layoutY="2.0" onAction="#handleLogin" prefHeight="25.0" prefWidth="76.0" fx:id="btnLogin" text="Anmelden" />
+         <Button layoutX="14.0" layoutY="2.0" mnemonicParsing="false" fx:id="btnRegistration" text="Registrieren" />
+      </children>
+   </Pane>
 
 </VBox>

@@ -10,7 +10,9 @@ public class HttpUtil
 {
     private static final HttpClient client = HttpClient.newHttpClient();
 
-    public HttpUtil(){}
+    public HttpUtil()
+    {
+    }
 
     /**
      * Send a GET request to the specified URL.
@@ -20,14 +22,11 @@ public class HttpUtil
      * @throws IOException          If an I/O error occurs when sending or receiving.
      * @throws InterruptedException If the operation is interrupted.
      */
-    public static String get(String url) throws IOException, InterruptedException, IOException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
+    public static String get(String url) throws IOException, InterruptedException, IOException
+    {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         return response.body();
     }
@@ -42,15 +41,11 @@ public class HttpUtil
      * @throws IOException          If an I/O error occurs when sending or receiving.
      * @throws InterruptedException If the operation is interrupted.
      */
-    public static String post(String url, String body, String contentType) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", contentType)
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+    public static String post(String url, String body, String contentType) throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).header("Content-Type", contentType).POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
-        HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         return response.body();
     }

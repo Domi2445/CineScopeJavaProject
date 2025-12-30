@@ -121,15 +121,11 @@ public class DetailController implements Initializable {
         handler.fuegeFilmHinzu(film.getImdbID());
     }
 
-    public void fuegeFilmHinzu(String imdbID) {
-        Dateihandler dh = new DateihandlerIO(d);
-        List<String> liste = leseWatchlist();
-        if (!liste.contains(imdbID)) {
-            liste.add(imdbID);
-            speichereWatchlist(liste);
-        }
+
+    @FXML
+    private void handleRemoveFromWatchlist() {
+        DateihandlerIO handler = new DateihandlerIO();
+        handler.entferneFilm(film.getImdbID());
     }
-
-
 
 }

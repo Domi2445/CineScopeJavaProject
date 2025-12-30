@@ -10,15 +10,12 @@ import java.util.List;
 
 public class DateihandlerIO extends Dateihandler {
 
-    private static final String WATCHLIST_PATH = "watchlist.json";
     private static final Gson gson = new Gson();
     private static final Type LIST_TYPE = new TypeToken<List<String>>() {}.getType();
 
     public DateihandlerIO() {
         try {
             File file = new File(WATCHLIST_PATH);
-
-            // Datei erzeugen, falls sie fehlt
             if (!file.exists()) {
                 file.createNewFile();
                 try (FileWriter fw = new FileWriter(WATCHLIST_PATH)) {
@@ -30,12 +27,19 @@ public class DateihandlerIO extends Dateihandler {
             e.printStackTrace();
         }
     }
+    public void fuegeFilmHinzu(String imdbID) {
+        List<String> liste = leseWatchlist();
+        if (!liste.contains(imdbID)) {
+            liste.add(imdbID);
+            speichereWatchlist(liste);
+        }
+    }
 
-    // -------------------------------
-    // WATCHLIST JSON METHODEN
-    // -------------------------------
-
-
-
+    public void entferneFilm(String imdbID) {
+        List<String> liste = leseWatchlist();
+        if (liste.remove(imdbID)) {
+            speichereWatchlist(liste);
+        }
+    }
 
 }

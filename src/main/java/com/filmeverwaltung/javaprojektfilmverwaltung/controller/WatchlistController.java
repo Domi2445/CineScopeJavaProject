@@ -138,14 +138,19 @@ public class WatchlistController {
             e.printStackTrace();
         }
     }
-
-
-    public void entferneFilm(String imdbID)
-    {
-        Dateihandler dh = new DateihandlerIO();
-        List<String> liste = leseWatchlist();
-        if (liste.remove(imdbID)) {
-            speichereWatchlist(liste);
+    @FXML
+    private void handleDeleteSelected() {
+        Filmmodel film = tableWatchlist.getSelectionModel().getSelectedItem();
+        if (film == null) {
+            return; // Nichts ausgewählt
         }
+
+        // Aus Datei entfernen
+        DateihandlerIO handler = new DateihandlerIO();
+        handler.entferneFilm(film.getImdbID());
+
+        // Aus Tabelle entfernen
+        tableWatchlist.getItems().remove(film);
     }
+
 }

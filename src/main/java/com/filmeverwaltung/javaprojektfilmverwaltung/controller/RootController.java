@@ -33,6 +33,9 @@ public class RootController {
     }
 
     @FXML
+    private void onFavorites() { loadView("/fxml/favorites.fxml"); }
+
+    @FXML
     private void onHistory() {
         loadView("/fxml/history.fxml");
     }

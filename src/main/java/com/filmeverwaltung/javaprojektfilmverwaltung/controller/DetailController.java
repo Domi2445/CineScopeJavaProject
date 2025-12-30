@@ -122,10 +122,4 @@ public class DetailController implements Initializable {
     }
 
 
-    @FXML
-    private void handleRemoveFromWatchlist() {
-        DateihandlerIO handler = new DateihandlerIO();
-        handler.entferneFilm(film.getImdbID());
-    }
-
 }

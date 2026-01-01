@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       spacing="15" alignment="CENTER" style="-fx-padding: 40;"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.RegistrationController">
 
-    <Label text="Benutzerregistrierung" style="-fx-font-size: 22;" styleClass="heading"/>
+    <Label text="Benutzerregistrierung" style="-fx-font-size: 22; -fx-font-weight: bold;"/>
 
-    <Label text="Benutzername:"/>
-    <TextField fx:id="txtUsername" promptText="Geben Sie Ihren Benutzernamen ein"/>
+    <TextField fx:id="txtUsername" promptText="Benutzername (min. 3 Zeichen)" />
 
-    <Label text="E-Mail:"/>
-    <TextField fx:id="txtEmail" promptText="Geben Sie Ihre E-Mail-Adresse ein"/>
+    <PasswordField fx:id="txtPassword" promptText="Passwort (min. 6 Zeichen)" />
 
-    <Label text="Passwort:"/>
-    <PasswordField fx:id="txtPassword" promptText="Geben Sie Ihr Passwort ein"/>
+    <PasswordField fx:id="txtPasswordConfirm" promptText="Passwort bestätigen" />
 
-    <Label text="Passwort bestätigen:"/>
-    <PasswordField fx:id="txtConfirmPassword" promptText="Bestätigen Sie Ihr Passwort"/>
+    <Label fx:id="lblError" style="-fx-text-fill: red;" text="" visible="false" />
+    <Label fx:id="lblSuccess" style="-fx-text-fill: green;" text="" visible="false" />
 
-    <Button text="Registrieren" onAction="#handleRegister"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="btnRegister" text="Registrieren" onAction="#handleRegister" prefWidth="120" />
+        <Button fx:id="btnBackToLogin" text="Zurück zum Login" onAction="#backToLogin" prefWidth="120" />
+    </HBox>
 
 </VBox>

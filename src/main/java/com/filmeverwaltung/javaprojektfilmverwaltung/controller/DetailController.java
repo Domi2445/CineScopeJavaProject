@@ -1,7 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.Dateihandler;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -12,13 +12,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.DateihandlerIO;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class DetailController implements Initializable {
@@ -117,7 +115,7 @@ public class DetailController implements Initializable {
 
     @FXML
     private void handleAddToWatchList() {
-        DateihandlerIO handler = new DateihandlerIO();
+        WatchlistHandler handler = new WatchlistHandler();
         handler.fuegeFilmHinzu(film.getImdbID());
     }
 

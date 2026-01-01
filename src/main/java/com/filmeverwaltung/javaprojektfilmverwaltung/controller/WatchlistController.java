@@ -1,8 +1,8 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.Dateihandler;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.DateihandlerIO;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import javafx.application.Platform;
@@ -12,13 +12,11 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,26 +38,79 @@ public class WatchlistController {
     private TableColumn<Filmmodel, String> colRating;
 
     @FXML
+    private TableColumn<Filmmodel, Void> colFavorites;
+
+    @FXML
     private Button btnExport;
 
+    @FXML
+    private ComboBox<String> cmbSize;
+
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
+    private final FavoritesHandler favoritesHandler = new FavoritesHandler();
 
     @FXML
     private void initialize() {
 
+        // Größenauswahl ComboBox initialisieren
+        cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
+        cmbSize.setValue("Standard");
+        cmbSize.setOnAction(event -> anpasseTabellenschriftgroesse());
+
         // Spalten binden
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
+
+        // Button-Spalte für "Zu Favoriten hinzufügen"
+        colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>() {
+            @Override
+            public TableCell<Filmmodel, Void> call(TableColumn<Filmmodel, Void> param) {
+                return new TableCell<Filmmodel, Void>() {
+                    private final Button btnAddToFavorites = new Button("Zu Favoriten");
+
+                    {
+                        btnAddToFavorites.setOnAction(event -> {
+                            Filmmodel film = getTableView().getItems().get(getIndex());
+                            if (film != null && film.getImdbID() != null) {
+                                favoritesHandler.fuegeFilmHinzu(film.getImdbID());
+                                // Button-Text ändern als Feedback
+                                btnAddToFavorites.setText("✓ Hinzugefügt");
+                                btnAddToFavorites.setDisable(true);
+                            }
+                        });
+                    }
+
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            Filmmodel film = getTableView().getItems().get(getIndex());
+                            // Prüfen, ob bereits in Favoriten
+                            if (film != null && favoritesHandler.istFavorit(film.getImdbID())) {
+                                btnAddToFavorites.setText("✓ Hinzugefügt");
+                                btnAddToFavorites.setDisable(true);
+                            } else {
+                                btnAddToFavorites.setText("Zu Favoriten");
+                                btnAddToFavorites.setDisable(false);
+                            }
+                            setGraphic(btnAddToFavorites);
+                        }
+                    }
+                };
+            }
+        });
 
 
 
         // -----------------------------------------
         // WATCHLIST AUS JSON LADEN
         // -----------------------------------------
-        DateihandlerIO handler = new DateihandlerIO();
-        List<String> ids = handler.leseWatchlist();
+        WatchlistHandler handler = new WatchlistHandler();
+        List<String> ids = handler.lesen();
         ObservableList<Filmmodel> filme = observableArrayList();
-        tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating));
+        tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating, colFavorites));
         tableWatchlist.setItems(filme);
         for (String id : ids) {
             Filmmodel film = omdbService.getFilmById(id);
@@ -146,11 +197,30 @@ public class WatchlistController {
         }
 
         // Aus Datei entfernen
-        DateihandlerIO handler = new DateihandlerIO();
+        WatchlistHandler handler = new WatchlistHandler();
         handler.entferneFilm(film.getImdbID());
 
         // Aus Tabelle entfernen
         tableWatchlist.getItems().remove(film);
+    }
+
+    private void anpasseTabellenschriftgroesse() {
+        String groesse = cmbSize.getValue();
+        String style = "";
+
+        switch (groesse) {
+            case "Klein":
+                style = "-fx-font-size: 10px;";
+                break;
+            case "Standard":
+                style = "-fx-font-size: 12px;";
+                break;
+            case "Groß":
+                style = "-fx-font-size: 14px;";
+                break;
+        }
+
+        tableWatchlist.setStyle(style);
     }
 
 }

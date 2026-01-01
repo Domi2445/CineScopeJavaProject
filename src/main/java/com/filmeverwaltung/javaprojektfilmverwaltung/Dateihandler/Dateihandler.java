@@ -24,8 +24,8 @@ public abstract class Dateihandler
 
     }
 
-    public List<String> leseWatchlist() {
-        try (BufferedReader br = new BufferedReader(new FileReader(WATCHLIST_PATH))) {
+    public List<String> lesen(String path) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             List<String> list = gson.fromJson(br, LIST_TYPE);
             return list != null ? list : new ArrayList<>();
         } catch (Exception e) {
@@ -33,8 +33,8 @@ public abstract class Dateihandler
         }
     }
 
-    public void speichereWatchlist(List<String> ids) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(WATCHLIST_PATH))) {
+    public void speichern(List<String> ids, String path) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path))) {
             gson.toJson(ids, bw);
         } catch (IOException e) {
             e.printStackTrace();

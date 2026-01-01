@@ -17,7 +17,7 @@
             <TableColumn fx:id="colTitle" minWidth="100.0" prefWidth="200.0" text="Titel" />
             <TableColumn fx:id="colYear" minWidth="60.0" prefWidth="80.0" text="Jahr" />
             <TableColumn fx:id="colRating" minWidth="80.0" prefWidth="100.0" text="Bewertung" />
-            <TableColumn fx:id="colFavorites" minWidth="100.0" prefWidth="120.0" />
+            <TableColumn fx:id="colFavorites" minWidth="100.0" prefWidth="106.0" />
         </columns>
     </TableView>
 

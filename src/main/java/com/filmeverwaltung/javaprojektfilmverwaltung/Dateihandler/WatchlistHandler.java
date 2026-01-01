@@ -3,11 +3,13 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler;
 import java.io.*;
 import java.util.List;
 
-public class WatchlistHandler extends Dateihandler {
+public class WatchlistHandler extends Dateihandler
+{
 
     private static final String WATCHLIST_PATH = "watchlist.json";
 
-    public WatchlistHandler() {
+    public WatchlistHandler()
+    {
         super();
         try {
             File file = new File(WATCHLIST_PATH);
@@ -22,15 +24,18 @@ public class WatchlistHandler extends Dateihandler {
         }
     }
 
-    public List<String> lesen() {
+    public List<String> lesen()
+    {
         return lesen(WATCHLIST_PATH);
     }
 
-    public void speichern(List<String> ids) {
+    public void speichern(List<String> ids)
+    {
         speichern(ids, WATCHLIST_PATH);
     }
 
-    public void fuegeFilmHinzu(String imdbID) {
+    public void fuegeFilmHinzu(String imdbID)
+    {
         List<String> liste = lesen();
         if (!liste.contains(imdbID)) {
             liste.add(imdbID);
@@ -38,14 +43,16 @@ public class WatchlistHandler extends Dateihandler {
         }
     }
 
-    public void entferneFilm(String imdbID) {
+    public void entferneFilm(String imdbID)
+    {
         List<String> liste = lesen();
         if (liste.remove(imdbID)) {
             speichern(liste);
         }
     }
 
-    public boolean istInWatchlist(String imdbID) {
+    public boolean istInWatchlist(String imdbID)
+    {
         return lesen().contains(imdbID);
     }
 }

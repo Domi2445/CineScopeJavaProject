@@ -13,9 +13,8 @@
     <Label fx:id="lblError" style="-fx-text-fill: red;" text="" visible="false" />
    <Pane prefHeight="31.0" prefWidth="214.0">
       <children>
-      
                 <Button layoutX="107.0" layoutY="2.0" onAction="#handleLogin" prefHeight="25.0" prefWidth="76.0" fx:id="btnLogin" text="Anmelden" />
-         <Button layoutX="14.0" layoutY="2.0" mnemonicParsing="false" fx:id="btnRegistration" text="Registrieren" />
+         <Button layoutX="14.0" layoutY="2.0" onAction="#onRegisterClick" mnemonicParsing="false" fx:id="btnRegistration" text="Registrieren" />
       </children>
    </Pane>
 

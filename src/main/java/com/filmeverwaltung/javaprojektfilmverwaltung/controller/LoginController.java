@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -66,12 +67,15 @@ public class LoginController
 
     private void handleRegister()
     {
-        // Registrierung-Logik hier implementieren
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/register.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registration.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) txtUsername.getScene().getWindow();
-            stage.setScene(new Scene(root));
+
+            // Finde den contentArea (StackPane) im root-Layout
+            StackPane contentArea = (StackPane) txtUsername.getScene().getRoot().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(root);
+            }
         } catch (IOException e) {
             showError("Fehler beim Laden der Registrierung.");
             e.printStackTrace();

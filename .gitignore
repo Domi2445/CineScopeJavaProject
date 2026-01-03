@@ -1,0 +1,20 @@
+# Config mit sensiblen Daten
+src/main/resources/config/config.json
+**/config.json
+
+# Compiled class files
+*.class
+out/
+build/
+bin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Maven
+target/
+
+# Logs
+*.log

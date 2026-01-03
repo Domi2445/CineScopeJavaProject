@@ -1,0 +1,14 @@
+{
+  "database": {
+    "url": "jdbc:oracle:thin:@freesql.oracle.com:1521/freesql",
+    "user": "USERNAME_HERE",
+    "password": "PASSWORD_HERE"
+  },
+  "api": {
+    "omdb": "DEIN_OMDB_API_KEY"
+  },
+  "app": {
+    "language": "de",
+    "debug": false
+  }
+}

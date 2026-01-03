@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
+import com.filmeverwaltung.javaprojektfilmverwaltung.service.ImdbDescriptionProvider;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -29,6 +30,9 @@ public class DetailController implements Initializable {
 
     private Stage dialogStage;
     private Filmmodel film;
+
+    // Provider zum Nachladen von Beschreibungen
+    private final ImdbDescriptionProvider descriptionProvider = new ImdbDescriptionProvider();
 
 
     public void setDialogStage(Stage stage) {
@@ -56,10 +60,34 @@ public class DetailController implements Initializable {
         lblYear.setText(valueOrDash(film.getYear()));
         lblWriter.setText(valueOrDash(film.getWriter()));
 
-        if("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
+        // Wenn Plot fehlt, zuerst Platzhalter setzen und asynchron nachladen
+        if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
             txtPlot.setText("No Description Available");
-        } else
-        {
+
+            if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                Task<String> t = new Task<>() {
+                    @Override
+                    protected String call() throws Exception {
+                        return descriptionProvider.fetchPlotByImdbId(film.getImdbID());
+                    }
+                };
+
+                t.setOnSucceeded(e -> {
+                    String fetched = t.getValue();
+                    if (fetched != null && !fetched.isBlank()) {
+                        film.setPlot(fetched);
+                        txtPlot.setText(fetched);
+                    }
+                });
+
+                t.setOnFailed(e -> {
+                    // Kein großes Logging im UI-Thread notwendig
+                });
+
+                new Thread(t).start();
+            }
+
+        } else {
             txtPlot.setText(film.getPlot());
         }
 

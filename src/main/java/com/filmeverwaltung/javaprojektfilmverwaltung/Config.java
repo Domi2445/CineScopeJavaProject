@@ -24,6 +24,8 @@ public class Config
             config.app = new App();
             config.app.language = "de";
             config.app.debug = false;
+            config.api.omdb = "";
+            config.api.tmdb = "";
             return config;
         }
     }
@@ -36,6 +38,7 @@ public class Config
 
     public static class ApiKeys {
         public String omdb;
+        public String tmdb;
     }
 
     public static class App {

@@ -1,7 +1,8 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.util;
 
-import com.filmeverwaltung.javaprojektfilmverwaltung.model.TranslationResponse;
-import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import java.net.URLEncoder;
@@ -15,7 +16,6 @@ import java.util.logging.Logger;
 public class TranslationUtil
 {
 
-    private static final Gson gson = new Gson();
     private static final Logger LOGGER = Logger.getLogger(TranslationUtil.class.getName());
     private static final String TRANSLATE_URL = "https://api.mymemory.translated.net/get";
     private static boolean apiAvailable = true;
@@ -64,34 +64,78 @@ public class TranslationUtil
             return text;
         }
 
-        // Parse die JSON-Antwort
-        TranslationResponse response;
-        try
-        {
-            response = gson.fromJson(responseBody, TranslationResponse.class);
-        } catch (JsonSyntaxException e)
-        {
+        // Parse die JSON-Antwort robust (MyMemory kann gelegentlich Felder in unterschiedlichem Typ zurückgeben)
+        String translatedText = null;
+        double matchValue = 0d;
+        try {
+            JsonElement rootEl = JsonParser.parseString(responseBody);
+            if (!rootEl.isJsonObject()) {
+                handleApiError("Unerwartetes JSON-Format (root nicht Objekt)");
+                return text;
+            }
+
+            JsonObject root = rootEl.getAsJsonObject();
+
+            // responseStatus: kann numerisch oder String sein
+            boolean statusOk = true;
+            if (root.has("responseStatus") && !root.get("responseStatus").isJsonNull()) {
+                JsonElement statusEl = root.get("responseStatus");
+                try {
+                    int statusInt = statusEl.getAsInt();
+                    statusOk = (statusInt == 200);
+                } catch (Exception ex) {
+                    statusOk = "200".equals(statusEl.getAsString());
+                }
+            }
+
+            if (!statusOk) {
+                handleApiError("API-Status ungleich 200");
+                return text;
+            }
+
+            if (root.has("responseData") && root.get("responseData").isJsonObject()) {
+                JsonObject rd = root.getAsJsonObject("responseData");
+                if (rd.has("translatedText") && !rd.get("translatedText").isJsonNull()) {
+                    translatedText = rd.get("translatedText").getAsString();
+                }
+                if (rd.has("match") && !rd.get("match").isJsonNull()) {
+                    try {
+                        matchValue = rd.get("match").getAsDouble();
+                    } catch (Exception ex) {
+                        try {
+                            matchValue = Double.parseDouble(rd.get("match").getAsString());
+                        } catch (Exception ignore) {
+                        }
+                    }
+                }
+            }
+
+            // `matches` kann Array oder String sein; wir loggen den Fall
+            if (root.has("matches") && !root.get("matches").isJsonNull()) {
+                JsonElement matchesEl = root.get("matches");
+                if (matchesEl.isJsonArray()) {
+                    LOGGER.fine(() -> "MyMemory: matches array size=" + matchesEl.getAsJsonArray().size());
+                } else {
+                    LOGGER.fine(() -> "MyMemory: matches ist kein Array (type=" + matchesEl.getClass().getSimpleName() + ")");
+                }
+            }
+
+        } catch (JsonSyntaxException e) {
             handleApiError("Ungültiges JSON: " + e.getMessage());
             return text;
-        }
-
-        // Überprüfe die API-Antwort auf Fehler
-        if (response == null || response.getResponseData() == null || (response.getResponseStatus() != null && !response.getResponseStatus().equals("200")))
-        {
-            handleApiError("Ungültige Response oder Status-Fehler");
+        } catch (Exception e) {
+            handleApiError("Fehler beim Parsen der API-Antwort: " + e.getMessage());
             return text;
         }
 
-        // Extrahiere die übersetzte Zeichenkette
-        String translatedText = response.getResponseData().getTranslatedText();
-        if (translatedText == null || translatedText.isBlank())
-        {
+        if (translatedText == null || translatedText.isBlank()) {
             handleApiError("Keine Übersetzung erhalten");
             return text;
         }
 
         apiAvailable = true;
-        LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + response.getResponseData().getMatch());
+        final double match = matchValue;
+        LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + match);
         return translatedText;
     }
 

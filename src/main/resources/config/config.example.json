@@ -5,7 +5,8 @@
     "password": "PASSWORD_HERE"
   },
   "api": {
-    "omdb": "DEIN_OMDB_API_KEY"
+    "omdb": "DEIN_OMDB_API_KEY",
+    "tmdb": "DEIN_TMDB_API_KEY"
   },
   "app": {
     "language": "de",

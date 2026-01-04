@@ -3,9 +3,11 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController"
       spacing="15" style="-fx-padding: 20;">
 
     <Label text="Einstellungen" style="-fx-font-size: 22;"/>
+    <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
     <CheckBox text="Dark Mode aktivieren"/>
     <CheckBox text="Statistik anzeigen"/>
 </VBox>

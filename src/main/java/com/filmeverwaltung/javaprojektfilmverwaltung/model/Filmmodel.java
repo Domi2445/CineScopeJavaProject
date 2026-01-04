@@ -46,6 +46,12 @@ public class Filmmodel
     private String poster; // OMDb Poster-URL
 
     /**
+     * IMDb Rating des Films (0-10).
+     */
+    @SerializedName("imdbRating")
+    private String imdbRating; // OMDb IMDb Rating
+
+    /**
      * Standardkonstruktor für Filmmodel.
      */
     public Filmmodel()
@@ -209,6 +215,26 @@ public class Filmmodel
     public void setPoster(String poster)
     {
         this.poster = poster;
+    }
+
+    /**
+     * Getter für das IMDb Rating des Films.
+     *
+     * @return Das IMDb Rating des Films (0-10).
+     */
+    public String getImdbRating()
+    {
+        return imdbRating;
+    }
+
+    /**
+     * Setter für das IMDb Rating des Films.
+     *
+     * @param imdbRating Das IMDb Rating des Films.
+     */
+    public void setImdbRating(String imdbRating)
+    {
+        this.imdbRating = imdbRating;
     }
 
     /**

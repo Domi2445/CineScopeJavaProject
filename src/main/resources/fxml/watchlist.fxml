@@ -13,6 +13,8 @@
         <ComboBox fx:id="cmbSize" promptText="Standard"/>
     </HBox>
 
+    <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
+
     <TableView fx:id="tableWatchlist">
         <columns>
             <TableColumn fx:id="colTitle" minWidth="100.0" prefWidth="200.0" text="Titel"/>

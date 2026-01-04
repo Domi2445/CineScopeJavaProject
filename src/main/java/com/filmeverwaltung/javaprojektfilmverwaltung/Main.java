@@ -1,5 +1,6 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.db.DatabaseManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -30,6 +31,17 @@ public class Main extends Application
         stage.setTitle("Filme Verwaltung");
         stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icons/app.png"))));
         stage.show();
+    }
+
+    /**
+     * Wird aufgerufen, wenn die Anwendung beendet wird
+     */
+    @Override
+    public void stop() throws Exception
+    {
+        super.stop();
+        // Schließe die Datenbankverbindung beim Beenden
+        DatabaseManager.closeConnection();
     }
 
     /**

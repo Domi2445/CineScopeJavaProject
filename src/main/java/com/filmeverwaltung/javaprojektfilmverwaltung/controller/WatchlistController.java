@@ -33,6 +33,9 @@ public class WatchlistController
     private TableView<Filmmodel> tableWatchlist;
 
     @FXML
+    private Label lblLoading;
+
+    @FXML
     private TableColumn<Filmmodel, String> colTitle;
 
     @FXML
@@ -56,6 +59,8 @@ public class WatchlistController
     @FXML
     private void initialize()
     {
+        // Zeige Loading-Label
+        lblLoading.setVisible(true);
 
         // Größenauswahl ComboBox initialisieren
         cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
@@ -135,7 +140,8 @@ public class WatchlistController
             }
         }
 
-        tableWatchlist.setItems(filme);
+        // Verstecke Loading-Label am Ende
+        lblLoading.setVisible(false);
 
 
         // -----------------------------------------

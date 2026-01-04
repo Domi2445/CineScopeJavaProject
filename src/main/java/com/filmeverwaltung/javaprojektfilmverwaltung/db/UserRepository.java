@@ -41,7 +41,7 @@ public class UserRepository
         String sql = "INSERT INTO users (USERNAME, PASSWORD_HASH, EMAIL, CREATED_AT, LAST_LOGIN, IS_ACTIVE) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection c = DatabaseManager.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+             PreparedStatement ps = c.prepareStatement(sql, new String[]{"USER_ID"}))
         {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
@@ -59,7 +59,8 @@ public class UserRepository
             {
                 if (generatedKeys.next())
                 {
-                    int id = generatedKeys.getInt(1);
+                    // Oracle gibt die ID als BigDecimal zurück
+                    int id = generatedKeys.getBigDecimal(1).intValue();
                     user.setUserId(id);
                     return id;
                 }

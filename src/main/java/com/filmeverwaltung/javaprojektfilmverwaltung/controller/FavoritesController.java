@@ -40,6 +40,9 @@ public class FavoritesController
     @FXML
     private ComboBox<String> cmbImageSize;
 
+    @FXML
+    private Label lblLoading;
+
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
     private final FavoritesHandler handler = new FavoritesHandler();
 
@@ -49,6 +52,9 @@ public class FavoritesController
     @FXML
     public void initialize()
     {
+        // Zeige Loading-Label
+        lblLoading.setVisible(true);
+
         // Bildgrößen-ComboBox initialisieren
         cmbImageSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
         cmbImageSize.setValue("Standard");
@@ -101,6 +107,9 @@ public class FavoritesController
                 }
             }
         }
+
+        // Verstecke Loading-Label am Ende
+        lblLoading.setVisible(false);
     }
 
     private void addMovieCard(Filmmodel film, int column, int row)

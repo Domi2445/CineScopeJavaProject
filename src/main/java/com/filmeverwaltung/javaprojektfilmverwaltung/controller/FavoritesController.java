@@ -23,7 +23,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -166,7 +166,7 @@ public class FavoritesController
             @Override
             protected Image call() throws Exception
             {
-                try (InputStream is = new URL(posterUrl).openStream())
+                try (InputStream is = URI.create(posterUrl).toURL().openStream())
                 {
                     return new Image(is);
                 }

@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -137,7 +138,7 @@ public class DetailController implements Initializable
             @Override
             protected Image call() throws Exception
             {
-                try (InputStream is = new URL(posterUrl).openStream())
+                try (InputStream is = URI.create(posterUrl).toURL().openStream())
                 {
                     return new Image(is);
                 }

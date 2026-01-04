@@ -8,8 +8,16 @@ out/
 build/
 bin/
 
-# IDE
-.idea/
+# IDE (IntelliJ)
+# Alles in .idea ignorieren, aber Run-Konfigurationen erlauben
+.idea/*
+!.idea/runConfigurations/
+!.idea/runConfigurations/*.xml
+
+# Persönliche IDE-Dateien weiterhin ignorieren
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
 *.iml
 .vscode/
 

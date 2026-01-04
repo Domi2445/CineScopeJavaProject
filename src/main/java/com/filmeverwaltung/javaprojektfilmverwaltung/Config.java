@@ -11,11 +11,14 @@ public class Config
     public ApiKeys api;
     public App app;
 
-    public static Config load() {
-        try (FileReader reader = new FileReader("src/main/resources/config/config.json")) {
+    public static Config load()
+    {
+        try (FileReader reader = new FileReader("src/main/resources/config/config.json"))
+        {
             Gson gson = new Gson();
             return gson.fromJson(reader, Config.class);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             System.err.println("Fehler beim Laden der Config: " + e.getMessage());
             // Fallback-Werte
             Config config = new Config();
@@ -30,18 +33,21 @@ public class Config
         }
     }
 
-    public static class Database {
+    public static class Database
+    {
         public String url;
         public String user;
         public String password;
     }
 
-    public static class ApiKeys {
+    public static class ApiKeys
+    {
         public String omdb;
         public String tmdb;
     }
 
-    public static class App {
+    public static class App
+    {
         public String language;
         public boolean debug;
     }

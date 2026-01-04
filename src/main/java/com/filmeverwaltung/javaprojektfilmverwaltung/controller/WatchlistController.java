@@ -1,8 +1,8 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandler;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import javafx.application.Platform;
@@ -23,7 +23,8 @@ import java.util.List;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
-public class WatchlistController {
+public class WatchlistController
+{
 
     @FXML
     private TableView<Filmmodel> tableWatchlist;
@@ -50,7 +51,8 @@ public class WatchlistController {
     private final FavoritesHandler favoritesHandler = new FavoritesHandler();
 
     @FXML
-    private void initialize() {
+    private void initialize()
+    {
 
         // Größenauswahl ComboBox initialisieren
         cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
@@ -62,16 +64,21 @@ public class WatchlistController {
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
 
         // Button-Spalte für "Zu Favoriten hinzufügen"
-        colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>() {
+        colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>()
+        {
             @Override
-            public TableCell<Filmmodel, Void> call(TableColumn<Filmmodel, Void> param) {
-                return new TableCell<Filmmodel, Void>() {
+            public TableCell<Filmmodel, Void> call(TableColumn<Filmmodel, Void> param)
+            {
+                return new TableCell<Filmmodel, Void>()
+                {
                     private final Button btnAddToFavorites = new Button("Zu Favoriten");
 
                     {
-                        btnAddToFavorites.setOnAction(event -> {
+                        btnAddToFavorites.setOnAction(event ->
+                        {
                             Filmmodel film = getTableView().getItems().get(getIndex());
-                            if (film != null && film.getImdbID() != null) {
+                            if (film != null && film.getImdbID() != null)
+                            {
                                 favoritesHandler.fuegeFilmHinzu(film.getImdbID());
                                 // Button-Text ändern als Feedback
                                 btnAddToFavorites.setText("✓ Hinzugefügt");
@@ -81,17 +88,22 @@ public class WatchlistController {
                     }
 
                     @Override
-                    protected void updateItem(Void item, boolean empty) {
+                    protected void updateItem(Void item, boolean empty)
+                    {
                         super.updateItem(item, empty);
-                        if (empty) {
+                        if (empty)
+                        {
                             setGraphic(null);
-                        } else {
+                        } else
+                        {
                             Filmmodel film = getTableView().getItems().get(getIndex());
                             // Prüfen, ob bereits in Favoriten
-                            if (film != null && favoritesHandler.istFavorit(film.getImdbID())) {
+                            if (film != null && favoritesHandler.istFavorit(film.getImdbID()))
+                            {
                                 btnAddToFavorites.setText("✓ Hinzugefügt");
                                 btnAddToFavorites.setDisable(true);
-                            } else {
+                            } else
+                            {
                                 btnAddToFavorites.setText("Zu Favoriten");
                                 btnAddToFavorites.setDisable(false);
                             }
@@ -103,7 +115,6 @@ public class WatchlistController {
         });
 
 
-
         // -----------------------------------------
         // WATCHLIST AUS JSON LADEN
         // -----------------------------------------
@@ -112,9 +123,11 @@ public class WatchlistController {
         ObservableList<Filmmodel> filme = observableArrayList();
         tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating, colFavorites));
         tableWatchlist.setItems(filme);
-        for (String id : ids) {
+        for (String id : ids)
+        {
             Filmmodel film = omdbService.getFilmById(id);
-            if (film != null) {
+            if (film != null)
+            {
                 filme.add(film);
             }
         }
@@ -125,10 +138,13 @@ public class WatchlistController {
         // -----------------------------------------
         // Doppelklick für Details
         // -----------------------------------------
-        tableWatchlist.setRowFactory(tv -> {
+        tableWatchlist.setRowFactory(tv ->
+        {
             TableRow<Filmmodel> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+            row.setOnMouseClicked(event ->
+            {
+                if (event.getClickCount() == 2 && (!row.isEmpty()))
+                {
                     Filmmodel rowData = row.getItem();
                     openDetail(rowData);
                 }
@@ -140,13 +156,15 @@ public class WatchlistController {
     // Film-Detailansicht öffnen
     private void openDetail(Filmmodel film)
     {
-        try {
+        try
+        {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
             Scene scene = new Scene(loader.load());
             Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);
 
-            if (tableWatchlist != null && tableWatchlist.getScene() != null) {
+            if (tableWatchlist != null && tableWatchlist.getScene() != null)
+            {
                 dialog.initOwner(tableWatchlist.getScene().getWindow());
             }
 
@@ -160,20 +178,26 @@ public class WatchlistController {
             dialog.show();
 
             // Falls Daten unvollständig → nachladen
-            if (film.getPlot() == null || film.getWriter() == null) {
-                Task<Filmmodel> task = new Task<>() {
+            if (film.getPlot() == null || film.getWriter() == null)
+            {
+                Task<Filmmodel> task = new Task<>()
+                {
                     @Override
-                    protected Filmmodel call() {
-                        if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                    protected Filmmodel call()
+                    {
+                        if (film.getImdbID() != null && !film.getImdbID().isBlank())
+                        {
                             return omdbService.getFilmById(film.getImdbID());
                         }
                         return omdbService.getFilmByTitle(film.getTitle());
                     }
                 };
 
-                task.setOnSucceeded(ev -> {
+                task.setOnSucceeded(ev ->
+                {
                     Filmmodel full = task.getValue();
-                    if (full != null) {
+                    if (full != null)
+                    {
                         Platform.runLater(() -> ctrl.setFilm(full));
                     }
                 });
@@ -185,14 +209,18 @@ public class WatchlistController {
                 th.start();
             }
 
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
+
     @FXML
-    private void handleDeleteSelected() {
+    private void handleDeleteSelected()
+    {
         Filmmodel film = tableWatchlist.getSelectionModel().getSelectedItem();
-        if (film == null) {
+        if (film == null)
+        {
             return; // Nichts ausgewählt
         }
 
@@ -204,11 +232,13 @@ public class WatchlistController {
         tableWatchlist.getItems().remove(film);
     }
 
-    private void anpasseTabellenschriftgroesse() {
+    private void anpasseTabellenschriftgroesse()
+    {
         String groesse = cmbSize.getValue();
         String style = "";
 
-        switch (groesse) {
+        switch (groesse)
+        {
             case "Klein":
                 style = "-fx-font-size: 10px;";
                 break;

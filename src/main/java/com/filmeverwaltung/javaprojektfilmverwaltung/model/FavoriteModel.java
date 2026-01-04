@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 /**
  * Model-Klasse für einen Favoriten-Film mit zusätzlichen Metadaten.
  */
-public class FavoriteModel {
+public class FavoriteModel
+{
     private String imdbID;
     private String title;
     private String year;
@@ -14,18 +15,21 @@ public class FavoriteModel {
     private String notes;             // Benutzernotizen
     private LocalDateTime addedAt;    // Wann hinzugefügt
 
-    public FavoriteModel() {
+    public FavoriteModel()
+    {
         this.addedAt = LocalDateTime.now();
         this.userRating = 0;
     }
 
-    public FavoriteModel(String imdbID) {
+    public FavoriteModel(String imdbID)
+    {
         this.imdbID = imdbID;
         this.addedAt = LocalDateTime.now();
         this.userRating = 0;
     }
 
-    public FavoriteModel(String imdbID, String title, String year, String posterUrl) {
+    public FavoriteModel(String imdbID, String title, String year, String posterUrl)
+    {
         this.imdbID = imdbID;
         this.title = title;
         this.year = year;
@@ -35,66 +39,82 @@ public class FavoriteModel {
     }
 
     // Getters & Setters
-    public String getImdbID() {
+    public String getImdbID()
+    {
         return imdbID;
     }
 
-    public void setImdbID(String imdbID) {
+    public void setImdbID(String imdbID)
+    {
         this.imdbID = imdbID;
     }
 
-    public String getTitle() {
+    public String getTitle()
+    {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(String title)
+    {
         this.title = title;
     }
 
-    public String getYear() {
+    public String getYear()
+    {
         return year;
     }
 
-    public void setYear(String year) {
+    public void setYear(String year)
+    {
         this.year = year;
     }
 
-    public String getPosterUrl() {
+    public String getPosterUrl()
+    {
         return posterUrl;
     }
 
-    public void setPosterUrl(String posterUrl) {
+    public void setPosterUrl(String posterUrl)
+    {
         this.posterUrl = posterUrl;
     }
 
-    public int getUserRating() {
+    public int getUserRating()
+    {
         return userRating;
     }
 
-    public void setUserRating(int userRating) {
-        if (userRating >= 0 && userRating <= 10) {
+    public void setUserRating(int userRating)
+    {
+        if (userRating >= 0 && userRating <= 10)
+        {
             this.userRating = userRating;
         }
     }
 
-    public String getNotes() {
+    public String getNotes()
+    {
         return notes;
     }
 
-    public void setNotes(String notes) {
+    public void setNotes(String notes)
+    {
         this.notes = notes;
     }
 
-    public LocalDateTime getAddedAt() {
+    public LocalDateTime getAddedAt()
+    {
         return addedAt;
     }
 
-    public void setAddedAt(LocalDateTime addedAt) {
+    public void setAddedAt(LocalDateTime addedAt)
+    {
         this.addedAt = addedAt;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         FavoriteModel that = (FavoriteModel) obj;
@@ -102,18 +122,15 @@ public class FavoriteModel {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return imdbID != null ? imdbID.hashCode() : 0;
     }
 
     @Override
-    public String toString() {
-        return "FavoriteModel{" +
-                "imdbID='" + imdbID + '\'' +
-                ", title='" + title + '\'' +
-                ", userRating=" + userRating +
-                ", addedAt=" + addedAt +
-                '}';
+    public String toString()
+    {
+        return "FavoriteModel{" + "imdbID='" + imdbID + '\'' + ", title='" + title + '\'' + ", userRating=" + userRating + ", addedAt=" + addedAt + '}';
     }
 }
 

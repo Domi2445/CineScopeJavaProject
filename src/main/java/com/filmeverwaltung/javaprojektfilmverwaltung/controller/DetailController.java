@@ -3,6 +3,8 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
+import com.filmeverwaltung.javaprojektfilmverwaltung.service.ImdbDescriptionProvider;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,8 +13,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
-import com.filmeverwaltung.javaprojektfilmverwaltung.service.ImdbDescriptionProvider;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -20,13 +20,19 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 
-public class DetailController implements Initializable {
+public class DetailController implements Initializable
+{
 
-    @FXML private Label lblTitle;
-    @FXML private Label lblYear;
-    @FXML private Label lblWriter;
-    @FXML private TextArea txtPlot;
-    @FXML private ImageView imgPoster;
+    @FXML
+    private Label lblTitle;
+    @FXML
+    private Label lblYear;
+    @FXML
+    private Label lblWriter;
+    @FXML
+    private TextArea txtPlot;
+    @FXML
+    private ImageView imgPoster;
 
     private Stage dialogStage;
     private Filmmodel film;
@@ -35,25 +41,30 @@ public class DetailController implements Initializable {
     private final ImdbDescriptionProvider descriptionProvider = new ImdbDescriptionProvider();
 
 
-    public void setDialogStage(Stage stage) {
+    public void setDialogStage(Stage stage)
+    {
         this.dialogStage = stage;
     }
 
-    public void setFilm(Filmmodel film) {
+    public void setFilm(Filmmodel film)
+    {
         this.film = film;
         aktualisiereUI();
         ladePoster();
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        if (film != null) {
+    public void initialize(URL url, ResourceBundle rb)
+    {
+        if (film != null)
+        {
             aktualisiereUI();
             ladePoster();
         }
     }
 
-    private void aktualisiereUI() {
+    private void aktualisiereUI()
+    {
         if (film == null) return;
 
         lblTitle.setText(valueOrDash(film.getTitle()));
@@ -61,62 +72,73 @@ public class DetailController implements Initializable {
         lblWriter.setText(valueOrDash(film.getWriter()));
 
         // Wenn Plot fehlt, zuerst Platzhalter setzen und asynchron nachladen
-        if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
+        if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank())
+        {
             txtPlot.setText("No Description Available");
 
-            if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
-                Task<String> t = new Task<>() {
+            if (film.getImdbID() != null && !film.getImdbID().isBlank())
+            {
+                Task<String> t = new Task<>()
+                {
                     @Override
-                    protected String call() throws Exception {
+                    protected String call() throws Exception
+                    {
                         return descriptionProvider.fetchPlotByImdbId(film.getImdbID());
                     }
                 };
 
-                t.setOnSucceeded(e -> {
+                t.setOnSucceeded(e ->
+                {
                     String fetched = t.getValue();
-                    if (fetched != null && !fetched.isBlank()) {
+                    if (fetched != null && !fetched.isBlank())
+                    {
                         film.setPlot(fetched);
                         txtPlot.setText(fetched);
                     }
                 });
 
-                t.setOnFailed(e -> {
+                t.setOnFailed(e ->
+                {
                     // Kein großes Logging im UI-Thread notwendig
                 });
 
                 new Thread(t).start();
             }
 
-        } else {
+        } else
+        {
             txtPlot.setText(film.getPlot());
         }
 
     }
 
-    private String valueOrDash(String s) {
+    private String valueOrDash(String s)
+    {
         return (s == null || s.isBlank()) ? "-" : s;
     }
 
-    private void ladePoster() {
+    private void ladePoster()
+    {
         if (film == null) return;
 
         String url = film.getPoster();
 
-        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A"))
-                && film.getImdbID() != null) {
-            url = "https://img.omdbapi.com/?i=" +
-                    URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) +
-                    "&apikey=" + ApiConfig.OMDB_API_KEY;
+        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A")) && film.getImdbID() != null)
+        {
+            url = "https://img.omdbapi.com/?i=" + URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) + "&apikey=" + ApiConfig.OMDB_API_KEY;
         }
 
         if (url == null || url.isBlank()) return;
 
         final String posterUrl = url;
 
-        Task<Image> task = new Task<>() {
+        Task<Image> task = new Task<>()
+        {
             @Override
-            protected Image call() throws Exception {
-                try (InputStream is = new URL(posterUrl).openStream()) {
+            protected Image call() throws Exception
+            {
+                try (InputStream is = new URL(posterUrl).openStream())
+                {
                     return new Image(is);
                 }
             }
@@ -129,12 +151,14 @@ public class DetailController implements Initializable {
     }
 
     @FXML
-    private void handleClose() {
+    private void handleClose()
+    {
         if (dialogStage != null) dialogStage.close();
     }
 
     @FXML
-    private void handleTranslatePlot() {
+    private void handleTranslatePlot()
+    {
         if (film == null) return;
         txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
         lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", "de"));
@@ -142,7 +166,8 @@ public class DetailController implements Initializable {
     }
 
     @FXML
-    private void handleAddToWatchList() {
+    private void handleAddToWatchList()
+    {
         WatchlistHandler handler = new WatchlistHandler();
         handler.fuegeFilmHinzu(film.getImdbID());
     }

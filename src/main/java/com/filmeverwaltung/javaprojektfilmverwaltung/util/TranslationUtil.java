@@ -67,9 +67,11 @@ public class TranslationUtil
         // Parse die JSON-Antwort robust (MyMemory kann gelegentlich Felder in unterschiedlichem Typ zurückgeben)
         String translatedText = null;
         double matchValue = 0d;
-        try {
+        try
+        {
             JsonElement rootEl = JsonParser.parseString(responseBody);
-            if (!rootEl.isJsonObject()) {
+            if (!rootEl.isJsonObject())
+            {
                 handleApiError("Unerwartetes JSON-Format (root nicht Objekt)");
                 return text;
             }
@@ -78,57 +80,77 @@ public class TranslationUtil
 
             // responseStatus: kann numerisch oder String sein
             boolean statusOk = true;
-            if (root.has("responseStatus") && !root.get("responseStatus").isJsonNull()) {
+            if (root.has("responseStatus") && !root.get("responseStatus").isJsonNull())
+            {
                 JsonElement statusEl = root.get("responseStatus");
-                try {
+                try
+                {
                     int statusInt = statusEl.getAsInt();
                     statusOk = (statusInt == 200);
-                } catch (Exception ex) {
+                } catch (Exception ex)
+                {
                     statusOk = "200".equals(statusEl.getAsString());
                 }
             }
 
-            if (!statusOk) {
+            if (!statusOk)
+            {
                 handleApiError("API-Status ungleich 200");
                 return text;
             }
 
-            if (root.has("responseData") && root.get("responseData").isJsonObject()) {
+            if (root.has("responseData") && root.get("responseData").isJsonObject())
+            {
                 JsonObject rd = root.getAsJsonObject("responseData");
-                if (rd.has("translatedText") && !rd.get("translatedText").isJsonNull()) {
+                if (rd.has("translatedText") && !rd.get("translatedText").isJsonNull())
+                {
                     translatedText = rd.get("translatedText").getAsString();
                 }
-                if (rd.has("match") && !rd.get("match").isJsonNull()) {
-                    try {
+                if (rd.has("match") && !rd.get("match").isJsonNull())
+                {
+                    try
+                    {
                         matchValue = rd.get("match").getAsDouble();
-                    } catch (Exception ex) {
-                        try {
+                    } catch (Exception ex)
+                    {
+                        try
+                        {
                             matchValue = Double.parseDouble(rd.get("match").getAsString());
-                        } catch (Exception ignore) {
+                        } catch (Exception ignore)
+                        {
                         }
                     }
                 }
             }
 
             // `matches` kann Array oder String sein; wir loggen den Fall
-            if (root.has("matches") && !root.get("matches").isJsonNull()) {
+            if (root.has("matches") && !root.get("matches").isJsonNull())
+            {
                 JsonElement matchesEl = root.get("matches");
-                if (matchesEl.isJsonArray()) {
+                if (matchesEl.isJsonArray())
+                {
                     LOGGER.fine(() -> "MyMemory: matches array size=" + matchesEl.getAsJsonArray().size());
-                } else {
+                } else
+                {
                     LOGGER.fine(() -> "MyMemory: matches ist kein Array (type=" + matchesEl.getClass().getSimpleName() + ")");
                 }
             }
 
-        } catch (JsonSyntaxException e) {
+            // Ende des try-Blocks
+        }
+        catch (JsonSyntaxException e)
+        {
             handleApiError("Ungültiges JSON: " + e.getMessage());
             return text;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             handleApiError("Fehler beim Parsen der API-Antwort: " + e.getMessage());
             return text;
         }
 
-        if (translatedText == null || translatedText.isBlank()) {
+        if (translatedText == null || translatedText.isBlank())
+        {
             handleApiError("Keine Übersetzung erhalten");
             return text;
         }

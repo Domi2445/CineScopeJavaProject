@@ -9,52 +9,66 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 
 
-/** Controller für die Root-Ansicht der Anwendung.
+/**
+ * Controller für die Root-Ansicht der Anwendung.
  * Verwaltet die Navigation zwischen verschiedenen Ansichten wie Suche, Watchlist, Verlauf und Einstellungen.
  */
-public class RootController {
+public class RootController
+{
 
     @FXML
     private StackPane contentArea;
 
     @FXML
-    private void initialize() {
+    private void initialize()
+    {
         loadView("/fxml/search.fxml");
     }
 
     @FXML
-    private void onSearch() {
+    private void onSearch()
+    {
         loadView("/fxml/search.fxml");
     }
 
     @FXML
-    private void onWatchlist() {
+    private void onWatchlist()
+    {
         loadView("/fxml/watchlist.fxml");
     }
 
     @FXML
-    private void onFavorites() { loadView("/fxml/favorites.fxml"); }
+    private void onFavorites()
+    {
+        loadView("/fxml/favorites.fxml");
+    }
 
     @FXML
-    private void onHistory() {
+    private void onHistory()
+    {
         loadView("/fxml/history.fxml");
     }
 
     @FXML
-    private void onSettings() {
+    private void onSettings()
+    {
         loadView("/fxml/settings.fxml");
     }
 
-    private void loadView(String path) {
-        try {
+    private void loadView(String path)
+    {
+        try
+        {
             Parent view = FXMLLoader.load(getClass().getResource(path));
             contentArea.getChildren().setAll(view);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
 
-    public void onLogin(ActionEvent actionEvent) {
+    public void onLogin(ActionEvent actionEvent)
+    {
         loadView("/fxml/login.fxml");
     }
 }

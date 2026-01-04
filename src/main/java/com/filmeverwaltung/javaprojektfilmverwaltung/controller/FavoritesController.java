@@ -28,7 +28,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class FavoritesController {
+public class FavoritesController
+{
 
     @FXML
     private GridPane gridFavorites;
@@ -43,13 +44,16 @@ public class FavoritesController {
     private int imageHeight = 200;
 
     @FXML
-    public void initialize() {
+    public void initialize()
+    {
         // Bildgrößen-ComboBox initialisieren
         cmbImageSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
         cmbImageSize.setValue("Standard");
-        cmbImageSize.setOnAction(event -> {
+        cmbImageSize.setOnAction(event ->
+        {
             String size = cmbImageSize.getValue();
-            switch (size) {
+            switch (size)
+            {
                 case "Klein":
                     imageWidth = 100;
                     imageHeight = 150;
@@ -71,7 +75,8 @@ public class FavoritesController {
         loadFavorites();
     }
 
-    private void loadFavorites() {
+    private void loadFavorites()
+    {
         // Favoriten-IDs laden
         List<String> ids = handler.lesen();
 
@@ -79,12 +84,15 @@ public class FavoritesController {
         int row = 0;
 
         // Für jede Film-ID ein Card erstellen
-        for (String id : ids) {
+        for (String id : ids)
+        {
             Filmmodel film = omdbService.getFilmById(id);
-            if (film != null) {
+            if (film != null)
+            {
                 addMovieCard(film, column, row);
                 column++;
-                if (column == 3) {
+                if (column == 3)
+                {
                     column = 0;
                     row++;
                 }
@@ -92,7 +100,8 @@ public class FavoritesController {
         }
     }
 
-    private void addMovieCard(Filmmodel film, int column, int row) {
+    private void addMovieCard(Filmmodel film, int column, int row)
+    {
         VBox imageCard = new VBox(5);
         imageCard.setStyle("-fx-border-color: #ddd; -fx-padding: 10; -fx-alignment: center; -fx-cursor: hand;");
 
@@ -113,7 +122,8 @@ public class FavoritesController {
 
         // Entfernen-Button
         Button removeButton = new Button("Entfernen");
-        removeButton.setOnAction(e -> {
+        removeButton.setOnAction(e ->
+        {
             // Film aus Datei entfernen
             handler.entferneFilm(film.getImdbID());
             // Grid aktualisieren
@@ -121,8 +131,10 @@ public class FavoritesController {
         });
 
         // Doppelklick für Details
-        imageCard.setOnMouseClicked(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+        imageCard.setOnMouseClicked(event ->
+        {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2)
+            {
                 openDetail(film);
             }
         });
@@ -131,15 +143,14 @@ public class FavoritesController {
         gridFavorites.add(imageCard, column, row);
     }
 
-    private void ladePoster(Filmmodel film, ImageView imageView) {
+    private void ladePoster(Filmmodel film, ImageView imageView)
+    {
         String url = film.getPoster();
 
         // Fallback auf IMDb-Bild, wenn kein Poster vorhanden
-        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A"))
-                && film.getImdbID() != null) {
-            url = "https://img.omdbapi.com/?i=" +
-                    URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) +
-                    "&apikey=" + ApiConfig.OMDB_API_KEY;
+        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A")) && film.getImdbID() != null)
+        {
+            url = "https://img.omdbapi.com/?i=" + URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) + "&apikey=" + ApiConfig.OMDB_API_KEY;
         }
 
         if (url == null || url.isBlank()) return;
@@ -147,17 +158,21 @@ public class FavoritesController {
         final String posterUrl = url;
 
         // Asynchron laden (wie im DetailController)
-        Task<Image> task = new Task<>() {
+        Task<Image> task = new Task<>()
+        {
             @Override
-            protected Image call() throws Exception {
-                try (InputStream is = new URL(posterUrl).openStream()) {
+            protected Image call() throws Exception
+            {
+                try (InputStream is = new URL(posterUrl).openStream())
+                {
                     return new Image(is);
                 }
             }
         };
 
         task.setOnSucceeded(e -> imageView.setImage(task.getValue()));
-        task.setOnFailed(e -> {
+        task.setOnFailed(e ->
+        {
             // Fehlerbild oder Platzhalter setzen
             System.err.println("Fehler beim Laden des Posters: " + posterUrl);
         });
@@ -167,14 +182,17 @@ public class FavoritesController {
         thread.start();
     }
 
-    private void openDetail(Filmmodel film) {
-        try {
+    private void openDetail(Filmmodel film)
+    {
+        try
+        {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
             Scene scene = new Scene(loader.load());
             Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);
 
-            if (gridFavorites != null && gridFavorites.getScene() != null) {
+            if (gridFavorites != null && gridFavorites.getScene() != null)
+            {
                 dialog.initOwner(gridFavorites.getScene().getWindow());
             }
 
@@ -188,20 +206,26 @@ public class FavoritesController {
             dialog.show();
 
             // Falls Daten unvollständig → nachladen
-            if (film.getPlot() == null || film.getWriter() == null) {
-                Task<Filmmodel> task = new Task<>() {
+            if (film.getPlot() == null || film.getWriter() == null)
+            {
+                Task<Filmmodel> task = new Task<>()
+                {
                     @Override
-                    protected Filmmodel call() {
-                        if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                    protected Filmmodel call()
+                    {
+                        if (film.getImdbID() != null && !film.getImdbID().isBlank())
+                        {
                             return omdbService.getFilmById(film.getImdbID());
                         }
                         return omdbService.getFilmByTitle(film.getTitle());
                     }
                 };
 
-                task.setOnSucceeded(ev -> {
+                task.setOnSucceeded(ev ->
+                {
                     Filmmodel full = task.getValue();
-                    if (full != null) {
+                    if (full != null)
+                    {
                         Platform.runLater(() -> ctrl.setFilm(full));
                     }
                 });
@@ -213,7 +237,8 @@ public class FavoritesController {
                 th.start();
             }
 
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
@@ -222,7 +247,8 @@ public class FavoritesController {
      * Aktualisiert das Grid, indem alle Elemente entfernt und neu geladen werden.
      * Wird nach dem Entfernen eines Films aufgerufen, um Lücken zu vermeiden.
      */
-    private void updateGrid() {
+    private void updateGrid()
+    {
         gridFavorites.getChildren().clear();
         loadFavorites();
     }

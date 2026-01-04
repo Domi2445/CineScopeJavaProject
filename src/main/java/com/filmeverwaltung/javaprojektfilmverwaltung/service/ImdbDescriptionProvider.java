@@ -8,12 +8,14 @@ import com.google.gson.JsonObject;
 /**
  * Hilfsklasse, die ggf. fehlende Beschreibungen (Plot) über die OMDb/IMDb oder TMDb nachlädt.
  */
-public class ImdbDescriptionProvider {
+public class ImdbDescriptionProvider
+{
 
     private final OmdbService omdbService;
     private final TMDbClient tmdbClient;
 
-    public ImdbDescriptionProvider() {
+    public ImdbDescriptionProvider()
+    {
         this.omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
         this.tmdbClient = new TMDbClient(ApiConfig.TMDB_API_KEY);
     }
@@ -22,28 +24,37 @@ public class ImdbDescriptionProvider {
      * Versucht, für die gegebene imdbID eine Plot-Beschreibung zu laden.
      * Zuerst OMDb, falls keine Beschreibung vorhanden -> TMDb (overview).
      */
-    public String fetchPlotByImdbId(String imdbId) {
+    public String fetchPlotByImdbId(String imdbId)
+    {
         if (imdbId == null || imdbId.isBlank()) return null;
 
-        try {
+        try
+        {
             // 1) OMDb
             Filmmodel full = omdbService.getFilmById(imdbId);
-            if (full != null) {
+            if (full != null)
+            {
                 String plot = full.getPlot();
-                if (plot != null && !plot.isBlank() && !"N/A".equalsIgnoreCase(plot)) {
+                if (plot != null && !plot.isBlank() && !"N/A".equalsIgnoreCase(plot))
+                {
                     return plot;
                 }
             }
 
             // 2) TMDb (falls API-Key gesetzt)
-            if (ApiConfig.TMDB_API_KEY != null && !ApiConfig.TMDB_API_KEY.isBlank()) {
-                try {
+            if (ApiConfig.TMDB_API_KEY != null && !ApiConfig.TMDB_API_KEY.isBlank())
+            {
+                try
+                {
                     JsonObject found = tmdbClient.findByImdbId(imdbId);
-                    if (found != null && found.has("movie_results")) {
+                    if (found != null && found.has("movie_results"))
+                    {
                         JsonArray arr = found.getAsJsonArray("movie_results");
-                        if (arr != null && arr.size() > 0) {
+                        if (arr != null && arr.size() > 0)
+                        {
                             JsonObject first = arr.get(0).getAsJsonObject();
-                            if (first.has("id")) {
+                            if (first.has("id"))
+                            {
                                 int tmdbId = first.get("id").getAsInt(); // TMDb Movie ID
                                 JsonObject details = tmdbClient.getMovieDetails(tmdbId, "de"); // versuche deutsche Beschreibung
                                 if (details != null && details.has("overview"))
@@ -54,12 +65,14 @@ public class ImdbDescriptionProvider {
                             }
                         }
                     }
-                } catch (Exception e) {
+                } catch (Exception e)
+                {
                     System.err.println("Fehler beim TMDb-Abgleich: " + e.getMessage());
                 }
             }
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             System.err.println("Fehler beim Laden der Beschreibung: " + e.getMessage());
         }
 

@@ -15,9 +15,12 @@ import javafx.scene.layout.StackPane;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RegistrationController
 {
+    private static final Logger LOGGER = Logger.getLogger(RegistrationController.class.getName());
 
     @FXML
     private TextField txtUsername;
@@ -132,7 +135,7 @@ public class RegistrationController
 
         } catch (SQLException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Datenbankfehler bei der Registrierung", e);
             showError("Datenbankfehler: " + e.getMessage());
         }
     }
@@ -151,7 +154,7 @@ public class RegistrationController
             }
         } catch (IOException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Navigieren zurück zum Login", e);
         }
     }
 

@@ -1,7 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
+
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.SessionManager;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -17,6 +19,7 @@ import java.io.IOException;
  */
 public class RootController
 {
+    private static final Logger LOGGER = Logger.getLogger(RootController.class.getName());
 
     @FXML
     private StackPane contentArea;
@@ -82,7 +85,7 @@ public class RootController
             contentArea.getChildren().setAll(view);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Laden der View: " + path, e);
         }
     }
 

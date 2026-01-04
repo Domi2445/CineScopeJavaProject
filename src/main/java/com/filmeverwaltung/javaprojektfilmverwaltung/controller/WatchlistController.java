@@ -20,11 +20,14 @@ import javafx.util.Callback;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
 public class WatchlistController
 {
+    private static final Logger LOGGER = Logger.getLogger(WatchlistController.class.getName());
 
     @FXML
     private TableView<Filmmodel> tableWatchlist;
@@ -202,7 +205,10 @@ public class WatchlistController
                     }
                 });
 
-                task.setOnFailed(ev -> task.getException().printStackTrace());
+                task.setOnFailed(ev ->
+                {
+                    LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", task.getException());
+                });
 
                 Thread th = new Thread(task, "omdb-detail-watchlist");
                 th.setDaemon(true);
@@ -211,7 +217,7 @@ public class WatchlistController
 
         } catch (IOException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Öffnen des Detail-Dialogs", e);
         }
     }
 

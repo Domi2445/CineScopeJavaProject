@@ -18,9 +18,12 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SearchController
 {
+    private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
     @FXML
     private TextField txtSearch;
@@ -103,7 +106,10 @@ public class SearchController
             tableResults.setItems(FXCollections.observableArrayList(list));
         });
 
-        task.setOnFailed(e -> task.getException().printStackTrace());
+        task.setOnFailed(e ->
+        {
+            LOGGER.log(Level.SEVERE, "Fehler bei der Filmsuche", task.getException());
+        });
 
         new Thread(task).start();
     }
@@ -151,14 +157,17 @@ public class SearchController
                 };
 
                 loadTask.setOnSucceeded(ev -> ctrl.setFilm(loadTask.getValue()));
-                loadTask.setOnFailed(ev -> loadTask.getException().printStackTrace());
+                loadTask.setOnFailed(ev ->
+                {
+                    LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", loadTask.getException());
+                });
 
                 new Thread(loadTask).start();
             }
 
         } catch (IOException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Öffnen des Detail-Dialogs", e);
         }
     }
 }

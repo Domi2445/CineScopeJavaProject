@@ -27,9 +27,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FavoritesController
 {
+    private static final Logger LOGGER = Logger.getLogger(FavoritesController.class.getName());
 
     @FXML
     private GridPane gridFavorites;
@@ -173,8 +176,7 @@ public class FavoritesController
         task.setOnSucceeded(e -> imageView.setImage(task.getValue()));
         task.setOnFailed(e ->
         {
-            // Fehlerbild oder Platzhalter setzen
-            System.err.println("Fehler beim Laden des Posters: " + posterUrl);
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des Posters: " + posterUrl, task.getException());
         });
 
         Thread thread = new Thread(task);
@@ -230,7 +232,10 @@ public class FavoritesController
                     }
                 });
 
-                task.setOnFailed(ev -> task.getException().printStackTrace());
+                task.setOnFailed(ev ->
+                {
+                    LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", task.getException());
+                });
 
                 Thread th = new Thread(task, "omdb-detail-favorites");
                 th.setDaemon(true);
@@ -239,7 +244,7 @@ public class FavoritesController
 
         } catch (IOException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Öffnen des Detail-Dialogs", e);
         }
     }
 

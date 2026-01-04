@@ -19,9 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoginController
 {
+    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
 
     @FXML
     private TextField txtUsername;
@@ -99,7 +102,7 @@ public class LoginController
             navigateToMainApp();
         } catch (SQLException e)
         {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Datenbankfehler beim Login", e);
             showError("Datenbankfehler: " + e.getMessage());
         }
     }
@@ -151,7 +154,7 @@ public class LoginController
         } catch (IOException e)
         {
             showError("Fehler beim Laden der Hauptanwendung.");
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Laden der Hauptanwendung", e);
         }
     }
 
@@ -204,7 +207,7 @@ public class LoginController
         } catch (IOException e)
         {
             showError("Fehler beim Laden der Registrierung.");
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Fehler beim Laden der Registrierung", e);
         }
     }
 

@@ -69,9 +69,6 @@ public class TMDbClient
         return null;
     }
 
-    // Beispiel:
-    // TMDbClient client = new TMDbClient();
-    // JsonObject found = client.findByImdbId("tt0111161");
-    // JsonArray results = found.getAsJsonArray("movie_results");
+
 }
 

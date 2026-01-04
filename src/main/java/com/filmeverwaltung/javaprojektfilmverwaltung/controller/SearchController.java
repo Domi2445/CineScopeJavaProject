@@ -15,7 +15,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -116,7 +115,7 @@ public class SearchController
      * @Return void
      *
      */
-    private void openDetail(@NotNull Filmmodel film)
+    private void openDetail(Filmmodel film)
     {
         try
         {

@@ -66,6 +66,7 @@ public class OmdbService
         }
     }
 
+
     /**
      * Suche Filme anhand eines Titels (s=) mit Pagination (bis zu 3 Seiten = 30 Ergebnisse)
      */

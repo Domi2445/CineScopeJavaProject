@@ -1,9 +1,11 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.SessionManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
@@ -20,9 +22,26 @@ public class RootController
     private StackPane contentArea;
 
     @FXML
+    private Button btnLoginLogout;
+
+    @FXML
     private void initialize()
     {
         loadView("/fxml/search.fxml");
+        updateLoginButtonText();
+    }
+
+    private void updateLoginButtonText()
+    {
+        SessionManager session = SessionManager.getInstance();
+        if (session.isLoggedIn())
+        {
+            btnLoginLogout.setText("👤 Abmelden");
+        }
+        else
+        {
+            btnLoginLogout.setText("🔒 Anmelden");
+        }
     }
 
     @FXML
@@ -67,8 +86,21 @@ public class RootController
         }
     }
 
-    public void onLogin(ActionEvent actionEvent)
+    @FXML
+    private void onLoginLogout()
     {
-        loadView("/fxml/login.fxml");
+        SessionManager session = SessionManager.getInstance();
+        if (session.isLoggedIn())
+        {
+            // Logout
+            session.logout();
+            updateLoginButtonText();
+            loadView("/fxml/search.fxml");
+        }
+        else
+        {
+            // Login
+            loadView("/fxml/login.fxml");
+        }
     }
 }

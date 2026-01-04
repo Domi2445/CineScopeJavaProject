@@ -18,7 +18,7 @@
             <Button text="🔖 Favoriten" onAction="#onFavorites"/>
             <Button text="📜 Verlauf" onAction="#onHistory"/>
             <Button text="⚙ Einstellungen" onAction="#onSettings"/>
-            <Button text="🔒 Anmelden" onAction="#onLogin"/>
+            <Button fx:id="btnLoginLogout" text="🔒 Anmelden" onAction="#onLoginLogout"/>
         </VBox>
     </left>
 

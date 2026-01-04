@@ -1,35 +1,41 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.model;
 
+import java.time.LocalDateTime;
+
 /**
- * Model-Klasse für einen Benutzer
+ * Model-Klasse für einen Benutzer — angepasst an die DB-Spalten.
  */
 public class User
 {
     private int userId;
     private String username;
-    private String password;
-    private String language;
-    private boolean darkMode;
+    private String passwordHash;
+    private String email;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLogin;
+    private boolean active;
 
     public User()
     {
     }
 
-    public User(int userId, String username, String password, String language, boolean darkMode)
+    public User(int userId, String username, String passwordHash, String email, LocalDateTime createdAt, LocalDateTime lastLogin, boolean active)
     {
         this.userId = userId;
         this.username = username;
-        this.password = password;
-        this.language = language;
-        this.darkMode = darkMode;
+        this.passwordHash = passwordHash;
+        this.email = email;
+        this.createdAt = createdAt;
+        this.lastLogin = lastLogin;
+        this.active = active;
     }
 
-    public User(String username, String password)
+    public User(String username, String passwordHash)
     {
         this.username = username;
-        this.password = password;
-        this.language = "de";
-        this.darkMode = false;
+        this.passwordHash = passwordHash;
+        this.active = true;
+        this.createdAt = LocalDateTime.now();
     }
 
     // Getter und Setter
@@ -53,40 +59,59 @@ public class User
         this.username = username;
     }
 
-    public String getPassword()
+    public String getPasswordHash()
     {
-        return password;
+        return passwordHash;
     }
 
-    public void setPassword(String password)
+    public void setPasswordHash(String passwordHash)
     {
-        this.password = password;
+        this.passwordHash = passwordHash;
     }
 
-    public String getLanguage()
+    public String getEmail()
     {
-        return language;
+        return email;
     }
 
-    public void setLanguage(String language)
+    public void setEmail(String email)
     {
-        this.language = language;
+        this.email = email;
     }
 
-    public boolean isDarkMode()
+    public LocalDateTime getCreatedAt()
     {
-        return darkMode;
+        return createdAt;
     }
 
-    public void setDarkMode(boolean darkMode)
+    public void setCreatedAt(LocalDateTime createdAt)
     {
-        this.darkMode = darkMode;
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getLastLogin()
+    {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin)
+    {
+        this.lastLogin = lastLogin;
+    }
+
+    public boolean isActive()
+    {
+        return active;
+    }
+
+    public void setActive(boolean active)
+    {
+        this.active = active;
     }
 
     @Override
     public String toString()
     {
-        return "User{" + "userId=" + userId + ", username='" + username + '\'' + ", language='" + language + '\'' + ", darkMode=" + darkMode + '}';
+        return "User{" + "userId=" + userId + ", username='" + username + '\'' + ", email='" + email + '\'' + ", createdAt=" + createdAt + ", lastLogin=" + lastLogin + ", active=" + active + '}';
     }
 }
-

@@ -12,6 +12,8 @@
 
     <TextField fx:id="txtUsername" promptText="Benutzername (min. 3 Zeichen)"/>
 
+    <TextField fx:id="txtEmail" promptText="E-Mail (optional)"/>
+
     <PasswordField fx:id="txtPassword" promptText="Passwort (min. 6 Zeichen)"/>
 
     <PasswordField fx:id="txtPasswordConfirm" promptText="Passwort bestätigen"/>

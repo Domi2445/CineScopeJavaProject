@@ -10,11 +10,10 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
     requires java.net.http;
     requires com.google.gson;
-    requires annotations;
     requires java.logging;
+    requires java.sql; // JDBC API
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;

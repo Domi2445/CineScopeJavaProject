@@ -38,7 +38,7 @@ public class UserRepository
 
     public int insertUser(User user) throws SQLException
     {
-        StriString sql = "INSERT INTO users (USERNAME, PASSWORD_HASH, EMAIL, CREATED_AT, LAST_LOGIN, IS_ACTIVE) " +
+        String sql = "INSERT INTO users (USERNAME, PASSWORD_HASH, EMAIL, CREATED_AT, LAST_LOGIN, IS_ACTIVE) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection c = DatabaseManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))

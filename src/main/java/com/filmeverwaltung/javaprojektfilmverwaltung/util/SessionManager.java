@@ -5,6 +5,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.util;
  */
 public class SessionManager
 {
+
     private static SessionManager instance;
     private int currentUserId = -1;
     private String currentUsername = null;

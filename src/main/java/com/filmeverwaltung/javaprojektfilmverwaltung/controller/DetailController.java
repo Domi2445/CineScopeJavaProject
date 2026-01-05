@@ -112,10 +112,7 @@ public class DetailController implements Initializable
                     }
                 });
 
-                t.setOnFailed(e ->
-                {
-                    // Kein großes Logging im UI-Thread notwendig
-                });
+
 
                 new Thread(t).start();
             }
@@ -162,8 +159,7 @@ public class DetailController implements Initializable
             {
                 streamingProvidersBox.getChildren().clear();
                 streamingProvidersBox.getChildren().add(new Label("Keine Streaming-Anbieter gefunden"));
-            }
-            else
+            } else
             {
                 // Lade ALLE Logos ZUERST, bevor sie angezeigt werden
                 List<Image> loadedImages = new java.util.ArrayList<>();

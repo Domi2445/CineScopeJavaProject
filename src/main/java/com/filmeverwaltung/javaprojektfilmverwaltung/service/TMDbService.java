@@ -1,6 +1,5 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.service;
 
-import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
  */
 public class TMDbService
 {
+
     private static final Logger LOGGER = Logger.getLogger(TMDbService.class.getName());
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private final String apiKey;
@@ -46,8 +46,7 @@ public class TMDbService
                 JsonObject firstResult = results.get(0).getAsJsonObject();
                 return firstResult.get("id").getAsString();
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             LOGGER.log(Level.WARNING, "Fehler bei TMDb Suche: " + e.getMessage(), e);
         }
@@ -59,6 +58,7 @@ public class TMDbService
      */
     public static class StreamingProvider
     {
+
         public String name;
         public String logoUrl;
 
@@ -129,8 +129,7 @@ public class TMDbService
                     }
                 }
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             LOGGER.log(Level.WARNING, "Fehler beim Laden von Streaming-Anbietern: " + e.getMessage(), e);
         }

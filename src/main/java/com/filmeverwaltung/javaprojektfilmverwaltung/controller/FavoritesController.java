@@ -7,6 +7,8 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -241,9 +243,13 @@ public class FavoritesController
                     }
                 });
 
-                task.setOnFailed(ev ->
+                task.setOnFailed(new EventHandler<WorkerStateEvent>()
                 {
-                    LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", task.getException());
+                    @Override
+                    public void handle(WorkerStateEvent ev)
+                    {
+                        LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", task.getException());
+                    }
                 });
 
                 Thread th = new Thread(task, "omdb-detail-favorites");

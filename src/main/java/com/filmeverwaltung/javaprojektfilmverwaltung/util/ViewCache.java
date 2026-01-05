@@ -1,6 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.util;
 
 import javafx.scene.Parent;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
  */
 public class ViewCache
 {
+
     private static final Logger LOGGER = Logger.getLogger(ViewCache.class.getName());
     private static final Map<String, Parent> viewCache = new HashMap<>();
 

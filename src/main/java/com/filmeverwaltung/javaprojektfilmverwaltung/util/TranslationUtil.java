@@ -137,13 +137,11 @@ public class TranslationUtil
             }
 
             // Ende des try-Blocks
-        }
-        catch (JsonSyntaxException e)
+        } catch (JsonSyntaxException e)
         {
             handleApiError("Ungültiges JSON: " + e.getMessage());
             return text;
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             handleApiError("Fehler beim Parsen der API-Antwort: " + e.getMessage());
             return text;

@@ -9,7 +9,7 @@
 
     <HBox spacing="10">
         <TextField fx:id="txtSearch" promptText="Filmtitel eingeben..."/>
-        <Button onAction="#handleSearch" text="Suchen"/>
+        <Button fx:id="btnSearch" onAction="#handleSearch" text="Suchen"/>
     </HBox>
 
     <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
@@ -24,4 +24,3 @@
         </columns>
     </TableView>
 </VBox>
-

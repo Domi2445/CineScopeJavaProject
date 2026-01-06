@@ -5,6 +5,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandl
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -55,12 +56,16 @@ public class WatchlistController
 
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
     private final FavoritesHandler favoritesHandler = new FavoritesHandler();
+    private final LoadingOverlay loadingOverlay = new LoadingOverlay();
 
     @FXML
     private void initialize()
     {
         // Zeige Loading-Label
         lblLoading.setVisible(true);
+        tableWatchlist.setVisible(false);
+        btnExport.setVisible(false);
+        if (cmbSize != null) cmbSize.setVisible(false);
 
         // Größenauswahl ComboBox initialisieren
         cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
@@ -131,18 +136,49 @@ public class WatchlistController
         ObservableList<Filmmodel> filme = observableArrayList();
         tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating, colFavorites));
         tableWatchlist.setItems(filme);
-        for (String id : ids)
+
+        loadingOverlay.show(tableWatchlist.getScene() == null ? null : tableWatchlist.getScene().getWindow(), "Watchlist wird geladen...");
+
+        Task<Void> loadTask = new Task<>()
         {
-            Filmmodel film = omdbService.getFilmById(id);
-            if (film != null)
+            @Override
+            protected Void call()
             {
-                filme.add(film);
+                for (String id : ids)
+                {
+                    Filmmodel film = omdbService.getFilmById(id);
+                    if (film != null)
+                    {
+                        Platform.runLater(() -> filme.add(film));
+                    }
+                }
+                return null;
             }
-        }
+        };
 
-        // Verstecke Loading-Label am Ende
-        lblLoading.setVisible(false);
+        loadTask.setOnSucceeded(e ->
+        {
+            loadingOverlay.hide();
+            lblLoading.setVisible(false);
+            tableWatchlist.setVisible(true);
+            btnExport.setVisible(true);
+            if (cmbSize != null) cmbSize.setVisible(true);
+        });
 
+        loadTask.setOnFailed(e ->
+        {
+            LOGGER.log(Level.SEVERE, "Fehler beim Laden der Watchlist", loadTask.getException());
+            loadingOverlay.hide();
+            lblLoading.setText("Fehler beim Laden");
+            lblLoading.setVisible(true);
+            tableWatchlist.setVisible(true);
+            btnExport.setVisible(true);
+            if (cmbSize != null) cmbSize.setVisible(true);
+        });
+
+        Thread th = new Thread(loadTask, "watchlist-load");
+        th.setDaemon(true);
+        th.start();
 
         // -----------------------------------------
         // Doppelklick für Details

@@ -15,7 +15,7 @@ public class SettingsController
     private static final Logger LOGGER = Logger.getLogger(SettingsController.class.getName());
 
     @FXML
-    private ComboBox cmbLanguage;
+    private ComboBox<String> cmbLanguage;
 
 
     @FXML
@@ -28,10 +28,11 @@ public class SettingsController
     private Label lblLoading;
 
 
-
     @FXML
     private void initialize()
     {
+
+
         // Zeige Loading-Label
         lblLoading.setVisible(true);
 
@@ -39,6 +40,9 @@ public class SettingsController
         // Für jetzt verstecke das Loading-Label sofort
         lblLoading.setVisible(false);
     }
+
+
+
 
 
 }

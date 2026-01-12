@@ -16,6 +16,7 @@ import java.util.Objects;
  */
 public class Main extends Application
 {
+
     /**
      * Startmethode der JavaFX-Anwendung
      *
@@ -25,6 +26,7 @@ public class Main extends Application
     @Override
     public void start(Stage stage) throws Exception
     {
+
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/root.fxml")));
         Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
@@ -51,6 +53,8 @@ public class Main extends Application
      */
     public static void main(String[] args)
     {
+
         launch();
     }
+
 }

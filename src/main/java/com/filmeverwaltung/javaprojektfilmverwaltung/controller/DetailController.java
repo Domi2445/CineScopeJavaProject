@@ -9,6 +9,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
@@ -297,6 +298,18 @@ public class DetailController implements Initializable
         if (film == null) return;
         txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
         lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", "de"));
+
+        // Wenn MyMemory API einen Fehler gemeldet hat, zeige einen Alert in der GUI
+        String tmError = com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.getLastError();
+        if (tmError != null)
+        {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Übersetzungsfehler");
+            alert.setHeaderText("Fehler bei der Übersetzung (MyMemory API)");
+            alert.setContentText(tmError);
+            alert.showAndWait();
+            com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.clearLastError();
+        }
 
     }
 

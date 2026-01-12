@@ -22,6 +22,9 @@ public class TranslationUtil
     private static long lastFailTime = 0;
     private static final long RETRY_INTERVAL = 60000; // 1 Minute
 
+    // Publicly accessible last error message from the MyMemory API (null when last call succeeded)
+    private static volatile String lastErrorMessage = null;
+
     /**
      * Übersetzt einen Text von einer Sprache in eine andere
      *
@@ -154,6 +157,8 @@ public class TranslationUtil
         }
 
         apiAvailable = true;
+        // Clear last error on success
+        lastErrorMessage = null;
         final double match = matchValue;
         LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + match);
         return translatedText;
@@ -165,6 +170,16 @@ public class TranslationUtil
         LOGGER.warning("MyMemory API: " + message);
         apiAvailable = false;
         lastFailTime = System.currentTimeMillis();
+        lastErrorMessage = message;
 
+    }
+
+    // Public accessor for controllers to read and clear the last error
+    public static String getLastError() {
+        return lastErrorMessage;
+    }
+
+    public static void clearLastError() {
+        lastErrorMessage = null;
     }
 }

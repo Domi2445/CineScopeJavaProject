@@ -6,6 +6,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.db.FilmRepository;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,6 +14,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -244,6 +246,19 @@ public class SearchController {
             if (pendingTasks[0] == 0) {
                 updateSearchResults(list);
             }
+
+            // Wenn Translation API einen Fehler gemeldet hat, zeige einen Alert
+            String tmError = TranslationUtil.getLastError();
+            if (tmError != null) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Übersetzungsfehler");
+                    alert.setHeaderText("MyMemory API Fehler");
+                    alert.setContentText(tmError);
+                    alert.showAndWait();
+                    TranslationUtil.clearLastError();
+                });
+            }
         });
 
         task.setOnFailed(e -> {
@@ -319,6 +334,19 @@ public class SearchController {
                             }
                         };
                         new Thread(saveTask).start();
+                    }
+
+                    // Wenn MyMemory API Fehler hatte, zeige Alert
+                    String tmError2 = TranslationUtil.getLastError();
+                    if (tmError2 != null) {
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Übersetzungsfehler");
+                            alert.setHeaderText("MyMemory API Fehler");
+                            alert.setContentText(tmError2);
+                            alert.showAndWait();
+                            TranslationUtil.clearLastError();
+                        });
                     }
                 });
 

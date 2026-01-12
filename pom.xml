@@ -145,6 +145,20 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.40.1.0</version>
         </dependency>
+
+        <!-- Hinweis: Für MS Access (UCanAccess) bitte die benötigten JARs herunterladen
+             und zur Laufzeit in den Classpath legen (z.B. in das Projektverzeichnis `libs/`).
+             Diese JARs werden hier nicht automatisch referenziert, damit der Build ohne lokale JARs funktioniert.
+             Benötigte Dateien (Beispiel): ucanaccess-X.jar, jackcess-X.jar, hsqldb.jar, commons-lang.jar, commons-logging.jar
+        -->
+
+        <!-- UCanAccess (verwende die lokal von Maven heruntergeladene Version) -->
+        <dependency>
+            <groupId>net.sf.ucanaccess</groupId>
+            <artifactId>ucanaccess</artifactId>
+            <version>5.0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -93,16 +93,17 @@ public class FilmRepository
         String sql = "SELECT IMDB_ID, TITLE, YEAR, WRITER, PLOT, IMDB_RATING, VIEW_COUNT " +
                      "FROM films " +
                      "WHERE IMDB_RATING IS NOT NULL AND IMDB_RATING != 'N/A' " +
-                     "ORDER BY VIEW_COUNT DESC " +
-                     "FETCH FIRST ? ROWS ONLY";
+                     "ORDER BY VIEW_COUNT DESC";
 
         try (Connection c = DatabaseManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql))
         {
-            ps.setInt(1, limit);
+            // Für maximale Portabilität: setze die maximale Anzahl zurückgegebener Zeilen
+            ps.setMaxRows(limit);
             try (ResultSet rs = ps.executeQuery())
             {
-                while (rs.next())
+                int count = 0;
+                while (rs.next() && count < limit)
                 {
                     Filmmodel film = new Filmmodel();
                     film.setImdbID(rs.getString("IMDB_ID"));
@@ -112,6 +113,7 @@ public class FilmRepository
                     film.setPlot(rs.getString("PLOT"));
                     film.setImdbRating(rs.getString("IMDB_RATING"));
                     topMovies.add(film);
+                    count++;
                 }
             }
         }
@@ -135,4 +137,3 @@ public class FilmRepository
         }
     }
 }
-

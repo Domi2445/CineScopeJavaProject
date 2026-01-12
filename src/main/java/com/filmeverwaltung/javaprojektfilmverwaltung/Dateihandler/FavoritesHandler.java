@@ -2,8 +2,8 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler;
 
 import java.io.*;
 import java.util.List;
-
-public class FavoritesHandler extends Dateihandler {
+public class FavoritesHandler extends Dateihandler
+{
 
     private static final String FAVORITES_PATH = "favorites.json";
 
@@ -12,7 +12,7 @@ public class FavoritesHandler extends Dateihandler {
         try {
             File file = new File(FAVORITES_PATH);
             if (!file.exists()) {
-                file.createNewFile();
+
                 try (FileWriter fw = new FileWriter(FAVORITES_PATH)) {
                     fw.write("[]");
                 }

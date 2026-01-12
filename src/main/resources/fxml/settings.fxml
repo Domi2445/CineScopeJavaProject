@@ -1,13 +1,27 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ComboBox?>
+
+
+
 <VBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController"
       spacing="15" style="-fx-padding: 20;">
 
     <Label text="Einstellungen" style="-fx-font-size: 22;"/>
+
+
+    //Sprache
+    <Label text="Spracheinstellungen:" style="-fx-font-size: 15;"/>
+    <ComboBox fx:id="cmbLanguage" promptText="Sprache auswählen" style="-fx-font-size: 14;"/>
+
+
     <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
-    <CheckBox text="Dark Mode aktivieren"/>
-    <CheckBox text="Statistik anzeigen"/>
+
+    <CheckBox fx:id="chkDarkMode" text="Dark Mode aktivieren"/>
+
+    <CheckBox fx:id="chkStatistics" text="Statistik anzeigen"/>
 </VBox>
+

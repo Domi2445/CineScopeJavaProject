@@ -30,6 +30,11 @@ public class Filmmodel
     @SerializedName("Plot")
     private String plot;
     /**
+     * Genre des Films.
+     */
+    @SerializedName("Genre")
+    private String genre;
+    /**
      * Antwortstatus des Films.
      */
     @SerializedName("Response")
@@ -92,7 +97,6 @@ public class Filmmodel
      *
      * @param title Der Titel des Films.
      */
-
     public void setTitle(String title)
     {
         this.title = title;
@@ -103,7 +107,6 @@ public class Filmmodel
      *
      * @return Das Erscheinungsjahr des Films.
      */
-
     public String getYear()
     {
         return year;
@@ -134,7 +137,6 @@ public class Filmmodel
      *
      * @param writer Der Autor des Films.
      */
-
     public void setWriter(String writer)
     {
         this.writer = writer;
@@ -150,9 +152,34 @@ public class Filmmodel
         return plot;
     }
 
+    /**
+     * Setter für die Handlung des Films.
+     *
+     * @param plot Die Handlung des Films.
+     */
     public void setPlot(String plot)
     {
         this.plot = plot;
+    }
+
+    /**
+     * Getter für das Genre des Films.
+     *
+     * @return Das Genre des Films.
+     */
+    public String getGenre()
+    {
+        return genre;
+    }
+
+    /**
+     * Setter für das Genre des Films.
+     *
+     * @param genre Das Genre des Films.
+     */
+    public void setGenre(String genre)
+    {
+        this.genre = genre;
     }
 
     /**
@@ -160,7 +187,6 @@ public class Filmmodel
      *
      * @return Die Antwort des Films.
      */
-
     public String getResponse()
     {
         return response;
@@ -191,7 +217,6 @@ public class Filmmodel
      *
      * @param imdbID Die IMDb-ID des Films.
      */
-
     public void setImdbID(String imdbID)
     {
         this.imdbID = imdbID;

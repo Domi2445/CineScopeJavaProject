@@ -21,6 +21,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -74,6 +75,14 @@ public class SearchController {
                 }
             });
             return row;
+        });
+
+        // Add Enter key listener to search field
+        txtSearch.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                handleSearch();
+                event.consume();
+            }
         });
 
         txtSearch.setVisible(false);

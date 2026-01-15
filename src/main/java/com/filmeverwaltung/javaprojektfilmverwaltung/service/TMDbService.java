@@ -172,6 +172,54 @@ public class TMDbService {
     }
 
     /**
+     * Holt die Poster-URL von TMDB für einen Film
+     */
+    public String getPosterUrlForMovie(String movieTitle) {
+        try {
+            String tmdbId = getMovieIdByTitle(movieTitle);
+            if (tmdbId == null) return null;
+
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String json = HttpUtil.get(url);
+            JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
+
+            if (movie.has("poster_path") && !movie.get("poster_path").isJsonNull()) {
+                String posterPath = movie.get("poster_path").getAsString();
+                if (posterPath != null && !posterPath.isEmpty()) {
+                    return "https://image.tmdb.org/t/p/w500" + posterPath;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDB-Posters: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Holt den Teaser/Tagline von TMDB für einen Film
+     */
+    public String getTeaserForMovie(String movieTitle) {
+        try {
+            String tmdbId = getMovieIdByTitle(movieTitle);
+            if (tmdbId == null) return null;
+
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String json = HttpUtil.get(url);
+            JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
+
+            if (movie.has("tagline") && !movie.get("tagline").isJsonNull()) {
+                String tagline = movie.get("tagline").getAsString();
+                if (tagline != null && !tagline.isEmpty() && !tagline.isBlank()) {
+                    return tagline;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDB-Teasers: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
      * Konvertiert ein TMDB JSON-Objekt zu einem Filmmodel
      */
     private Filmmodel convertTmdbToFilmmodel(JsonObject tmdbMovie) {

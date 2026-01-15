@@ -31,6 +31,8 @@ public class DetailController implements Initializable {
     @FXML
     private Label lblTitle;
     @FXML
+    private Label lblTeaser;
+    @FXML
     private Label lblYear;
     @FXML
     private Label lblWriter;
@@ -108,6 +110,36 @@ public class DetailController implements Initializable {
         lblTitle.setText(valueOrDash(film.getTitle()));
         lblYear.setText(valueOrDash(film.getYear()));
         lblWriter.setText(valueOrDash(film.getWriter()));
+
+        // Teaser anzeigen oder nachladen
+        if (film.getTeaser() != null && !film.getTeaser().isBlank() && !"N/A".equalsIgnoreCase(film.getTeaser())) {
+            lblTeaser.setText(film.getTeaser());
+            lblTeaser.setVisible(true);
+        } else {
+            lblTeaser.setText("");
+            lblTeaser.setVisible(false);
+
+            // Lade Teaser asynchron von TMDB
+            if (film.getTitle() != null && !film.getTitle().isBlank()) {
+                Task<String> teaserTask = new Task<>() {
+                    @Override
+                    protected String call() throws Exception {
+                        return tmdbService.getTeaserForMovie(film.getTitle());
+                    }
+                };
+
+                teaserTask.setOnSucceeded(e -> {
+                    String teaser = teaserTask.getValue();
+                    if (teaser != null && !teaser.isBlank()) {
+                        film.setTeaser(teaser);
+                        lblTeaser.setText(teaser);
+                        lblTeaser.setVisible(true);
+                    }
+                });
+
+                new Thread(teaserTask).start();
+            }
+        }
 
         // Lade Streaming-Anbieter asynchron
         ladeStreamingAnbieter();
@@ -314,11 +346,26 @@ public class DetailController implements Initializable {
             protected Image call() throws Exception {
                 try (InputStream is = URI.create(posterUrl).toURL().openStream()) {
                     return new Image(is);
+                } catch (Exception e) {
+                    // Falls OMDB fehlschlägt, versuche TMDB als Fallback
+                    if (film.getTitle() != null && !film.getTitle().isEmpty()) {
+                        String tmdbPosterUrl = tmdbService.getPosterUrlForMovie(film.getTitle());
+                        if (tmdbPosterUrl != null && !tmdbPosterUrl.isEmpty()) {
+                            try (InputStream isTmdb = URI.create(tmdbPosterUrl).toURL().openStream()) {
+                                return new Image(isTmdb);
+                            }
+                        }
+                    }
+                    throw e; // Wenn auch TMDB fehlschlägt, werfe Exception
                 }
             }
         };
 
         task.setOnSucceeded(e -> imgPoster.setImage(task.getValue()));
+
+        task.setOnFailed(e -> {
+            System.err.println("Fehler beim Laden des Posters: " + e.getSource().getException().getMessage());
+        });
 
         new Thread(task).start();
     }

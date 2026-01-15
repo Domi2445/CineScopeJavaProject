@@ -27,6 +27,8 @@
         <VBox spacing="10" HBox.hgrow="ALWAYS">
             <Label fx:id="lblTitle" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
 
+            <Label fx:id="lblTeaser" style="-fx-font-size: 14; -fx-font-style: italic; -fx-text-fill: #666;" wrapText="true"/>
+
             <HBox spacing="20">
                 <VBox spacing="5">
                     <Label text="Jahr:" style="-fx-font-weight: bold;"/>

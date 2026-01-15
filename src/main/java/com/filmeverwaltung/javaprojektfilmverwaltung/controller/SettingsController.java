@@ -40,7 +40,6 @@ public class SettingsController
     {
         cmbLanguage.getItems().setAll(Language.values());
 
-        
 
         // Zeige Loading-Label
         lblLoading.setVisible(true);
@@ -49,9 +48,7 @@ public class SettingsController
         // Für jetzt verstecke das Loading-Label sofort
         lblLoading.setVisible(false);
 
-
     }
-
 
 
 }

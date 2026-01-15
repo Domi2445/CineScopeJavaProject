@@ -35,12 +35,19 @@ public class SearchController {
 
     private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
+    // FXML UI Components
     @FXML
     private TextField txtSearch;
     @FXML
     private Button btnSearch;
     @FXML
     private ComboBox<String> cmbGenre;
+    @FXML
+    private ComboBox<String> cmbLanguage;
+    @FXML
+    private ComboBox<String> cmbMinRating;
+    @FXML
+    private ComboBox<String> cmbRuntime;
     @FXML
     private Label lblLoading;
     @FXML
@@ -56,6 +63,7 @@ public class SearchController {
     @FXML
     private TableColumn<Filmmodel, String> colPlot;
 
+    // Services and utilities
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
     private final FilmRepository filmRepository = new FilmRepository();
     private final LoadingOverlay overlay = new LoadingOverlay();
@@ -63,14 +71,15 @@ public class SearchController {
 
     @FXML
     private void initialize() {
+        // Configure table columns
         colTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
         colYear.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getYear()));
         colRating.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getImdbRating()));
         colWriter.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getWriter()));
         colPlot.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlot()));
-
         colRating.setVisible(false);
 
+        // Configure table row double-click to open detail view
         tableResults.setRowFactory(tv -> {
             TableRow<Filmmodel> row = new TableRow<>();
             row.setOnMouseClicked(e -> {
@@ -81,16 +90,26 @@ public class SearchController {
             return row;
         });
 
-        // Initialize genre ComboBox
+        // Initialize Genre ComboBox
         cmbGenre.setItems(FXCollections.observableArrayList(filterController.getAvailableGenres()));
         cmbGenre.getSelectionModel().selectFirst();
-        cmbGenre.setOnAction(event -> {
-            // Reapply filter to current results when genre selection changes
-            if (!tableResults.getItems().isEmpty()) {
-                List<Filmmodel> currentResults = new java.util.ArrayList<>(tableResults.getItems());
-                updateSearchResults(currentResults);
-            }
-        });
+        cmbGenre.setOnAction(event -> refilterCurrentTable());
+
+        // Initialize Language ComboBox
+        cmbLanguage.setItems(FXCollections.observableArrayList(filterController.getAvailableLanguages()));
+        cmbLanguage.getSelectionModel().selectFirst();
+        cmbLanguage.setOnAction(event -> refilterCurrentTable());
+
+        // Initialize Minimum Rating ComboBox
+        cmbMinRating.setItems(FXCollections.observableArrayList(filterController.getAvailableRatings()));
+        cmbMinRating.getSelectionModel().selectFirst();
+        cmbMinRating.setOnAction(event -> refilterCurrentTable());
+
+        // Initialize Runtime ComboBox
+        cmbRuntime.setItems(FXCollections.observableArrayList(filterController.getAvailableRuntimes()));
+        cmbRuntime.getSelectionModel().selectFirst();
+        cmbRuntime.setOnAction(event -> refilterCurrentTable());
+
         // Add Enter key listener to search field
         txtSearch.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -99,29 +118,68 @@ public class SearchController {
             }
         });
 
-        txtSearch.setVisible(false);
-        txtSearch.setDisable(true);
-        btnSearch.setVisible(false);
-        btnSearch.setDisable(true);
-        cmbGenre.setVisible(false);
-        cmbGenre.setDisable(true);
+        // Initially hide search and filter controls
+        setSearchControlsVisibility(false);
 
+        // Load top movies on startup
         loadTopMovies();
     }
 
+    /**
+     * Helper method to set visibility and enable state of all search/filter controls
+     */
+    private void setSearchControlsVisibility(boolean visible) {
+        txtSearch.setVisible(visible);
+        txtSearch.setDisable(!visible);
+        btnSearch.setVisible(visible);
+        btnSearch.setDisable(!visible);
+        cmbGenre.setVisible(visible);
+        cmbGenre.setDisable(!visible);
+        cmbLanguage.setVisible(visible);
+        cmbLanguage.setDisable(!visible);
+        cmbMinRating.setVisible(visible);
+        cmbMinRating.setDisable(!visible);
+        cmbRuntime.setVisible(visible);
+        cmbRuntime.setDisable(!visible);
+    }
+
+    /**
+     * Helper method to enable/disable all search/filter controls
+     */
+    private void setSearchControlsEnabled(boolean enabled) {
+        txtSearch.setDisable(!enabled);
+        btnSearch.setDisable(!enabled);
+        cmbGenre.setDisable(!enabled);
+        cmbLanguage.setDisable(!enabled);
+        cmbMinRating.setDisable(!enabled);
+        cmbRuntime.setDisable(!enabled);
+    }
+
+    /**
+     * Helper method to hide loading overlay
+     */
     private void hideLoadingScreen() {
         overlay.hide();
     }
 
+    /**
+     * Helper method to re-filter current table results based on filter changes
+     */
+    private void refilterCurrentTable() {
+        if (tableResults.getItems() == null || tableResults.getItems().isEmpty()) {
+            return;
+        }
+        List<Filmmodel> currentResults = new java.util.ArrayList<>(tableResults.getItems());
+        updateSearchResults(currentResults);
+    }
+
+    /**
+     * Load and display top-rated movies from database
+     */
     private void loadTopMovies() {
         tableResults.setVisible(false);
         lblLoading.setVisible(false);
-        btnSearch.setDisable(true);
-        btnSearch.setVisible(false);
-        txtSearch.setDisable(true);
-        txtSearch.setVisible(false);
-        cmbGenre.setDisable(true);
-        cmbGenre.setVisible(false);
+        setSearchControlsVisibility(false);
 
         if (tableResults != null && tableResults.getScene() != null) {
             overlay.show(tableResults.getScene().getWindow(), "Lade beliebteste Filme...");
@@ -164,12 +222,7 @@ public class SearchController {
                 lblLoading.setVisible(true);
             }
 
-            txtSearch.setVisible(true);
-            txtSearch.setDisable(false);
-            btnSearch.setVisible(true);
-            btnSearch.setDisable(false);
-            cmbGenre.setVisible(true);
-            cmbGenre.setDisable(false);
+            setSearchControlsVisibility(true);
             hideLoadingScreen();
         });
 
@@ -178,17 +231,15 @@ public class SearchController {
             hideLoadingScreen();
             lblLoading.setVisible(false);
             tableResults.setVisible(true);
-            txtSearch.setVisible(true);
-            txtSearch.setDisable(false);
-            btnSearch.setVisible(true);
-            btnSearch.setDisable(false);
-            cmbGenre.setVisible(true);
-            cmbGenre.setDisable(false);
+            setSearchControlsVisibility(true);
         });
 
         new Thread(task).start();
     }
 
+    /**
+     * Handle search button click or Enter key press
+     */
     @FXML
     private void handleSearch() {
         String query = txtSearch.getText().trim();
@@ -197,9 +248,7 @@ public class SearchController {
         colRating.setVisible(false);
         tableResults.setVisible(false);
         lblLoading.setVisible(false);
-        btnSearch.setDisable(true);
-        txtSearch.setDisable(true);
-        cmbGenre.setDisable(true);
+        setSearchControlsEnabled(false);
 
         if (tableResults != null && tableResults.getScene() != null) {
             overlay.show(tableResults.getScene().getWindow(), "Suche wird ausgeführt...");
@@ -229,9 +278,7 @@ public class SearchController {
                 lblLoading.setText("Keine Filme gefunden");
                 lblLoading.setVisible(true);
                 tableResults.setVisible(false);
-                btnSearch.setDisable(false);
-                txtSearch.setDisable(false);
-                cmbGenre.setDisable(false);
+                setSearchControlsEnabled(true);
                 return;
             }
 
@@ -299,30 +346,39 @@ public class SearchController {
             hideLoadingScreen();
             lblLoading.setVisible(false);
             tableResults.setVisible(true);
-            btnSearch.setDisable(false);
-            txtSearch.setDisable(false);
-            cmbGenre.setDisable(false);
+            setSearchControlsEnabled(true);
         });
 
         new Thread(task).start();
     }
 
+    /**
+     * Update search results with all active filters applied
+     */
     private void updateSearchResults(List<Filmmodel> list) {
-        // Get selected genre filter
-        String selectedGenre = cmbGenre.getSelectionModel().getSelectedItem();
+        // Get selected filter values
+        final String selectedGenre = cmbGenre.getSelectionModel().getSelectedItem();
+        final String selectedLanguage = cmbLanguage.getSelectionModel().getSelectedItem();
+        final String selectedMinRating = cmbMinRating.getSelectionModel().getSelectedItem();
+        final String selectedRuntime = cmbRuntime.getSelectionModel().getSelectedItem();
 
-        // Filter results by genre
+        // Apply all filters in sequence
         List<Filmmodel> filteredList = list.stream()
-                .filter(film -> {
-                    String filmGenre = film.getGenre();
-                    return filterController.filterByGenre(filmGenre, selectedGenre);
-                })
+                .filter(f -> filterController.filterByGenre(f.getGenre(), selectedGenre))
+                .filter(f -> filterController.filterByLanguage(f.getLanguage(), selectedLanguage))
+                .filter(f -> filterController.filterByMinRating(f.getImdbRating(), selectedMinRating))
+                .filter(f -> filterController.filterByRuntime(f.getRuntimeInMinutes(), selectedRuntime))
                 .toList();
 
-        // If no results after filtering, show message
-        if (filteredList.isEmpty() && selectedGenre != null && !"Alle Genres".equalsIgnoreCase(selectedGenre)) {
+        boolean hasActiveFilters =
+                (selectedGenre != null && !"Alle Genres".equalsIgnoreCase(selectedGenre)) ||
+                        (selectedLanguage != null && !"Alle Sprachen".equalsIgnoreCase(selectedLanguage)) ||
+                        (selectedMinRating != null && !"Alle Bewertungen".equalsIgnoreCase(selectedMinRating)) ||
+                        (selectedRuntime != null && !"Alle Laufzeiten".equalsIgnoreCase(selectedRuntime));
+
+        if (filteredList.isEmpty() && hasActiveFilters) {
             hideLoadingScreen();
-            lblLoading.setText("Keine Filme in diesem Genre gefunden");
+            lblLoading.setText("Keine Ergebnisse für die gewählten Filter");
             lblLoading.setVisible(true);
             tableResults.setVisible(false);
         } else {
@@ -332,12 +388,12 @@ public class SearchController {
             tableResults.setVisible(true);
         }
 
-        btnSearch.setDisable(false);
-        txtSearch.setDisable(false);
-        cmbGenre.setDisable(false);
+        setSearchControlsEnabled(true);
     }
 
-
+    /**
+     * Open detail dialog for selected film
+     */
     private void openDetail(Filmmodel film) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));

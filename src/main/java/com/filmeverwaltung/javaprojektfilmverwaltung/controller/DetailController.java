@@ -6,16 +6,16 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.ImdbDescriptionProvider;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.TMDbService;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
@@ -26,8 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DetailController implements Initializable
-{
+public class DetailController implements Initializable {
 
     @FXML
     private Label lblTitle;
@@ -41,6 +40,22 @@ public class DetailController implements Initializable
     private ImageView imgPoster;
     @FXML
     private HBox streamingProvidersBox;
+    @FXML
+    private Button btnSimilarMovies;
+    @FXML
+    private VBox similarMoviesSection;
+    @FXML
+    private TableView<Filmmodel> tableSimilarMovies;
+    @FXML
+    private TableColumn<Filmmodel, String> colSimilarTitle;
+    @FXML
+    private TableColumn<Filmmodel, String> colSimilarYear;
+    @FXML
+    private TableColumn<Filmmodel, String> colSimilarRating;
+    @FXML
+    private TableColumn<Filmmodel, String> colSimilarPlot;
+    @FXML
+    private ProgressIndicator progressSimilar;
 
     private Stage dialogStage;
     private Filmmodel film;
@@ -51,33 +66,43 @@ public class DetailController implements Initializable
     private final TMDbService tmdbService = new TMDbService(ApiConfig.TMDB_API_KEY);
 
 
-    public void setDialogStage(Stage stage)
-    {
+    public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
     }
 
-    public void setFilm(Filmmodel film)
-    {
+    public void setFilm(Filmmodel film) {
         this.film = film;
         // Reset: neuer Film soll neu geladen werden
         lastLoadedFilmTitle = null;
         streamingProvidersBox.getChildren().clear();
+        if (similarMoviesSection != null) {
+            similarMoviesSection.setVisible(false);
+        }
         aktualisiereUI();
         ladePoster();
     }
 
     @Override
-    public void initialize(URL url, ResourceBundle rb)
-    {
-        if (film != null)
-        {
+    public void initialize(URL url, ResourceBundle rb) {
+        // Initialisiere Similar Movies Tabelle
+        if (colSimilarTitle != null) {
+            colSimilarTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
+            colSimilarYear.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getYear()));
+            colSimilarRating.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getImdbRating()));
+            colSimilarPlot.setCellValueFactory(c -> new SimpleStringProperty(
+                    c.getValue().getPlot() != null && c.getValue().getPlot().length() > 100
+                            ? c.getValue().getPlot().substring(0, 100) + "..."
+                            : c.getValue().getPlot()
+            ));
+        }
+
+        if (film != null) {
             aktualisiereUI();
             ladePoster();
         }
     }
 
-    private void aktualisiereUI()
-    {
+    private void aktualisiereUI() {
         if (film == null) return;
 
         lblTitle.setText(valueOrDash(film.getTitle()));
@@ -88,50 +113,38 @@ public class DetailController implements Initializable
         ladeStreamingAnbieter();
 
         // Wenn Plot fehlt, zuerst Platzhalter setzen und asynchron nachladen
-        if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank())
-        {
+        if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
             txtPlot.setText("No Description Available");
 
-            if (film.getImdbID() != null && !film.getImdbID().isBlank())
-            {
-                Task<String> t = new Task<>()
-                {
+            if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
+                Task<String> t = new Task<>() {
                     @Override
-                    protected String call() throws Exception
-                    {
+                    protected String call() throws Exception {
                         return descriptionProvider.fetchPlotByImdbId(film.getImdbID());
                     }
                 };
 
-                t.setOnSucceeded(e ->
-                {
+                t.setOnSucceeded(e -> {
                     String fetched = t.getValue();
-                    if (fetched != null && !fetched.isBlank())
-                    {
+                    if (fetched != null && !fetched.isBlank()) {
                         film.setPlot(fetched);
                         txtPlot.setText(fetched);
                     }
                 });
 
-
-
                 new Thread(t).start();
             }
 
-        } else
-        {
+        } else {
             txtPlot.setText(film.getPlot());
         }
-
     }
 
-    private void ladeStreamingAnbieter()
-    {
+    private void ladeStreamingAnbieter() {
         if (film == null || film.getTitle() == null) return;
 
         // Verhindere doppeltes Laden: Wenn dieser Film bereits geladen wurde, nicht erneut laden
-        if (lastLoadedFilmTitle != null && lastLoadedFilmTitle.equals(film.getTitle()))
-        {
+        if (lastLoadedFilmTitle != null && lastLoadedFilmTitle.equals(film.getTitle())) {
             return;
         }
 
@@ -143,65 +156,52 @@ public class DetailController implements Initializable
         Label labelLoading = new Label("Wird geladen...");
         streamingProvidersBox.getChildren().add(labelLoading);
 
-        Task<List<TMDbService.StreamingProvider>> task = new Task<>()
-        {
+        Task<List<TMDbService.StreamingProvider>> task = new Task<>() {
             @Override
-            protected List<TMDbService.StreamingProvider> call() throws Exception
-            {
+            protected List<TMDbService.StreamingProvider> call() throws Exception {
                 return tmdbService.getStreamingProvidersForMovie(film.getTitle());
             }
         };
 
-        task.setOnSucceeded(e ->
-        {
+        task.setOnSucceeded(e -> {
             List<TMDbService.StreamingProvider> providers = task.getValue();
 
-            if (providers.isEmpty())
-            {
+            if (providers.isEmpty()) {
                 streamingProvidersBox.getChildren().clear();
                 streamingProvidersBox.getChildren().add(new Label("Keine Streaming-Anbieter gefunden"));
-            } else
-            {
+            } else {
                 // Lade ALLE Logos ZUERST, bevor sie angezeigt werden
                 List<Image> loadedImages = new java.util.ArrayList<>();
                 final int[] loadedCount = {0};
 
-                for (int i = 0; i < providers.size(); i++)
-                {
+                for (int i = 0; i < providers.size(); i++) {
                     TMDbService.StreamingProvider provider = providers.get(i);
 
-                    Task<Image> logoTask = new Task<>()
-                    {
+                    Task<Image> logoTask = new Task<>() {
                         @Override
-                        protected Image call() throws Exception
-                        {
-                            try (InputStream is = URI.create(provider.logoUrl).toURL().openStream())
-                            {
+                        protected Image call() throws Exception {
+                            try (InputStream is = URI.create(provider.logoUrl).toURL().openStream()) {
                                 return new Image(is);
                             }
                         }
                     };
 
-                    logoTask.setOnSucceeded(ev ->
-                    {
+                    logoTask.setOnSucceeded(ev -> {
                         loadedImages.add(logoTask.getValue());
                         loadedCount[0]++;
 
                         // Wenn ALLE Logos geladen sind, DANN anzeigen
-                        if (loadedCount[0] == providers.size())
-                        {
+                        if (loadedCount[0] == providers.size()) {
                             displayStreamingLogos(providers, loadedImages);
                         }
                     });
 
-                    logoTask.setOnFailed(ev ->
-                    {
+                    logoTask.setOnFailed(ev -> {
                         System.err.println("Fehler beim Laden des Logos für: " + provider.name);
                         loadedImages.add(null);  // Placeholder für fehlended Bild
                         loadedCount[0]++;
 
-                        if (loadedCount[0] == providers.size())
-                        {
+                        if (loadedCount[0] == providers.size()) {
                             displayStreamingLogos(providers, loadedImages);
                         }
                     });
@@ -211,8 +211,7 @@ public class DetailController implements Initializable
             }
         });
 
-        task.setOnFailed(e ->
-        {
+        task.setOnFailed(e -> {
             streamingProvidersBox.getChildren().clear();
             streamingProvidersBox.getChildren().add(new Label("Fehler beim Laden von Streaming-Anbietern"));
         });
@@ -223,15 +222,12 @@ public class DetailController implements Initializable
     /**
      * Zeigt alle Streaming-Logos an (wird aufgerufen, nachdem ALLE geladen sind)
      */
-    private void displayStreamingLogos(List<TMDbService.StreamingProvider> providers, List<Image> images)
-    {
+    private void displayStreamingLogos(List<TMDbService.StreamingProvider> providers, List<Image> images) {
         streamingProvidersBox.getChildren().clear();
 
-        for (int i = 0; i < providers.size(); i++)
-        {
+        for (int i = 0; i < providers.size(); i++) {
             Image image = images.get(i);
-            if (image != null)
-            {
+            if (image != null) {
                 ImageView logoView = new ImageView(image);
                 logoView.setFitWidth(50);
                 logoView.setFitHeight(50);
@@ -247,20 +243,65 @@ public class DetailController implements Initializable
         }
     }
 
+    /**
+     * Lädt ähnliche Filme vom aktuellen Film
+     */
+    @FXML
+    private void handleShowSimilarMovies() {
+        if (film == null || film.getTitle() == null) {
+            showAlert("Fehler", "Kein Film ausgewählt", "Es konnte kein Film geladen werden.");
+            return;
+        }
 
-    private String valueOrDash(String s)
-    {
+        btnSimilarMovies.setDisable(true);
+        progressSimilar.setVisible(true);
+        similarMoviesSection.setVisible(true);
+
+        Task<List<Filmmodel>> task = new Task<>() {
+            @Override
+            protected List<Filmmodel> call() throws Exception {
+                return tmdbService.getSimilarMoviesForMovie(film.getTitle());
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<Filmmodel> similarMovies = task.getValue();
+
+            if (similarMovies == null || similarMovies.isEmpty()) {
+                showAlert("Keine Ergebnisse", "TMDb", "Für diesen Film konnten keine ähnlichen Filme gefunden werden.");
+                progressSimilar.setVisible(false);
+                btnSimilarMovies.setDisable(false);
+                similarMoviesSection.setVisible(false);
+                return;
+            }
+
+            tableSimilarMovies.setItems(FXCollections.observableArrayList(similarMovies));
+            progressSimilar.setVisible(false);
+            btnSimilarMovies.setDisable(false);
+        });
+
+        task.setOnFailed(e -> {
+            e.getSource().getException().printStackTrace();
+            showAlert("Fehler", "Ähnliche Filme konnten nicht geladen werden",
+                    "Es ist ein Fehler bei der Abfrage der TMDB-API aufgetreten.");
+            progressSimilar.setVisible(false);
+            btnSimilarMovies.setDisable(false);
+            similarMoviesSection.setVisible(false);
+        });
+
+        new Thread(task).start();
+    }
+
+    private String valueOrDash(String s) {
         return (s == null || s.isBlank()) ? "-" : s;
     }
 
-    private void ladePoster()
-    {
+    private void ladePoster() {
         if (film == null) return;
 
         String url = film.getPoster();
 
-        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A")) && film.getImdbID() != null)
-        {
+        if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A")) && film.getImdbID() != null) {
             url = "https://img.omdbapi.com/?i=" + URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) + "&apikey=" + ApiConfig.OMDB_API_KEY;
         }
 
@@ -268,13 +309,10 @@ public class DetailController implements Initializable
 
         final String posterUrl = url;
 
-        Task<Image> task = new Task<>()
-        {
+        Task<Image> task = new Task<>() {
             @Override
-            protected Image call() throws Exception
-            {
-                try (InputStream is = URI.create(posterUrl).toURL().openStream())
-                {
+            protected Image call() throws Exception {
+                try (InputStream is = URI.create(posterUrl).toURL().openStream()) {
                     return new Image(is);
                 }
             }
@@ -282,27 +320,23 @@ public class DetailController implements Initializable
 
         task.setOnSucceeded(e -> imgPoster.setImage(task.getValue()));
 
-
         new Thread(task).start();
     }
 
     @FXML
-    private void handleClose()
-    {
+    private void handleClose() {
         if (dialogStage != null) dialogStage.close();
     }
 
     @FXML
-    private void handleTranslatePlot()
-    {
+    private void handleTranslatePlot() {
         if (film == null) return;
         txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
         lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", "de"));
 
         // Wenn MyMemory API einen Fehler gemeldet hat, zeige einen Alert in der GUI
         String tmError = com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.getLastError();
-        if (tmError != null)
-        {
+        if (tmError != null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Übersetzungsfehler");
             alert.setHeaderText("Fehler bei der Übersetzung (MyMemory API)");
@@ -310,15 +344,22 @@ public class DetailController implements Initializable
             alert.showAndWait();
             com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.clearLastError();
         }
-
     }
 
     @FXML
-    private void handleAddToWatchList()
-    {
+    private void handleAddToWatchList() {
         WatchlistHandler handler = new WatchlistHandler();
         handler.fuegeFilmHinzu(film.getImdbID());
     }
 
-
+    /**
+     * Hilfsmethode zum Anzeigen von Alerts
+     */
+    private void showAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 }

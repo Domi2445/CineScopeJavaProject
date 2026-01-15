@@ -3,6 +3,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.service;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -169,6 +170,78 @@ public class TMDbService {
             return getSimilarMovies(tmdbId);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Liefert eine YouTube-Embed-URL für Trailer/Teaser eines Films (Sprache de bevorzugt, dann en)
+     */
+    public String getTrailerUrlForMovie(String movieTitle) {
+        String tmdbId = getMovieIdByTitle(movieTitle);
+        if (tmdbId == null || tmdbId.isEmpty()) {
+            return null;
+        }
+        return getTrailerUrlByTmdbId(tmdbId);
+    }
+
+    private String getTrailerUrlByTmdbId(String tmdbId) {
+        try {
+            String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=de";
+            String json = HttpUtil.get(url);
+            JsonObject response = JsonParser.parseString(json).getAsJsonObject();
+            JsonArray results = response.getAsJsonArray("results");
+            if (results == null || results.size() == 0) {
+                return null;
+            }
+
+            List<JsonObject> candidates = new ArrayList<>();
+            for (JsonElement el : results) {
+                JsonObject video = el.getAsJsonObject();
+                if (!video.has("site") || !"YouTube".equalsIgnoreCase(video.get("site").getAsString())) {
+                    continue;
+                }
+                String type = video.has("type") ? video.get("type").getAsString() : "";
+                if (!"Trailer".equalsIgnoreCase(type) && !"Teaser".equalsIgnoreCase(type)) {
+                    continue;
+                }
+                candidates.add(video);
+            }
+
+            if (candidates.isEmpty()) {
+                return null;
+            }
+
+            candidates.sort((a, b) -> {
+                int lang = scoreLang(b) - scoreLang(a);
+                if (lang != 0) return lang;
+                int type = scoreType(b) - scoreType(a);
+                if (type != 0) return type;
+                return 0;
+            });
+
+            String key = candidates.get(0).get("key").getAsString();
+            return "https://www.youtube.com/embed/" + key;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des Trailers: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private int scoreLang(JsonObject video) {
+        String lang = video.has("iso_639_1") && !video.get("iso_639_1").isJsonNull()
+                ? video.get("iso_639_1").getAsString()
+                : "";
+        if ("de".equalsIgnoreCase(lang)) return 2;
+        if ("en".equalsIgnoreCase(lang)) return 1;
+        return 0;
+    }
+
+    private int scoreType(JsonObject video) {
+        String type = video.has("type") && !video.get("type").isJsonNull()
+                ? video.get("type").getAsString()
+                : "";
+        if ("Trailer".equalsIgnoreCase(type)) return 2;
+        if ("Teaser".equalsIgnoreCase(type)) return 1;
+        return 0;
     }
 
     /**

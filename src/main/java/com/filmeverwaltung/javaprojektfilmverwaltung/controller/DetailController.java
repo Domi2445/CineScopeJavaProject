@@ -16,6 +16,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
@@ -56,6 +58,12 @@ public class DetailController implements Initializable {
     private TableColumn<Filmmodel, String> colSimilarPlot;
     @FXML
     private ProgressIndicator progressSimilar;
+    @FXML
+    private Button btnTrailer;
+    @FXML
+    private WebView webTrailer;
+    @FXML
+    private Label lblTrailerStatus;
 
     private Stage dialogStage;
     private Filmmodel film;
@@ -69,6 +77,7 @@ public class DetailController implements Initializable {
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
     }
+
 
     public void setFilm(Filmmodel film) {
         this.film = film;
@@ -326,6 +335,20 @@ public class DetailController implements Initializable {
     @FXML
     private void handleClose() {
         if (dialogStage != null) dialogStage.close();
+
+        // Stoppe Trailer-Wiedergabe und gib Ressourcen frei
+        if (webTrailer != null) {
+            try {
+                WebEngine engine = webTrailer.getEngine();
+                if (engine != null) {
+                    engine.load(null);
+                }
+                webTrailer.setVisible(false);
+                webTrailer.setManaged(false);
+            } catch (Exception ex) {
+                System.err.println("Fehler beim WebView cleanup: " + ex.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -351,6 +374,82 @@ public class DetailController implements Initializable {
         WatchlistHandler handler = new WatchlistHandler();
         handler.fuegeFilmHinzu(film.getImdbID());
     }
+
+    @FXML
+    private void handleShowTrailer() {
+        if (film == null || film.getTitle() == null) {
+            return;
+        }
+
+        btnTrailer.setDisable(true);
+        lblTrailerStatus.setText("Lade Trailer...");
+
+        if (webTrailer != null) {
+            webTrailer.setVisible(false);
+            webTrailer.setManaged(false);
+        }
+
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() {
+                return tmdbService.getTrailerUrlForMovie(film.getTitle());
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            String url = task.getValue();
+            if (url != null && webTrailer != null) {
+                try {
+                    // Teste ob WebEngine verfügbar ist
+                    WebEngine engine = webTrailer.getEngine();
+
+                    // Setze User-Agent um YouTube-Embed-Probleme zu vermeiden
+                    engine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+                    // Aktiviere JavaScript
+                    engine.setJavaScriptEnabled(true);
+
+                    // Lade den Trailer
+                    engine.load(url);
+
+                    webTrailer.setVisible(true);
+                    webTrailer.setManaged(true);
+                    lblTrailerStatus.setText("");
+
+                    // Fehlerbehandlung für WebEngine
+                    engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                        if (newState == javafx.concurrent.Worker.State.FAILED) {
+                            lblTrailerStatus.setText("Fehler beim Laden des Videos");
+                            System.err.println("WebEngine Fehler: " + engine.getLoadWorker().getException());
+                        }
+                    });
+
+                } catch (Exception ex) {
+                    lblTrailerStatus.setText("WebView-Fehler: " + ex.getMessage());
+                    System.err.println("DetailController - WebView Fehler:");
+                    ex.printStackTrace();
+                }
+            } else if (url == null) {
+                lblTrailerStatus.setText("Kein Trailer gefunden");
+            } else {
+                lblTrailerStatus.setText("WebView nicht verfügbar");
+            }
+            btnTrailer.setDisable(false);
+        });
+
+        task.setOnFailed(e -> {
+            lblTrailerStatus.setText("Fehler beim Laden");
+            Throwable ex = e.getSource().getException();
+            System.err.println("Task Fehler beim Laden des Trailers:");
+            if (ex != null) {
+                ex.printStackTrace();
+            }
+            btnTrailer.setDisable(false);
+        });
+
+        new Thread(task).start();
+    }
+
 
     /**
      * Hilfsmethode zum Anzeigen von Alerts

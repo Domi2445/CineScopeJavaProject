@@ -136,7 +136,8 @@ public class FilmRepository
                         if (m.has("vote_average") && !m.get("vote_average").isJsonNull()) {
                             try {
                                 film.setImdbRating(String.valueOf(m.get("vote_average").getAsDouble()));
-                            } catch (Exception ex) {
+                            } catch (Exception ex)
+                            {
                                 film.setImdbRating(m.get("vote_average").getAsString());
                             }
                         }

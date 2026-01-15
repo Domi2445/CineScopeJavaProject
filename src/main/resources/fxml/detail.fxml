@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.web.WebView?>
 
 <VBox spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.DetailController">
@@ -46,6 +47,15 @@
             <VBox spacing="5">
                 <Label text="Streaming-Anbieter:" style="-fx-font-weight: bold;"/>
                 <HBox fx:id="streamingProvidersBox" spacing="10" style="-fx-padding: 5;"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Trailer:" style="-fx-font-weight: bold;"/>
+                <HBox spacing="8">
+                    <Button fx:id="btnTrailer" text="Trailer anzeigen" onAction="#handleShowTrailer"/>
+                    <Label fx:id="lblTrailerStatus" text=""/>
+                </HBox>
+                <WebView fx:id="webTrailer" prefHeight="240" prefWidth="400" visible="false" managed="false"/>
             </VBox>
         </VBox>
     </HBox>

@@ -13,7 +13,8 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires java.net.http;
     requires com.google.gson;
     requires java.logging;
-    requires java.sql; // JDBC API
+    requires java.sql;
+    requires java.desktop; // JDBC API
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;

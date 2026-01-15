@@ -3,13 +3,49 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <VBox prefHeight="481.0" prefWidth="574.0" spacing="15" style="-fx-padding: 20;"
       xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SearchController">
 
+    <!-- Search and Genre Filter HBox -->
     <HBox spacing="10">
-        <TextField fx:id="txtSearch" promptText="Filmtitel eingeben..."/>
+        <TextField fx:id="txtSearch" promptText="Filmtitel eingeben..." HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnSearch" onAction="#handleSearch" text="Suchen"/>
+    </HBox>
+
+    <!-- NEW: Genre Filter HBox -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Genre:" style="-fx-font-size: 12;"/>
+        <ComboBox fx:id="cmbGenre" promptText="Alle Genres" prefWidth="200.0">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Alle Genres"/>
+                    <String fx:value="Action"/>
+                    <String fx:value="Adventure"/>
+                    <String fx:value="Animation"/>
+                    <String fx:value="Biography"/>
+                    <String fx:value="Comedy"/>
+                    <String fx:value="Crime"/>
+                    <String fx:value="Documentary"/>
+                    <String fx:value="Drama"/>
+                    <String fx:value="Family"/>
+                    <String fx:value="Fantasy"/>
+                    <String fx:value="Film-Noir"/>
+                    <String fx:value="History"/>
+                    <String fx:value="Horror"/>
+                    <String fx:value="Musical"/>
+                    <String fx:value="Mystery"/>
+                    <String fx:value="Romance"/>
+                    <String fx:value="Sci-Fi"/>
+                    <String fx:value="Sport"/>
+                    <String fx:value="Thriller"/>
+                    <String fx:value="War"/>
+                    <String fx:value="Western"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
     </HBox>
 
     <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>

@@ -22,7 +22,7 @@ public class HttpUtil
      * @throws IOException          If an I/O error occurs when sending or receiving.
      * @throws InterruptedException If the operation is interrupted.
      */
-    public static String get(String url) throws IOException, InterruptedException, IOException
+    public static String get(String url) throws IOException, InterruptedException
     {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
 

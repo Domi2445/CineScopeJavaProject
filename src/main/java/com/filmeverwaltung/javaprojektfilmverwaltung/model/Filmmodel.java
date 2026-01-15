@@ -39,6 +39,9 @@ public class Filmmodel {
     @SerializedName("imdbRating")
     private String imdbRating;
 
+    // NEW: User ID (Foreign Key zur users-Tabelle)
+    private Long userId;
+
     public Filmmodel() { }
 
     public Filmmodel(String title, String year, String writer, String plot) {
@@ -82,6 +85,10 @@ public class Filmmodel {
 
     public String getImdbRating() { return imdbRating; }
     public void setImdbRating(String imdbRating) { this.imdbRating = imdbRating; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
     public int getRuntimeInMinutes() {
         if (runtime == null || runtime.isBlank() || "N/A".equalsIgnoreCase(runtime)) {
             return -1;

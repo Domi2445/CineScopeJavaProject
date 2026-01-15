@@ -121,7 +121,7 @@ public class SearchController {
         // Initially hide search and filter controls
         setSearchControlsVisibility(false);
 
-        // Load top movies on startup
+        // Load top movies on startup (jetzt aus lokaler Access-DB / Repository)
         loadTopMovies();
     }
 
@@ -174,33 +174,44 @@ public class SearchController {
     }
 
     /**
-     * Load and display top-rated movies from database
+     * Load and display top-rated movies from TMDB via FilmRepository
      */
     private void loadTopMovies() {
         tableResults.setVisible(false);
         lblLoading.setVisible(false);
         setSearchControlsVisibility(false);
 
-        if (tableResults != null && tableResults.getScene() != null) {
-            overlay.show(tableResults.getScene().getWindow(), "Lade beliebteste Filme...");
-        } else {
-            overlay.show(null, "Lade beliebteste Filme...");
-        }
-
         Task<List<Filmmodel>> task = new Task<>() {
             @Override
             protected List<Filmmodel> call() {
-                try {
-                    return filmRepository.getTopMovies(15);
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Fehler beim Laden der beliebtesten Filme", e);
-                    return List.of();
-                }
+                return filmRepository.getTopMovies(20);
             }
+
         };
 
         task.setOnSucceeded(e -> {
             List<Filmmodel> topMovies = new java.util.ArrayList<>(task.getValue());
+
+            // Format year and rating for all movies
+            for (Filmmodel film : topMovies) {
+                // Extract year from date string (e.g., "2025-11-05" -> "2025")
+                if (film.getYear() != null && !film.getYear().isEmpty()) {
+                    String year = film.getYear();
+                    if (year.length() >= 4) {
+                        film.setYear(year.substring(0, 4));
+                    }
+                }
+                // Round rating to 2 decimal places
+                if (film.getImdbRating() != null && !film.getImdbRating().isEmpty() && !"N/A".equalsIgnoreCase(film.getImdbRating())) {
+                    try {
+                        double rating = Double.parseDouble(film.getImdbRating());
+                        film.setImdbRating(String.format("%.2f", rating));
+                    } catch (NumberFormatException ex) {
+                        // Keep original value if parsing fails
+                    }
+                }
+            }
+
             topMovies.removeIf(film -> film.getImdbRating() == null || film.getImdbRating().isEmpty() || "N/A".equalsIgnoreCase(film.getImdbRating()));
 
             if (!topMovies.isEmpty()) {
@@ -214,16 +225,61 @@ public class SearchController {
                     }
                 });
 
-                colRating.setVisible(true);
-                tableResults.setItems(FXCollections.observableArrayList(topMovies));
-                tableResults.setVisible(true);
+                // Load OMDB posters for all top movies (fallback to TMDB if N/A)
+                final int[] pendingPosterTasks = {topMovies.size()};
+                for (Filmmodel film : topMovies) {
+                    Task<Void> posterTask = new Task<>() {
+                        @Override
+                        protected Void call() {
+                            try {
+                                // Versuche OMDB-Poster zu laden
+                                Filmmodel omdbFilm = omdbService.getFilmByTitle(film.getTitle());
+                                if (omdbFilm != null && omdbFilm.getPoster() != null && !"N/A".equalsIgnoreCase(omdbFilm.getPoster())) {
+                                    film.setPoster(omdbFilm.getPoster());
+                                    return null;
+                                }
+                                // Falls OMDB kein Poster hat, versuche TMDB
+                                // TMDB poster_path ist bereits in film gespeichert (falls vorhanden)
+                                // Keine weitere Aktion nötig
+                            } catch (Exception ex) {
+                                LOGGER.log(Level.FINE, "Fehler beim Laden des OMDB-Posters für: " + film.getTitle(), ex);
+                            }
+                            return null;
+                        }
+                    };
+
+                    posterTask.setOnSucceeded(ev -> {
+                        pendingPosterTasks[0]--;
+                        if (pendingPosterTasks[0] == 0) {
+                            // Alle Poster geladen
+                            colRating.setVisible(true);
+                            tableResults.setItems(FXCollections.observableArrayList(topMovies));
+                            tableResults.setVisible(true);
+                            setSearchControlsVisibility(true);
+                            hideLoadingScreen();
+                        }
+                    });
+
+                    posterTask.setOnFailed(ev -> {
+                        pendingPosterTasks[0]--;
+                        LOGGER.log(Level.WARNING, "Fehler beim Laden des Posters", posterTask.getException());
+                        if (pendingPosterTasks[0] == 0) {
+                            colRating.setVisible(true);
+                            tableResults.setItems(FXCollections.observableArrayList(topMovies));
+                            tableResults.setVisible(true);
+                            setSearchControlsVisibility(true);
+                            hideLoadingScreen();
+                        }
+                    });
+
+                    new Thread(posterTask).start();
+                }
             } else {
                 lblLoading.setText("Keine Filme mit gültiger Bewertung gefunden");
                 lblLoading.setVisible(true);
+                setSearchControlsVisibility(true);
+                hideLoadingScreen();
             }
-
-            setSearchControlsVisibility(true);
-            hideLoadingScreen();
         });
 
         task.setOnFailed(e -> {
@@ -273,6 +329,26 @@ public class SearchController {
         task.setOnSucceeded(e -> {
             List<Filmmodel> list = new java.util.ArrayList<>(task.getValue());
 
+            // Format year and rating for all movies
+            for (Filmmodel film : list) {
+                // Extract year from date string (e.g., "2025-11-05" -> "2025")
+                if (film.getYear() != null && !film.getYear().isEmpty()) {
+                    String year = film.getYear();
+                    if (year.length() >= 4) {
+                        film.setYear(year.substring(0, 4));
+                    }
+                }
+                // Round rating to 2 decimal places
+                if (film.getImdbRating() != null && !film.getImdbRating().isEmpty() && !"N/A".equalsIgnoreCase(film.getImdbRating())) {
+                    try {
+                        double rating = Double.parseDouble(film.getImdbRating());
+                        film.setImdbRating(String.format("%.2f", rating));
+                    } catch (NumberFormatException ex) {
+                        // Keep original value if parsing fails
+                    }
+                }
+            }
+
             if (list.isEmpty()) {
                 hideLoadingScreen();
                 lblLoading.setText("Keine Filme gefunden");
@@ -298,10 +374,20 @@ public class SearchController {
                                     Filmmodel fullFilm = omdbService.getFilmById(film.getImdbID());
                                     if (fullFilm != null) {
                                         if (fullFilm.getImdbRating() != null && !"N/A".equalsIgnoreCase(fullFilm.getImdbRating())) {
-                                            film.setImdbRating(fullFilm.getImdbRating());
+                                            // Round rating to 2 decimal places
+                                            try {
+                                                double rating = Double.parseDouble(fullFilm.getImdbRating());
+                                                film.setImdbRating(String.format("%.2f", rating));
+                                            } catch (NumberFormatException ex) {
+                                                film.setImdbRating(fullFilm.getImdbRating());
+                                            }
                                         }
                                         if (fullFilm.getWriter() != null && !"N/A".equalsIgnoreCase(fullFilm.getWriter())) {
                                             film.setWriter(fullFilm.getWriter());
+                                        }
+                                        // Poster von OMDB (Fallback zu existierendem TMDB-Poster)
+                                        if (fullFilm.getPoster() != null && !"N/A".equalsIgnoreCase(fullFilm.getPoster())) {
+                                            film.setPoster(fullFilm.getPoster());
                                         }
                                     }
                                 }
@@ -320,6 +406,41 @@ public class SearchController {
                     });
 
                     new Thread(detailsTask).start();
+                } else {
+                    // Auch für Filme ohne fehlende Details: versuche OMDB-Poster zu laden
+                    pendingTasks[0]++;
+                    Task<Void> posterTask = new Task<>() {
+                        @Override
+                        protected Void call() {
+                            try {
+                                if (film.getImdbID() != null && !film.getImdbID().isEmpty()) {
+                                    Filmmodel omdbFilm = omdbService.getFilmById(film.getImdbID());
+                                    if (omdbFilm != null && omdbFilm.getPoster() != null && !"N/A".equalsIgnoreCase(omdbFilm.getPoster())) {
+                                        film.setPoster(omdbFilm.getPoster());
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                LOGGER.log(Level.FINE, "Fehler beim Laden des OMDB-Posters", ex);
+                            }
+                            return null;
+                        }
+                    };
+
+                    posterTask.setOnSucceeded(ev -> {
+                        pendingTasks[0]--;
+                        if (pendingTasks[0] == 0) {
+                            updateSearchResults(list);
+                        }
+                    });
+
+                    posterTask.setOnFailed(ev -> {
+                        pendingTasks[0]--;
+                        if (pendingTasks[0] == 0) {
+                            updateSearchResults(list);
+                        }
+                    });
+
+                    new Thread(posterTask).start();
                 }
             }
 

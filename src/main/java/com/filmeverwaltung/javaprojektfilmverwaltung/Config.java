@@ -44,6 +44,7 @@ public class Config
     {
         public String omdb;
         public String tmdb;
+        public String tmdbLanguage;
     }
 
     public static class App

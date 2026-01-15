@@ -176,9 +176,10 @@ public class DatabaseManager
                     LOGGER.log(Level.INFO, "Tabelle 'films' existiert nicht - erstelle sie für Access DB");
                     try (Statement st = conn.createStatement())
                     {
-                        // Access-kompatible Spalten
+                        // Access-kompatible Spalten mit USER_ID als Foreign Key
                         String createFilms = "CREATE TABLE films ("
                                 + "ID COUNTER PRIMARY KEY, "
+                                + "USER_ID LONG, "
                                 + "IMDB_ID TEXT(50), "
                                 + "TITLE TEXT(255), "
                                 + "YEAR TEXT(10), "
@@ -186,12 +187,24 @@ public class DatabaseManager
                                 + "PLOT MEMO, "
                                 + "IMDB_RATING TEXT(20), "
                                 + "VIEW_COUNT INTEGER, "
-                                + "LAST_VIEWED DATETIME)";
+                                + "LAST_VIEWED DATETIME, "
+                                + "FOREIGN KEY (USER_ID) REFERENCES users(USER_ID))";
                         st.executeUpdate(createFilms);
                         LOGGER.log(Level.INFO, "Tabelle 'films' erfolgreich erstellt");
                     }
                 } else {
                     LOGGER.log(Level.FINE, "Tabelle 'films' bereits vorhanden");
+                    // Prüfe ob USER_ID Spalte existiert und füge sie ggf. hinzu
+                    try (ResultSet rsColumns = md.getColumns(null, null, "films", "USER_ID")) {
+                        if (!rsColumns.next()) {
+                            // Spalte existiert nicht, füge sie hinzu
+                            LOGGER.log(Level.INFO, "USER_ID Spalte existiert nicht in films - füge sie hinzu");
+                            try (Statement st = conn.createStatement()) {
+                                st.executeUpdate("ALTER TABLE films ADD COLUMN USER_ID LONG");
+                                LOGGER.log(Level.INFO, "USER_ID Spalte erfolgreich hinzugefügt");
+                            }
+                        }
+                    }
                 }
             }
         }

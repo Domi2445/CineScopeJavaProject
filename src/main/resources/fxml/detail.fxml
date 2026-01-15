@@ -4,68 +4,78 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.web.WebView?>
 
-<VBox spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<ScrollPane fitToWidth="true" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" style="-fx-background: linear-gradient(#f7f9fc, #eef2f8); -fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.DetailController">
-
-    <HBox spacing="20">
+<VBox spacing="15" style="-fx-padding: 22; -fx-background-color: transparent;">
+    <HBox spacing="22">
         <!-- Poster und Buttons -->
-        <VBox spacing="10" style="-fx-min-width: 200;">
-            <ImageView fx:id="imgPoster" fitHeight="300" fitWidth="200" preserveRatio="true"/>
+        <VBox spacing="12" style="-fx-min-width: 200; -fx-background-color: white; -fx-padding: 12; -fx-border-color: #e3e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10,0,0,4);">
+            <ImageView fx:id="imgPoster" fitHeight="300" fitWidth="200" preserveRatio="true" />
 
             <Button fx:id="btnSimilarMovies" text="Ähnliche Filme anzeigen" onAction="#handleShowSimilarMovies"
-                    style="-fx-padding: 10; -fx-font-size: 12;"/>
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#5da9ff,#3b82f6); -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Zur Watchlist hinzufügen" onAction="#handleAddToWatchList"
-                    style="-fx-padding: 10; -fx-font-size: 12;"/>
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#1fbf75,#10b981); -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Übersetzen" onAction="#handleTranslatePlot"
-                    style="-fx-padding: 10; -fx-font-size: 12;"/>
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#9c6bff,#7c3aed); -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Schließen" onAction="#handleClose"
-                    style="-fx-padding: 10; -fx-font-size: 12;"/>
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #e5e7eb; -fx-text-fill: #111827; -fx-background-radius: 8;" />
         </VBox>
 
         <!-- Film Details -->
-        <VBox spacing="10" HBox.hgrow="ALWAYS">
-            <Label fx:id="lblTitle" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        <VBox spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e3e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,5);">
+            <Label fx:id="lblTitle" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
 
-            <Label fx:id="lblTeaser" style="-fx-font-size: 14; -fx-font-style: italic; -fx-text-fill: #666;" wrapText="true"/>
+            <!-- Trailer-Container mit WebView -->
+            <VBox fx:id="trailerContainer" visible="false" managed="false" spacing="8" prefHeight="450" minHeight="400" maxWidth="1400" prefWidth="1200"
+                  style="-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #0f172a; -fx-border-radius: 12; -fx-background-radius: 12;">
+                <WebView fx:id="trailerWebView" prefHeight="400" minHeight="360" VBox.vgrow="ALWAYS" />
+                <HBox spacing="10" prefHeight="40" minHeight="40" alignment="CENTER_RIGHT">
+                    <Hyperlink fx:id="lnkTrailerExternal" text="" style="-fx-font-size: 12; -fx-text-fill: #2563eb;" visible="false" managed="false" />
+                </HBox>
+            </VBox>
 
-            <HBox spacing="20">
+            <HBox spacing="22">
                 <VBox spacing="5">
-                    <Label text="Jahr:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="lblYear"/>
+                    <Label text="Jahr:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                    <Label fx:id="lblYear" />
                 </VBox>
                 <VBox spacing="5">
-                    <Label text="Autor:" style="-fx-font-weight: bold;"/>
-                    <Label fx:id="lblWriter"/>
+                    <Label text="Autor:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                    <Label fx:id="lblWriter" />
                 </VBox>
             </HBox>
 
-            <VBox spacing="5">
-                <Label text="Handlung:" style="-fx-font-weight: bold;"/>
-                <TextArea fx:id="txtPlot" wrapText="true" prefRowCount="8" editable="false"/>
+            <VBox spacing="6" VBox.vgrow="ALWAYS">
+                <Label text="Handlung:" style="-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #0f172a;" />
+                <TextArea fx:id="txtPlot" wrapText="true" prefRowCount="15" minHeight="200" VBox.vgrow="ALWAYS" editable="false"
+                          style="-fx-font-size: 13; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #e5e7eb;" />
             </VBox>
 
-            <VBox spacing="5">
-                <Label text="Streaming-Anbieter:" style="-fx-font-weight: bold;"/>
-                <HBox fx:id="streamingProvidersBox" spacing="10" style="-fx-padding: 5;"/>
+            <VBox spacing="6">
+                <Label text="Streaming-Anbieter:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                <HBox fx:id="streamingProvidersBox" spacing="10" style="-fx-padding: 5;" />
             </VBox>
         </VBox>
     </HBox>
 
-    <Separator/>
+    <Separator />
 
     <!-- Similar Movies Section -->
     <VBox fx:id="similarMoviesSection" spacing="10" visible="false">
-        <Label text="Ähnliche Filme" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
-        <ProgressIndicator fx:id="progressSimilar" visible="false" prefWidth="50" prefHeight="50"/>
+        <Label text="Ähnliche Filme" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+        <ProgressIndicator fx:id="progressSimilar" visible="false" prefWidth="50" prefHeight="50" />
 
         <TableView fx:id="tableSimilarMovies" prefHeight="250">
             <columns>
-                <TableColumn fx:id="colSimilarTitle" text="Titel" prefWidth="250"/>
-                <TableColumn fx:id="colSimilarYear" text="Jahr" prefWidth="80"/>
-                <TableColumn fx:id="colSimilarRating" text="Bewertung" prefWidth="100"/>
-                <TableColumn fx:id="colSimilarPlot" text="Handlung" prefWidth="300"/>
+                <TableColumn fx:id="colSimilarTitle" text="Titel" prefWidth="250" />
+                <TableColumn fx:id="colSimilarYear" text="Jahr" prefWidth="80" />
+                <TableColumn fx:id="colSimilarRating" text="Bewertung" prefWidth="100" />
+                <TableColumn fx:id="colSimilarPlot" text="Handlung" prefWidth="300" />
             </columns>
         </TableView>
     </VBox>
-</VBox>
+    </VBox>
+</ScrollPane>

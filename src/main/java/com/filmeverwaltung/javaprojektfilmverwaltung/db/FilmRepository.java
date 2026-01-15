@@ -64,8 +64,8 @@ public class FilmRepository
      */
     private void insertFilm(Filmmodel film) throws SQLException
     {
-        String sql = "INSERT INTO films (USER_ID, IMDB_ID, TITLE, YEAR, WRITER, PLOT, TEASER, IMDB_RATING, VIEW_COUNT, LAST_VIEWED) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
+        String sql = "INSERT INTO films (USER_ID, IMDB_ID, TITLE, YEAR, WRITER, PLOT, IMDB_RATING, VIEW_COUNT, LAST_VIEWED) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)";
         try (Connection c = DatabaseManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql))
         {
@@ -75,9 +75,8 @@ public class FilmRepository
             ps.setString(4, film.getYear());
             ps.setString(5, film.getWriter());
             ps.setString(6, film.getPlot());
-            ps.setString(7, film.getTeaser());
-            ps.setString(8, film.getImdbRating());
-            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(7, film.getImdbRating());
+            ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             ps.executeUpdate();
         }
     }

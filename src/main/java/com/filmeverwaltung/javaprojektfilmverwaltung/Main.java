@@ -1,6 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.db.DatabaseManager;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,6 +42,8 @@ public class Main extends Application
     @Override
     public void stop() throws Exception
     {
+        // Stoppe den eingebetteten Webserver, falls er läuft
+        LocalWebServer.stop();
         super.stop();
         // Schließe die Datenbankverbindung beim Beenden
         DatabaseManager.closeConnection();

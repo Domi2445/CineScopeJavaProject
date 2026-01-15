@@ -16,8 +16,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -25,13 +28,21 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class DetailController implements Initializable {
+
+    private static final Logger LOGGER = Logger.getLogger(DetailController.class.getName());
 
     @FXML
     private Label lblTitle;
     @FXML
-    private Label lblTeaser;
+    private WebView trailerWebView;
+    @FXML
+    private VBox trailerContainer;
+    @FXML
+    private Hyperlink lnkTrailerExternal;
     @FXML
     private Label lblYear;
     @FXML
@@ -70,15 +81,50 @@ public class DetailController implements Initializable {
 
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
+
+        // Füge Event-Handler hinzu, um Video beim Schließen zu stoppen
+        if (stage != null) {
+            stage.setOnCloseRequest(event -> stopVideo());
+        }
+    }
+
+    /**
+     * Stoppt das Video in der WebView
+     */
+    private void stopVideo() {
+        if (trailerWebView != null && trailerWebView.getEngine() != null) {
+            LOGGER.log(Level.INFO, "Video wird gestoppt");
+            // Leere den WebView-Inhalt, um das Video zu stoppen
+            trailerWebView.getEngine().loadContent("");
+            trailerWebView.setVisible(false);
+            trailerWebView.setManaged(false);
+        }
     }
 
     public void setFilm(Filmmodel film) {
+        // Stoppe das aktuell laufende Video
+        stopVideo();
+
         this.film = film;
-        // Reset: neuer Film soll neu geladen werden
         lastLoadedFilmTitle = null;
         streamingProvidersBox.getChildren().clear();
         if (similarMoviesSection != null) {
             similarMoviesSection.setVisible(false);
+        }
+        if (trailerWebView != null) {
+            trailerWebView.getEngine().loadContent("");
+            trailerWebView.setVisible(false);
+            trailerWebView.setManaged(false);
+        }
+        if (trailerContainer != null) {
+            trailerContainer.setVisible(false);
+            trailerContainer.setManaged(false);
+        }
+        if (lnkTrailerExternal != null) {
+            lnkTrailerExternal.setText("");
+            lnkTrailerExternal.setVisible(false);
+            lnkTrailerExternal.setManaged(false);
+            lnkTrailerExternal.setOnAction(null);
         }
         aktualisiereUI();
         ladePoster();
@@ -86,6 +132,9 @@ public class DetailController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        // Starte lokalen Webserver
+        com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.start();
+
         // Initialisiere Similar Movies Tabelle
         if (colSimilarTitle != null) {
             colSimilarTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
@@ -111,34 +160,181 @@ public class DetailController implements Initializable {
         lblYear.setText(valueOrDash(film.getYear()));
         lblWriter.setText(valueOrDash(film.getWriter()));
 
-        // Teaser anzeigen oder nachladen
-        if (film.getTeaser() != null && !film.getTeaser().isBlank() && !"N/A".equalsIgnoreCase(film.getTeaser())) {
-            lblTeaser.setText(film.getTeaser());
-            lblTeaser.setVisible(true);
-        } else {
-            lblTeaser.setText("");
-            lblTeaser.setVisible(false);
+        // Trailer-Link asynchron laden
+        if (film.getTitle() != null && !film.getTitle().isBlank()) {
+            LOGGER.log(Level.INFO, "🎬 Starte Trailer-Laden für: " + film.getTitle());
+            System.out.println("🎬 Starte Trailer-Laden für: " + film.getTitle());
 
-            // Lade Teaser asynchron von TMDB
-            if (film.getTitle() != null && !film.getTitle().isBlank()) {
-                Task<String> teaserTask = new Task<>() {
-                    @Override
-                    protected String call() throws Exception {
-                        return tmdbService.getTeaserForMovie(film.getTitle());
+            Task<String> trailerTask = new Task<>() {
+                @Override
+                protected String call() {
+                    try {
+                        String result = tmdbService.getTrailerUrlForMovie(film.getTitle());
+                        LOGGER.log(Level.INFO, "TMDb-Service zurückgegeben: " + result);
+                        System.out.println("TMDb-Service zurückgegeben: " + result);
+                        return result;
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.SEVERE, "Exception in getTrailerUrlForMovie: " + ex.getMessage(), ex);
+                        System.err.println("Exception in getTrailerUrlForMovie: " + ex);
+                        ex.printStackTrace();
+                        throw new RuntimeException(ex);
                     }
-                };
+                }
+            };
 
-                teaserTask.setOnSucceeded(e -> {
-                    String teaser = teaserTask.getValue();
-                    if (teaser != null && !teaser.isBlank()) {
-                        film.setTeaser(teaser);
-                        lblTeaser.setText(teaser);
-                        lblTeaser.setVisible(true);
+            trailerTask.setOnSucceeded(e -> {
+                String trailerUrl = trailerTask.getValue();
+                LOGGER.log(Level.INFO, "✓ Trailer-Callback - URL: " + trailerUrl);
+                System.out.println("✓ Trailer-Callback - URL: " + trailerUrl);
+
+                Platform.runLater(() -> {
+                    if (trailerUrl != null && !trailerUrl.isBlank()) {
+                        LOGGER.log(Level.INFO, "✓ Trailer URL ist nicht null - wird verarbeitet");
+                        System.out.println("✓ Trailer URL ist nicht null - wird verarbeitet");
+
+                        // Extrahiere Video-ID aus der Embed-URL
+                        String videoId = null;
+                        if (trailerUrl.contains("embed/")) {
+                            videoId = trailerUrl.split("embed/")[1].split("\\?")[0].split("&")[0];
+                        } else if (trailerUrl.contains("v=")) {
+                            videoId = trailerUrl.split("v=")[1].split("&")[0];
+                        }
+
+                        if (videoId == null || videoId.isEmpty()) {
+                            LOGGER.log(Level.WARNING, "Konnte Video-ID nicht extrahieren aus: " + trailerUrl);
+                            videoId = trailerUrl;
+                        }
+
+                        String youtubeWatchUrl = "https://www.youtube.com/watch?v=" + videoId;
+                        String youtubeEmbedUrl = "https://www.youtube.com/embed/" + videoId;
+
+                        LOGGER.log(Level.INFO, "Video-ID: " + videoId);
+                        LOGGER.log(Level.INFO, "Watch URL: " + youtubeWatchUrl);
+                        LOGGER.log(Level.INFO, "Embed URL: " + youtubeEmbedUrl);
+                        System.out.println("Video-ID: " + videoId);
+                        System.out.println("Watch URL: " + youtubeWatchUrl);
+                        System.out.println("Embed URL: " + youtubeEmbedUrl);
+
+                        try {
+                            // Konfiguriere WebView für anschauliche Anzeige
+                            javafx.scene.web.WebEngine engine = trailerWebView.getEngine();
+                            engine.setJavaScriptEnabled(true);
+
+                            LOGGER.log(Level.INFO, "WebView-Engine konfiguriert");
+                            System.out.println("WebView-Engine konfiguriert");
+
+                            // Erzeuge HTML mit eingebettetem Player (ohne zusätzlichen Button)
+                            String htmlContent = "<!DOCTYPE html>" +
+                                    "<html>" +
+                                    "<head>" +
+                                    "    <meta charset='UTF-8'>" +
+                                    "    <style>" +
+                                    "        * { margin: 0; padding: 0; box-sizing: border-box; }" +
+                                    "        html, body { width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; }" +
+                                    "        .wrapper { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 0; }" +
+                                    "        .player { width: 100%; height: 100%; max-width: 1200px; min-height: 520px; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.38); }" +
+                                    "        iframe { width: 100%; height: 100%; border: none; }" +
+                                    "    </style>" +
+                                    "</head>" +
+                                    "<body>" +
+                                    "    <div class='wrapper'>" +
+                                    "        <div class='player'>" +
+                                    "            <iframe " +
+                                    "                src='" + youtubeEmbedUrl + "?autoplay=0&rel=0&fs=1&modestbranding=1' " +
+                                    "                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' " +
+                                    "                allowfullscreen title='Trailer'></iframe>" +
+                                    "        </div>" +
+                                    "    </div>" +
+                                    "</body>" +
+                                    "</html>";
+
+                            LOGGER.log(Level.INFO, "HTML wird registriert. Länge: " + htmlContent.length());
+                            System.out.println("HTML wird registriert. Länge: " + htmlContent.length());
+
+                            // Registriere HTML im lokalen Webserver
+                            String trailerRoute = "trailer_" + videoId;
+                            com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.setContent(trailerRoute, htmlContent);
+                            String serverUrl = com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.getUrl(trailerRoute);
+
+                            LOGGER.log(Level.INFO, "Lade HTML von Webserver: " + serverUrl);
+                            System.out.println("Lade HTML von Webserver: " + serverUrl);
+
+                            // Lade HTML vom lokalen Webserver
+                            engine.load(serverUrl);
+
+                            trailerWebView.setVisible(true);
+                            trailerWebView.setManaged(true);
+                            trailerContainer.setVisible(true);
+                            trailerContainer.setManaged(true);
+
+                            // Zeige Fallback-Link außerhalb der WebView
+                            lnkTrailerExternal.setText("🎬 Im Browser öffnen");
+                            lnkTrailerExternal.setTooltip(new Tooltip("Öffnet den Trailer auf YouTube"));
+
+                            lnkTrailerExternal.setOnAction(ev -> {
+                                try {
+                                    Desktop.getDesktop().browse(URI.create(youtubeEmbedUrl));
+                                    LOGGER.log(Level.INFO, "Trailer-Link geöffnet: " + youtubeEmbedUrl);
+                                    System.out.println("Trailer-Link geöffnet: " + youtubeEmbedUrl);
+                                } catch (Exception ex) {
+                                    LOGGER.log(Level.WARNING, "Konnte Trailer nicht öffnen: " + ex.getMessage(), ex);
+                                    System.err.println("Konnte Trailer nicht öffnen: " + ex.getMessage());
+                                }
+                            });
+                            lnkTrailerExternal.setVisible(true);
+                            lnkTrailerExternal.setManaged(true);
+
+                            LOGGER.log(Level.INFO, "✓ Trailer-Anzeige erfolgreich erstellt");
+                            System.out.println("✓ Trailer-Anzeige erfolgreich erstellt");
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.SEVERE, "❌ Fehler bei der Trailer-Anzeige: " + ex.getMessage(), ex);
+                            System.err.println("❌ Fehler bei der Trailer-Anzeige: " + ex.getMessage());
+                            ex.printStackTrace();
+
+                            trailerWebView.setVisible(false);
+                            trailerWebView.setManaged(false);
+                            trailerContainer.setVisible(false);
+                            trailerContainer.setManaged(false);
+                        }
+                    } else {
+                        LOGGER.log(Level.INFO, "⚠ Kein Trailer gefunden für: " + film.getTitle());
+                        System.out.println("⚠ Kein Trailer gefunden für: " + film.getTitle());
+                        trailerWebView.setVisible(false);
+                        trailerWebView.setManaged(false);
+                        trailerContainer.setVisible(false);
+                        trailerContainer.setManaged(false);
+                        lnkTrailerExternal.setVisible(false);
+                        lnkTrailerExternal.setManaged(false);
                     }
                 });
+            });
 
-                new Thread(teaserTask).start();
-            }
+            trailerTask.setOnFailed(e -> {
+                Throwable ex = e.getSource().getException();
+                LOGGER.log(Level.SEVERE, "❌ Fehler beim Trailer-Laden: " + (ex != null ? ex.getMessage() : "Unbekannter Fehler"), ex);
+                System.err.println("❌ Fehler beim Trailer-Laden: " + (ex != null ? ex.getMessage() : "Unbekannter Fehler"));
+                if (ex != null) ex.printStackTrace();
+
+                trailerWebView.setVisible(false);
+                trailerWebView.setManaged(false);
+                trailerContainer.setVisible(false);
+                trailerContainer.setManaged(false);
+                lnkTrailerExternal.setVisible(false);
+                lnkTrailerExternal.setManaged(false);
+            });
+
+            Thread trailerThread = new Thread(trailerTask);
+            trailerThread.setName("Trailer-Loader-" + film.getTitle());
+            trailerThread.setDaemon(false);
+            trailerThread.start();
+        } else {
+            LOGGER.log(Level.INFO, "Film-Titel ist leer, Trailer wird nicht geladen");
+            trailerWebView.setVisible(false);
+            trailerWebView.setManaged(false);
+            trailerContainer.setVisible(false);
+            trailerContainer.setManaged(false);
+            lnkTrailerExternal.setVisible(false);
+            lnkTrailerExternal.setManaged(false);
         }
 
         // Lade Streaming-Anbieter asynchron
@@ -372,6 +568,7 @@ public class DetailController implements Initializable {
 
     @FXML
     private void handleClose() {
+        stopVideo();
         if (dialogStage != null) dialogStage.close();
     }
 

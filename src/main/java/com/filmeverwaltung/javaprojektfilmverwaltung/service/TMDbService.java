@@ -1,5 +1,6 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.service;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -13,27 +14,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service für TMDb API - lädt Streaming-Anbieter und weitere Informationen
+ * Service für TMDb API - lädt Streaming-Anbieter, ähnliche Filme und weitere Informationen
  */
-public class TMDbService
-{
+public class TMDbService {
 
     private static final Logger LOGGER = Logger.getLogger(TMDbService.class.getName());
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private final String apiKey;
 
-    public TMDbService(String apiKey)
-    {
+    public TMDbService(String apiKey) {
         this.apiKey = apiKey;
     }
 
     /**
      * Sucht einen Film nach Titel und gibt die TMDb ID zurück
      */
-    public String getMovieIdByTitle(String title)
-    {
-        try
-        {
+    public String getMovieIdByTitle(String title) {
+        try {
             String encoded = URLEncoder.encode(title, StandardCharsets.UTF_8);
             String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=de";
 
@@ -41,13 +38,11 @@ public class TMDbService
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = response.getAsJsonArray("results");
 
-            if (results != null && results.size() > 0)
-            {
+            if (results != null && results.size() > 0) {
                 JsonObject firstResult = results.get(0).getAsJsonObject();
                 return firstResult.get("id").getAsString();
             }
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Fehler bei TMDb Suche: " + e.getMessage(), e);
         }
         return null;
@@ -56,14 +51,12 @@ public class TMDbService
     /**
      * Klasse zur Darstellung eines Streaming-Anbieters mit Logo
      */
-    public static class StreamingProvider
-    {
+    public static class StreamingProvider {
 
         public String name;
         public String logoUrl;
 
-        public StreamingProvider(String name, String logoUrl)
-        {
+        public StreamingProvider(String name, String logoUrl) {
             this.name = name;
             this.logoUrl = logoUrl;
         }
@@ -73,27 +66,22 @@ public class TMDbService
      * Ruft Streaming-Anbieter für einen Film ab (Deutschland)
      * Gibt nur die ersten 3 Anbieter mit Logo-URLs zurück
      */
-    public List<StreamingProvider> getStreamingProviders(String tmdbId)
-    {
+    public List<StreamingProvider> getStreamingProviders(String tmdbId) {
         List<StreamingProvider> providers = new ArrayList<>();
 
-        try
-        {
+        try {
             String url = BASE_URL + "/movie/" + tmdbId + "/watch/providers?api_key=" + apiKey;
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
             JsonObject results = response.getAsJsonObject("results");
 
-            if (results != null && results.has("DE"))
-            {
+            if (results != null && results.has("DE")) {
                 JsonObject deData = results.getAsJsonObject("DE");
 
                 // Prüfe auf verschiedene Streaming-Typen
-                if (deData.has("flatrate") && providers.size() < 3)
-                {
+                if (deData.has("flatrate") && providers.size() < 3) {
                     JsonArray flatrate = deData.getAsJsonArray("flatrate");
-                    for (int i = 0; i < flatrate.size() && providers.size() < 3; i++)
-                    {
+                    for (int i = 0; i < flatrate.size() && providers.size() < 3; i++) {
                         JsonObject provider = flatrate.get(i).getAsJsonObject();
                         String name = provider.get("provider_name").getAsString();
                         String logo = provider.get("logo_path").getAsString();
@@ -103,11 +91,9 @@ public class TMDbService
                 }
 
                 // Prüfe auf Kauf/Miete falls noch Platz
-                if (deData.has("buy") && providers.size() < 3)
-                {
+                if (deData.has("buy") && providers.size() < 3) {
                     JsonArray buy = deData.getAsJsonArray("buy");
-                    for (int i = 0; i < buy.size() && providers.size() < 3; i++)
-                    {
+                    for (int i = 0; i < buy.size() && providers.size() < 3; i++) {
                         JsonObject provider = buy.get(i).getAsJsonObject();
                         String name = provider.get("provider_name").getAsString() + " (Kauf)";
                         String logo = provider.get("logo_path").getAsString();
@@ -116,11 +102,9 @@ public class TMDbService
                     }
                 }
 
-                if (deData.has("rent") && providers.size() < 3)
-                {
+                if (deData.has("rent") && providers.size() < 3) {
                     JsonArray rent = deData.getAsJsonArray("rent");
-                    for (int i = 0; i < rent.size() && providers.size() < 3; i++)
-                    {
+                    for (int i = 0; i < rent.size() && providers.size() < 3; i++) {
                         JsonObject provider = rent.get(i).getAsJsonObject();
                         String name = provider.get("provider_name").getAsString() + " (Miete)";
                         String logo = provider.get("logo_path").getAsString();
@@ -129,8 +113,7 @@ public class TMDbService
                     }
                 }
             }
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Fehler beim Laden von Streaming-Anbietern: " + e.getMessage(), e);
         }
 
@@ -140,14 +123,102 @@ public class TMDbService
     /**
      * Kombiniert Filmsuche und Streaming-Anbieter (max. 3 mit Logos)
      */
-    public List<StreamingProvider> getStreamingProvidersForMovie(String movieTitle)
-    {
+    public List<StreamingProvider> getStreamingProvidersForMovie(String movieTitle) {
         String tmdbId = getMovieIdByTitle(movieTitle);
-        if (tmdbId != null)
-        {
+        if (tmdbId != null) {
             return getStreamingProviders(tmdbId);
         }
         return new ArrayList<>();
     }
-}
 
+    /**
+     * Ruft ähnliche Filme für einen Film ab (basierend auf TMDb ID)
+     * Gibt bis zu 20 ähnliche Filme zurück
+     */
+    public List<Filmmodel> getSimilarMovies(String tmdbId) {
+        List<Filmmodel> similarMovies = new ArrayList<>();
+
+        try {
+            String url = BASE_URL + "/movie/" + tmdbId + "/similar?api_key=" + apiKey + "&language=de&page=1";
+            String json = HttpUtil.get(url);
+            JsonObject response = JsonParser.parseString(json).getAsJsonObject();
+            JsonArray results = response.getAsJsonArray("results");
+
+            if (results != null) {
+                for (int i = 0; i < results.size(); i++) {
+                    JsonObject movieJson = results.get(i).getAsJsonObject();
+                    Filmmodel film = convertTmdbToFilmmodel(movieJson);
+                    if (film != null && film.getTitle() != null && !film.getTitle().isEmpty()) {
+                        similarMovies.add(film);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden ähnlicher Filme: " + e.getMessage(), e);
+        }
+
+        return similarMovies;
+    }
+
+    /**
+     * Kombiniert Filmsuche und ähnliche Filme
+     */
+    public List<Filmmodel> getSimilarMoviesForMovie(String movieTitle) {
+        String tmdbId = getMovieIdByTitle(movieTitle);
+        if (tmdbId != null && !tmdbId.isEmpty()) {
+            return getSimilarMovies(tmdbId);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Konvertiert ein TMDB JSON-Objekt zu einem Filmmodel
+     */
+    private Filmmodel convertTmdbToFilmmodel(JsonObject tmdbMovie) {
+        try {
+            Filmmodel film = new Filmmodel();
+
+            // Titel
+            if (tmdbMovie.has("title") && !tmdbMovie.get("title").isJsonNull()) {
+                film.setTitle(tmdbMovie.get("title").getAsString());
+            }
+
+            // Veröffentlichungsjahr
+            if (tmdbMovie.has("release_date") && !tmdbMovie.get("release_date").isJsonNull()) {
+                String releaseDate = tmdbMovie.get("release_date").getAsString();
+                if (releaseDate != null && !releaseDate.isEmpty() && releaseDate.length() >= 4) {
+                    film.setYear(releaseDate.substring(0, 4));
+                }
+            }
+
+            // Handlung/Plot
+            if (tmdbMovie.has("overview") && !tmdbMovie.get("overview").isJsonNull()) {
+                film.setPlot(tmdbMovie.get("overview").getAsString());
+            }
+
+            // Bewertung
+            if (tmdbMovie.has("vote_average") && !tmdbMovie.get("vote_average").isJsonNull()) {
+                double rating = tmdbMovie.get("vote_average").getAsDouble();
+                film.setImdbRating(String.format("%.1f", rating));
+            }
+
+            // Poster
+            if (tmdbMovie.has("poster_path") && !tmdbMovie.get("poster_path").isJsonNull()) {
+                String posterPath = tmdbMovie.get("poster_path").getAsString();
+                if (posterPath != null && !posterPath.isEmpty()) {
+                    film.setPoster("https://image.tmdb.org/t/p/w500" + posterPath);
+                }
+            }
+
+            // TMDb ID als Referenz
+            if (tmdbMovie.has("id") && !tmdbMovie.get("id").isJsonNull()) {
+                film.setImdbID("tmdb_" + tmdbMovie.get("id").getAsInt());
+            }
+
+            return film;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Konvertieren von TMDB Film zu Filmmodel: " + e.getMessage(), e);
+            return null;
+        }
+    }
+}

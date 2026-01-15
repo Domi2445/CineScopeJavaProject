@@ -1,275 +1,98 @@
+// src/main/java/com/filmeverwaltung/javaprojektfilmverwaltung/model/Filmmodel.java
 package com.filmeverwaltung.javaprojektfilmverwaltung.model;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Datenmodell für einen Film, basierend auf den Feldern der OMDb-API.
- * Wird für die JSON-Deserialisierung mit Gson verwendet.
- */
-public class Filmmodel
-{
-    /** Filmmodel-Eigenschaften, die den OMDb-API-Antwortfeldern entsprechen. */
-    /**
-     * Titel des Films.
-     */
+public class Filmmodel {
     @SerializedName("Title")
     private String title;
-    /**
-     * Erscheinungsjahr des Films.
-     */
+
     @SerializedName("Year")
     private String year;
-    /**
-     * Autor des Films.
-     */
+
     @SerializedName("Writer")
     private String writer;
-    /**
-     * Handlung des Films.
-     */
+
     @SerializedName("Plot")
     private String plot;
-    /**
-     * Genre des Films.
-     */
+
     @SerializedName("Genre")
     private String genre;
-    /**
-     * Antwortstatus des Films.
-     */
+
+    // NEW: Sprache (Language) - OMDb returns comma-separated languages
+    @SerializedName("Language")
+    private String language;
+
+    // NEW: Laufzeit (Runtime) - OMDb returns e.g., "123 min"
+    @SerializedName("Runtime")
+    private String runtime;
+
     @SerializedName("Response")
-    private String response; // wichtig für Fehlerprüfung
-    /**
-     * IMDb-ID des Films.
-     */
+    private String response;
+
     @SerializedName("imdbID")
-    private String imdbID; // OMDb imdbID
-    /**
-     * Poster-URL des Films.
-     */
+    private String imdbID;
+
     @SerializedName("Poster")
-    private String poster; // OMDb Poster-URL
+    private String poster;
 
-    /**
-     * IMDb Rating des Films (0-10).
-     */
     @SerializedName("imdbRating")
-    private String imdbRating; // OMDb IMDb Rating
+    private String imdbRating;
 
-    /**
-     * Standardkonstruktor für Filmmodel.
-     */
-    public Filmmodel()
-    {
-        // Für Gson
-    }
+    public Filmmodel() { }
 
-    /**
-     * Konstruktor für Filmmodel.
-     *
-     * @param title  Der Titel des Films.
-     * @param year   Das Erscheinungsjahr des Films.
-     * @param writer Der Autor des Films.
-     * @param plot   Die Beschreibung des Films.
-     */
-    public Filmmodel(String title, String year, String writer, String plot)
-    {
+    public Filmmodel(String title, String year, String writer, String plot) {
         this.title = title;
         this.year = year;
         this.writer = writer;
         this.plot = plot;
     }
 
-    // Getter & Setter
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    /**
-     * Getter für den Titel des Films.
-     *
-     * @return Der Titel des Films.
-     */
-    public String getTitle()
-    {
-        return title;
+    public String getYear() { return year; }
+    public void setYear(String year) { this.year = year; }
+
+    public String getWriter() { return writer; }
+    public void setWriter(String writer) { this.writer = writer; }
+
+    public String getPlot() { return plot; }
+    public void setPlot(String plot) { this.plot = plot; }
+
+    public String getGenre() { return genre; }
+    public void setGenre(String genre) { this.genre = genre; }
+
+    // NEW: Sprache
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) { this.language = language; }
+
+    // NEW: Laufzeit (raw string like "123 min")
+    public String getRuntime() { return runtime; }
+    public void setRuntime(String runtime) { this.runtime = runtime; }
+
+    public String getResponse() { return response; }
+    public void setResponse(String response) { this.response = response; }
+
+    public String getImdbID() { return imdbID; }
+    public void setImdbID(String imdbID) { this.imdbID = imdbID; }
+
+    public String getPoster() { return poster; }
+    public void setPoster(String poster) { this.poster = poster; }
+
+    public String getImdbRating() { return imdbRating; }
+    public void setImdbRating(String imdbRating) { this.imdbRating = imdbRating; }
+    public int getRuntimeInMinutes() {
+        if (runtime == null || runtime.isBlank() || "N/A".equalsIgnoreCase(runtime)) {
+            return -1;
+        }
+        try {
+            String num = runtime.toLowerCase().replace("min", "").trim();
+            return Integer.parseInt(num);
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
     }
-
-    /**
-     * Setter für den Titel des Films.
-     *
-     * @param title Der Titel des Films.
-     */
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
-
-    /**
-     * Getter für das Erscheinungsjahr des Films.
-     *
-     * @return Das Erscheinungsjahr des Films.
-     */
-    public String getYear()
-    {
-        return year;
-    }
-
-    /**
-     * Setter für das Erscheinungsjahr des Films.
-     *
-     * @param year Das Erscheinungsjahr des Films.
-     */
-    public void setYear(String year)
-    {
-        this.year = year;
-    }
-
-    /**
-     * Getter für den Autor des Films.
-     *
-     * @return Der Autor des Films.
-     */
-    public String getWriter()
-    {
-        return writer;
-    }
-
-    /**
-     * Setter für den Autor des Films.
-     *
-     * @param writer Der Autor des Films.
-     */
-    public void setWriter(String writer)
-    {
-        this.writer = writer;
-    }
-
-    /**
-     * Getter für die Handlung des Films.
-     *
-     * @return Die Handlung des Films.
-     */
-    public String getPlot()
-    {
-        return plot;
-    }
-
-    /**
-     * Setter für die Handlung des Films.
-     *
-     * @param plot Die Handlung des Films.
-     */
-    public void setPlot(String plot)
-    {
-        this.plot = plot;
-    }
-
-    /**
-     * Getter für das Genre des Films.
-     *
-     * @return Das Genre des Films.
-     */
-    public String getGenre()
-    {
-        return genre;
-    }
-
-    /**
-     * Setter für das Genre des Films.
-     *
-     * @param genre Das Genre des Films.
-     */
-    public void setGenre(String genre)
-    {
-        this.genre = genre;
-    }
-
-    /**
-     * Getter für die Antwort des Films.
-     *
-     * @return Die Antwort des Films.
-     */
-    public String getResponse()
-    {
-        return response;
-    }
-
-    /**
-     * Setter für die Antwort des Films.
-     *
-     * @param response Die Antwort des Films.
-     */
-    public void setResponse(String response)
-    {
-        this.response = response;
-    }
-
-    /**
-     * Getter für die IMDb-ID des Films.
-     *
-     * @return Die IMDb-ID des Films.
-     */
-    public String getImdbID()
-    {
-        return imdbID;
-    }
-
-    /**
-     * Setter für die IMDb-ID des Films.
-     *
-     * @param imdbID Die IMDb-ID des Films.
-     */
-    public void setImdbID(String imdbID)
-    {
-        this.imdbID = imdbID;
-    }
-
-    /**
-     * Getter für die Poster-URL des Films.
-     *
-     * @return Die Poster-URL des Films.
-     */
-    public String getPoster()
-    {
-        return poster;
-    }
-
-    /**
-     * Setter für die Poster-URL des Films.
-     *
-     * @param poster Die Poster-URL des Films.
-     */
-    public void setPoster(String poster)
-    {
-        this.poster = poster;
-    }
-
-    /**
-     * Getter für das IMDb Rating des Films.
-     *
-     * @return Das IMDb Rating des Films (0-10).
-     */
-    public String getImdbRating()
-    {
-        return imdbRating;
-    }
-
-    /**
-     * Setter für das IMDb Rating des Films.
-     *
-     * @param imdbRating Das IMDb Rating des Films.
-     */
-    public void setImdbRating(String imdbRating)
-    {
-        this.imdbRating = imdbRating;
-    }
-
-    /**
-     * Überschreibt die toString-Methode, um eine lesbare Darstellung des Films zu liefern.
-     *
-     * @return Eine lesbare Darstellung des Films.
-     */
     @Override
-    public String toString()
-    {
-        return title + " (" + year + ")\n" + plot;
-    }
+    public String toString() { return title + " (" + year + ")\n" + plot; }
 }

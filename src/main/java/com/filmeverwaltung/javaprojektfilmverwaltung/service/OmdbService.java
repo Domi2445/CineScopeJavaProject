@@ -68,13 +68,14 @@ public class OmdbService
 
 
     /**
-     * Suche Filme anhand eines Titels (s=) mit Pagination (bis zu 3 Seiten = 30 Ergebnisse)
+     * Suche Filme anhand eines Titels (s=) mit Pagination (bis zu 6 Seiten = 60 Ergebnisse)
+     * Fetched full details including genre for each film
      */
     public List<Filmmodel> searchByTitle(String query)
     {
         List<Filmmodel> allResults = new ArrayList<>();
 
-        // Abrufen von bis zu 3 Seiten (OMDB gibt max. 10 pro Seite)
+        // Abrufen von bis zu 6 Seiten (OMDB gibt max. 10 pro Seite)
         for (int page = 1; page <= 6; page++)
         {
             try
@@ -100,13 +101,37 @@ public class OmdbService
                 {
                     if (o instanceof Map<?, ?> m)
                     {
-                        Filmmodel fm = new Filmmodel(Objects.toString(m.get("Title"), ""), Objects.toString(m.get("Year"), ""), null, null);
-
                         String imdbID = Objects.toString(m.get("imdbID"), "");
-                        String poster = Objects.toString(m.get("Poster"), "");
 
-                        if (!imdbID.isBlank()) fm.setImdbID(imdbID);
-                        if (!poster.equalsIgnoreCase("N/A")) fm.setPoster(poster);
+                        // Fetch full film details to get genre information
+                        Filmmodel fullFilm = null;
+                        if (!imdbID.isBlank())
+                        {
+                            fullFilm = getFilmById(imdbID);
+                        }
+
+                        // Use full film data if available, otherwise create basic entry
+                        Filmmodel fm;
+                        if (fullFilm != null && !"False".equalsIgnoreCase(fullFilm.getResponse()))
+                        {
+                            fm = fullFilm;
+                        } else {
+                            // Fallback: Create basic film entry if full details unavailable
+                            fm = new Filmmodel(
+                                    Objects.toString(m.get("Title"), ""),
+                                    Objects.toString(m.get("Year"), ""),
+                                    null,
+                                    null
+                            );
+                            fm.setImdbID(imdbID);
+                            String poster = Objects.toString(m.get("Poster"), "");
+                            if (!poster.equalsIgnoreCase("N/A"))
+                            {
+                                fm.setPoster(poster);
+                            }
+                            // Set default genre if not available
+                            fm.setGenre("N/A");
+                        }
 
                         allResults.add(fm);
                     }

@@ -1,11 +1,11 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.util;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Language;
-
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static eu.hansolo.fx.countries.Country.PL;
+
+
 
 public final class LanguageUtil {
 
@@ -35,8 +35,8 @@ public final class LanguageUtil {
     public static Locale getLocale() {
         return switch (currentLanguage) {
             case EN -> Locale.ENGLISH;
-            case AR -> new Locale("ar");
-            case PL -> new Locale("pl");
+            case AR -> Locale.forLanguageTag("ar");
+            case PL -> Locale.forLanguageTag("pl");
             default -> Locale.GERMAN;
         };
     }
@@ -44,4 +44,10 @@ public final class LanguageUtil {
     public static String get(String key) {
         return bundle.getString(key);
     }
+
+    public static ResourceBundle getBundle() {
+        return bundle;
+    }
+
+
 }

@@ -9,7 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.logging.LogManager;
 
 
 /**
@@ -17,6 +21,46 @@ import java.util.Objects;
  */
 public class Main extends Application
 {
+    /**
+     * Custom PrintStream, der Ausgaben in die Log-Datei schreibt
+     */
+    static class LoggingPrintStream extends PrintStream {
+        private final PrintStream fileStream;
+
+        public LoggingPrintStream(PrintStream fileStream) {
+            super(fileStream);
+            this.fileStream = fileStream;
+        }
+
+        @Override
+        public void println(String x) {
+            fileStream.println(x);
+            fileStream.flush();
+        }
+
+        @Override
+        public void print(String x) {
+            fileStream.print(x);
+            fileStream.flush();
+        }
+    }
+
+    // Statischer Block - wird VOR main() ausgeführt
+    static {
+        try {
+            // Erstelle logs-Verzeichnis, falls es nicht existiert
+            Files.createDirectories(Paths.get("logs"));
+
+            // Leite System.out und System.err SO FRÜH WIE MÖGLICH in Log-Datei um
+            FileOutputStream logFile = new FileOutputStream("logs/cinescape_system.log", true);
+            PrintStream logPrintStream = new PrintStream(logFile, true);
+            System.setOut(new LoggingPrintStream(logPrintStream));
+            System.setErr(new LoggingPrintStream(logPrintStream));
+        } catch (IOException e) {
+            // Falls Fehler beim Umleiten, auf stderr ausgeben (noch nicht umgeleitet)
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Startmethode der JavaFX-Anwendung
@@ -56,8 +100,39 @@ public class Main extends Application
      */
     public static void main(String[] args)
     {
+        // Erstelle logs-Verzeichnis, falls es nicht existiert
+        try {
+            Files.createDirectories(Paths.get("logs"));
+        } catch (IOException e) {
+            System.err.println("Konnte logs-Verzeichnis nicht erstellen: " + e.getMessage());
+        }
+
+        // Konfiguriere Java Logging aus logging.properties
+        try {
+            String configPath = Main.class.getResource("/logging.properties").getPath();
+            LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
+        } catch (IOException e) {
+            System.err.println("Fehler beim Laden der Logging-Konfiguration: " + e.getMessage());
+        }
+
+        // Leite System.out und System.err in Log-Datei um
+        try {
+            FileOutputStream logFile = new FileOutputStream("logs/cinescape_system.log", true);
+            PrintStream logPrintStream = new PrintStream(logFile, true);
+            System.setOut(new LoggingPrintStream(logPrintStream));
+            System.setErr(new LoggingPrintStream(logPrintStream));
+        } catch (IOException e) {
+            System.err.println("Fehler beim Umleiten von stdout/stderr: " + e.getMessage());
+        }
+
 
         launch();
     }
 
 }
+
+
+
+
+
+

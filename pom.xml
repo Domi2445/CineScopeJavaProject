@@ -191,6 +191,13 @@
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
+                            <options>
+                                <option>--enable-native-access=javafx.graphics,javafx.web,javafx.media</option>
+                                <option>--add-exports=java.base/sun.misc=ALL-UNNAMED</option>
+                                <option>-Djava.util.logging.config.file=src/main/resources/logging.properties</option>
+                                <option>-XX:+UnlockDiagnosticVMOptions</option>
+                                <option>-XX:-PrintWarnings</option>
+                            </options>
                         </configuration>
                     </execution>
                 </executions>

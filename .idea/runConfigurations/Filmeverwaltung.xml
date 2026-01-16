@@ -2,6 +2,7 @@
   <configuration default="false" name="Filmeverwaltung" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="$PROJECT_DIR$/../../../../../Program Files/Java/jdk-25" />
     <option name="MAIN_CLASS_NAME" value="com.filmeverwaltung.javaprojektfilmverwaltung.Main" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=javafx.graphics,javafx.web,javafx.media --add-exports=java.base/sun.misc=ALL-UNNAMED -Djava.util.logging.config.file=src/main/resources/logging.properties -XX:+UnlockDiagnosticVMOptions -XX:-PrintWarnings" />
     <module name="JavaProjekt-Filme-Verwaltung" />
     <method v="2">
       <option name="Make" enabled="true" />

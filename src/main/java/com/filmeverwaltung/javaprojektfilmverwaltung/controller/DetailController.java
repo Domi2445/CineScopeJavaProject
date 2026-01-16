@@ -82,6 +82,21 @@ public class DetailController implements Initializable {
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
 
+        // Lade Custom-Theme CSS nur für diesen Dialog
+        if (stage != null && stage.getScene() != null) {
+            try {
+                var themeUrl = getClass().getResource("/styles/theme.css");
+                if (themeUrl != null) {
+                    String themeResource = themeUrl.toExternalForm();
+                    stage.getScene().getStylesheets().add(themeResource);
+                    LOGGER.log(Level.INFO, "✓ Custom-Theme geladen");
+
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Fehler beim Laden des Custom-Themes: " + e.getMessage());
+            }
+        }
+
         // Füge Event-Handler hinzu, um Video beim Schließen zu stoppen
         if (stage != null) {
             stage.setOnCloseRequest(event -> stopVideo());
@@ -134,6 +149,7 @@ public class DetailController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // Starte lokalen Webserver
         com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.start();
+
 
         // Initialisiere Similar Movies Tabelle
         if (colSimilarTitle != null) {
@@ -594,6 +610,19 @@ public class DetailController implements Initializable {
     private void handleAddToWatchList() {
         WatchlistHandler handler = new WatchlistHandler();
         handler.fuegeFilmHinzu(film.getImdbID());
+    }
+
+    /**
+     * Zeigt den Trailer an (Toggle zwischen versteckt und sichtbar)
+     */
+    @FXML
+    private void handleShowTrailer() {
+        if (trailerContainer != null) {
+            // Toggle Sichtbarkeit
+            boolean currentlyVisible = trailerContainer.isVisible();
+            trailerContainer.setVisible(!currentlyVisible);
+            trailerContainer.setManaged(!currentlyVisible);
+        }
     }
 
     /**

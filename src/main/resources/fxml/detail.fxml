@@ -15,11 +15,11 @@
             <ImageView fx:id="imgPoster" fitHeight="300" fitWidth="200" preserveRatio="true" />
 
             <Button fx:id="btnSimilarMovies" text="Ähnliche Filme anzeigen" onAction="#handleShowSimilarMovies"
-                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#5da9ff,#3b82f6); -fx-text-fill: white; -fx-background-radius: 8;" />
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Zur Watchlist hinzufügen" onAction="#handleAddToWatchList"
-                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#1fbf75,#10b981); -fx-text-fill: white; -fx-background-radius: 8;" />
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Übersetzen" onAction="#handleTranslatePlot"
-                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: linear-gradient(#9c6bff,#7c3aed); -fx-text-fill: white; -fx-background-radius: 8;" />
+                    style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #7c3aed; -fx-text-fill: white; -fx-background-radius: 8;" />
             <Button text="Schließen" onAction="#handleClose"
                     style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #e5e7eb; -fx-text-fill: #111827; -fx-background-radius: 8;" />
         </VBox>

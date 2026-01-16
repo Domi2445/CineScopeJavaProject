@@ -7,6 +7,7 @@ public enum Language
     AR("Arabisch"),
     Pl("Polnisch"),;
 
+
     private final String displayName;
 
     Language(String displayName)

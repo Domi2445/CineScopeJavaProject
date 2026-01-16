@@ -526,6 +526,12 @@ public class SearchController {
             dialog.setTitle(film.getTitle());
             dialog.setScene(scene);
 
+            // Setze maximale Höhe und Breite, damit die ScrollPane funktioniert
+            dialog.setMaxHeight(900);
+            dialog.setMaxWidth(1400);
+            dialog.setMinHeight(600);
+            dialog.setMinWidth(1000);
+
             DetailController ctrl = loader.getController();
             ctrl.setDialogStage(dialog);
             ctrl.setFilm(film);

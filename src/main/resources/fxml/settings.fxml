@@ -4,7 +4,7 @@
 <?import javafx.scene.control.ComboBox?>
 
 
-
+<?import javafx.scene.control.Button?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       xmlns="http://javafx.com/javafx"
       fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController"
@@ -24,5 +24,8 @@
     <CheckBox fx:id="chkNotifications" text="Benachrichtigungen aktivieren"/>
 
     <CheckBox fx:id="chkStatistics" text="Statistik anzeigen"/>
+
+    <Button fx:id="btnSaveSettings" text="Einstellungen speichern" style="-fx-font-size: 14;"/>
+
 </VBox>
 

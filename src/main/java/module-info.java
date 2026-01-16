@@ -15,6 +15,7 @@ module com.filmeverwaltung.javaprojektfilmverwaltung
     requires java.logging;
     requires java.sql;
     requires java.desktop; // JDBC API
+    requires jdk.httpserver; // Java interner HTTP Server
 
     opens com.filmeverwaltung.javaprojektfilmverwaltung to javafx.fxml;
     opens com.filmeverwaltung.javaprojektfilmverwaltung.controller to javafx.fxml;

@@ -16,6 +16,9 @@ public class Filmmodel {
     @SerializedName("Plot")
     private String plot;
 
+    // NEW: Teaser/Tagline (kurze Beschreibung)
+    private String teaser;
+
     @SerializedName("Genre")
     private String genre;
 
@@ -62,6 +65,9 @@ public class Filmmodel {
 
     public String getPlot() { return plot; }
     public void setPlot(String plot) { this.plot = plot; }
+
+    public String getTeaser() { return teaser; }
+    public void setTeaser(String teaser) { this.teaser = teaser; }
 
     public String getGenre() { return genre; }
     public void setGenre(String genre) { this.genre = genre; }

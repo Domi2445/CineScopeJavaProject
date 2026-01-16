@@ -3,7 +3,6 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.service;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -32,19 +31,52 @@ public class TMDbService {
      */
     public String getMovieIdByTitle(String title) {
         try {
+            LOGGER.log(Level.INFO, "🔍 Suche nach Film: " + title);
+            System.out.println("🔍 Suche nach Film: " + title);
+
             String encoded = URLEncoder.encode(title, StandardCharsets.UTF_8);
+
+            // Versuche zuerst auf Deutsch
             String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=de";
+            LOGGER.log(Level.INFO, "Suche URL (DE): " + url);
+            System.out.println("Suche URL (DE): " + url);
 
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = response.getAsJsonArray("results");
 
             if (results != null && results.size() > 0) {
-                JsonObject firstResult = results.get(0).getAsJsonObject();
-                return firstResult.get("id").getAsString();
+                String id = results.get(0).getAsJsonObject().get("id").getAsString();
+                LOGGER.log(Level.INFO, "✅ ID gefunden (DE): " + id);
+                System.out.println("✅ ID gefunden (DE): " + id);
+                return id;
             }
+
+            LOGGER.log(Level.INFO, "⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
+            System.out.println("⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
+
+            // Fallback auf Englisch
+            url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=en";
+            LOGGER.log(Level.INFO, "Suche URL (EN): " + url);
+            System.out.println("Suche URL (EN): " + url);
+
+            json = HttpUtil.get(url);
+            response = JsonParser.parseString(json).getAsJsonObject();
+            results = response.getAsJsonArray("results");
+
+            if (results != null && results.size() > 0) {
+                String id = results.get(0).getAsJsonObject().get("id").getAsString();
+                LOGGER.log(Level.INFO, "✅ ID gefunden (EN): " + id);
+                System.out.println("✅ ID gefunden (EN): " + id);
+                return id;
+            }
+
+            LOGGER.log(Level.WARNING, "❌ Keine Ergebnisse gefunden für: " + title);
+            System.out.println("❌ Keine Ergebnisse gefunden für: " + title);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Fehler bei TMDb Suche: " + e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, "❌ Fehler bei TMDb Suche: " + e.getMessage(), e);
+            System.err.println("❌ Fehler bei TMDb Suche: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -173,75 +205,92 @@ public class TMDbService {
     }
 
     /**
-     * Liefert eine YouTube-Embed-URL für Trailer/Teaser eines Films (Sprache de bevorzugt, dann en)
+     * Holt die Poster-URL von TMDB für einen Film
+     */
+    public String getPosterUrlForMovie(String movieTitle) {
+        try {
+            String tmdbId = getMovieIdByTitle(movieTitle);
+            if (tmdbId == null) return null;
+
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String json = HttpUtil.get(url);
+            JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
+
+            if (movie.has("poster_path") && !movie.get("poster_path").isJsonNull()) {
+                String posterPath = movie.get("poster_path").getAsString();
+                if (posterPath != null && !posterPath.isEmpty()) {
+                    return "https://image.tmdb.org/t/p/w500" + posterPath;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDB-Posters: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Holt den Teaser/Tagline von TMDB für einen Film
+     */
+    public String getTeaserForMovie(String movieTitle) {
+        try {
+            String tmdbId = getMovieIdByTitle(movieTitle);
+            if (tmdbId == null) {
+                LOGGER.log(Level.INFO, "Keine TMDB ID gefunden für: " + movieTitle);
+                return null;
+            }
+
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String json = HttpUtil.get(url);
+            JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
+
+            if (movie.has("tagline") && !movie.get("tagline").isJsonNull()) {
+                String tagline = movie.get("tagline").getAsString();
+                if (tagline != null && !tagline.isEmpty() && !tagline.isBlank()) {
+                    LOGGER.log(Level.INFO, "Teaser geladen für: " + movieTitle + " -> " + tagline);
+                    return tagline;
+                } else {
+                    LOGGER.log(Level.INFO, "Tagline ist leer für: " + movieTitle);
+                }
+            } else {
+                LOGGER.log(Level.INFO, "Keine tagline in TMDB Response für: " + movieTitle);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDB-Teasers für " + movieTitle + ": " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Holt einen Trailer (YouTube) von TMDb und liefert eine Embed-URL
      */
     public String getTrailerUrlForMovie(String movieTitle) {
-        String tmdbId = getMovieIdByTitle(movieTitle);
-        if (tmdbId == null || tmdbId.isEmpty()) {
-            return null;
-        }
-        return getTrailerUrlByTmdbId(tmdbId);
-    }
-
-    private String getTrailerUrlByTmdbId(String tmdbId) {
         try {
+            String tmdbId = getMovieIdByTitle(movieTitle);
+            if (tmdbId == null) return null;
+
             String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=de";
             String json = HttpUtil.get(url);
-            JsonObject response = JsonParser.parseString(json).getAsJsonObject();
-            JsonArray results = response.getAsJsonArray("results");
-            if (results == null || results.size() == 0) {
-                return null;
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            JsonArray results = root.has("results") && root.get("results").isJsonArray() ? root.getAsJsonArray("results") : null;
+            if (results == null || results.size() == 0) return null;
+
+            String fallback = null;
+            for (int i = 0; i < results.size(); i++) {
+                JsonObject vid = results.get(i).getAsJsonObject();
+                if (!vid.has("site") || !"YouTube".equalsIgnoreCase(vid.get("site").getAsString())) continue;
+                if (!vid.has("key")) continue;
+                String key = vid.get("key").getAsString();
+                String type = vid.has("type") ? vid.get("type").getAsString() : "";
+                boolean official = vid.has("official") && vid.get("official").getAsBoolean();
+                String embed = "https://www.youtube.com/embed/" + key + "?rel=0&autoplay=0";
+                if ("Trailer".equalsIgnoreCase(type) && official) return embed;
+                if (fallback == null && "Trailer".equalsIgnoreCase(type)) fallback = embed;
             }
-
-            List<JsonObject> candidates = new ArrayList<>();
-            for (JsonElement el : results) {
-                JsonObject video = el.getAsJsonObject();
-                if (!video.has("site") || !"YouTube".equalsIgnoreCase(video.get("site").getAsString())) {
-                    continue;
-                }
-                String type = video.has("type") ? video.get("type").getAsString() : "";
-                if (!"Trailer".equalsIgnoreCase(type) && !"Teaser".equalsIgnoreCase(type)) {
-                    continue;
-                }
-                candidates.add(video);
-            }
-
-            if (candidates.isEmpty()) {
-                return null;
-            }
-
-            candidates.sort((a, b) -> {
-                int lang = scoreLang(b) - scoreLang(a);
-                if (lang != 0) return lang;
-                int type = scoreType(b) - scoreType(a);
-                if (type != 0) return type;
-                return 0;
-            });
-
-            String key = candidates.get(0).get("key").getAsString();
-            return "https://www.youtube.com/embed/" + key;
+            return fallback;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Fehler beim Laden des Trailers: " + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDb-Trailers: " + e.getMessage(), e);
             return null;
         }
-    }
-
-    private int scoreLang(JsonObject video) {
-        String lang = video.has("iso_639_1") && !video.get("iso_639_1").isJsonNull()
-                ? video.get("iso_639_1").getAsString()
-                : "";
-        if ("de".equalsIgnoreCase(lang)) return 2;
-        if ("en".equalsIgnoreCase(lang)) return 1;
-        return 0;
-    }
-
-    private int scoreType(JsonObject video) {
-        String type = video.has("type") && !video.get("type").isJsonNull()
-                ? video.get("type").getAsString()
-                : "";
-        if ("Trailer".equalsIgnoreCase(type)) return 2;
-        if ("Teaser".equalsIgnoreCase(type)) return 1;
-        return 0;
     }
 
     /**

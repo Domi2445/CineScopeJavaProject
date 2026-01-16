@@ -27,6 +27,7 @@ public class RootController
     @FXML
     private Button btnLoginLogout;
 
+
     @FXML
     private void initialize()
     {
@@ -106,4 +107,6 @@ public class RootController
             loadView("/fxml/login.fxml");
         }
     }
+
+    
 }

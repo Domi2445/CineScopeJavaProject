@@ -40,6 +40,8 @@ public class SettingsController
     {
         cmbLanguage.getItems().setAll(Language.values());
 
+        cmbLanguage.getSelectionModel()
+                .select(LanguageUtil.getLanguage());
 
         // Zeige Loading-Label
         lblLoading.setVisible(true);
@@ -50,6 +52,23 @@ public class SettingsController
 
     }
 
+    @FXML
+    private void handleSaveSettings() {
 
+        // Sprache speichern
+        Language selectedLanguage =
+                cmbLanguage.getSelectionModel().getSelectedItem();
+
+        LanguageUtil.setLanguage(selectedLanguage);
+        LOGGER.info("Sprache auf " + selectedLanguage + " gesetzt.");
+        // Einstellungen speichern (Statistiken, Dark Mode)
+        boolean statsEnabled = chkStatistics.isSelected();
+        boolean darkModeEnabled = chkDarkMode.isSelected();
+
+//        RootController.reloadCurrentView();
+    }
 }
+
+
+
 

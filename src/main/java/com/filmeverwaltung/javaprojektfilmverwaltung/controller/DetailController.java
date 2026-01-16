@@ -35,6 +35,7 @@ public class DetailController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(DetailController.class.getName());
 
+    //initialisierung der FXML-Elemente
     @FXML
     private Label lblTitle;
     @FXML
@@ -78,7 +79,10 @@ public class DetailController implements Initializable {
     private final ImdbDescriptionProvider descriptionProvider = new ImdbDescriptionProvider();
     private final TMDbService tmdbService = new TMDbService(ApiConfig.TMDB_API_KEY);
 
-
+/**
+     * Setzt die Dialog-Stage und konfiguriert das Custom-Theme sowie das Schließen-Verhalten.
+ * @param stage Die Stage des Dialogs
+     */
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
 
@@ -116,6 +120,10 @@ public class DetailController implements Initializable {
         }
     }
 
+    /**
+     * Setzt den anzuzeigenden Film und aktualisiert die UI entsprechend.
+     * @param film Der anzuzeigende Film
+     */
     public void setFilm(Filmmodel film) {
         // Stoppe das aktuell laufende Video
         stopVideo();

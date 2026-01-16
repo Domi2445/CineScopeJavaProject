@@ -150,6 +150,12 @@ public class LoginController
             if (btnLoginLogout != null)
             {
                 btnLoginLogout.setText("👤 Abmelden");
+                btnLoginLogout.setVisible(false); // Verstecke den Button nach dem Login
+                Button btnLogout = (Button) currentRoot.lookup("#btnLogout");
+                if (btnLogout != null) {
+                    btnLogout.setVisible(true); // Zeige den Logout-Button
+                }
+
             }
         } catch (IOException e)
         {

@@ -19,6 +19,7 @@
             <Button text="📜 Verlauf" onAction="#onHistory"/>
             <Button text="⚙ Einstellungen" onAction="#onSettings"/>
             <Button fx:id="btnLoginLogout" text="🔒 Anmelden" onAction="#onLoginLogout"/>
+
         </VBox>
     </left>
 

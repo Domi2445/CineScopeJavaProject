@@ -25,6 +25,7 @@
         </VBox>
 
         <!-- Film Details -->
+<!--        hier werden die Filmdetails angezeigt -->
         <VBox spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e3e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,5);">
             <Label fx:id="lblTitle" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
 
@@ -73,6 +74,7 @@
     <Separator />
 
     <!-- Similar Movies Section -->
+<!--    Für Ähnliche Filme-->
     <VBox fx:id="similarMoviesSection" spacing="10" visible="false">
         <Label text="Ähnliche Filme" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
         <ProgressIndicator fx:id="progressSimilar" visible="false" prefWidth="50" prefHeight="50" />

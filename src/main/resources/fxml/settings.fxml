@@ -21,7 +21,7 @@
 
     <CheckBox fx:id="chkStatistics" text="Statistik anzeigen" />
 
-    <Button fx:id="btnSaveSettings" prefHeight="35.0" prefWidth="215.0" style="-fx-font-size: 14;" text="Einstellungen speichern" textFill="#d06500">
+    <Button fx:id="btnSaveSettings" prefHeight="35.0" prefWidth="215.0" style="-fx-font-size: 14;" text="Einstellungen speichern" textFill="#d06500" onAction="#handleSaveSettings">
       <font>
          <Font name="System Bold" size="12.0" />
       </font></Button>

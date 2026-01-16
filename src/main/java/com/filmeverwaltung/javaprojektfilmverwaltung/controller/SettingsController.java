@@ -20,7 +20,7 @@ public class SettingsController
 {
     private static final Logger LOGGER = Logger.getLogger(SettingsController.class.getName());
 
-   @FXML
+    @FXML
     private Button btnSaveSettings;
 
     @FXML
@@ -77,8 +77,9 @@ public class SettingsController
         try
         {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/settings.fxml"),
+                    getClass().getResource("/fxml/root.fxml"),
                     LanguageUtil.getBundle()
+
             );
             Parent view = loader.load();
 

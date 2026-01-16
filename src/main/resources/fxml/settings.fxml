@@ -1,31 +1,29 @@
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ComboBox?>
+<?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-      xmlns="http://javafx.com/javafx"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController"
-      spacing="15" style="-fx-padding: 20;">
+<VBox prefHeight="387.0" prefWidth="625.0" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
 
-    <Label text="Einstellungen" style="-fx-font-size: 22;"/>
+    <Label style="-fx-font-size: 22;" text="Einstellungen" />
 
 <!--    fürs Laden-->
-    <Label text="Spracheinstellungen:" style="-fx-font-size: 15;"/>
-    <ComboBox fx:id="cmbLanguage" promptText="Sprache auswählen" style="-fx-font-size: 14;"/>
+    <Label style="-fx-font-size: 15;" text="Spracheinstellungen:" />
+    <ComboBox fx:id="cmbLanguage" prefHeight="0.0" prefWidth="171.0" promptText="Sprache auswählen" style="-fx-font-size: 14;" />
 
 
-    <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
+    <Label fx:id="lblLoading" style="-fx-font-size: 14; -fx-text-fill: #666666;" text="Laden..." visible="false" />
 
 
-    <CheckBox fx:id="chkDarkMode" text="Dark Mode aktivieren"/>
-    <CheckBox fx:id="chkNotifications" text="Benachrichtigungen aktivieren"/>
+    <CheckBox fx:id="chkDarkMode" text="Dark Mode aktivieren" />
+    <CheckBox fx:id="chkNotifications" text="Benachrichtigungen aktivieren" />
 
-    <CheckBox fx:id="chkStatistics" text="Statistik anzeigen"/>
+    <CheckBox fx:id="chkStatistics" text="Statistik anzeigen" />
 
-    <Button fx:id="btnSaveSettings" text="Einstellungen speichern" style="-fx-font-size: 14;"/>
+    <Button fx:id="btnSaveSettings" prefHeight="35.0" prefWidth="215.0" style="-fx-font-size: 14;" text="Einstellungen speichern" textFill="#d06500">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Button>
 
 </VBox>
-

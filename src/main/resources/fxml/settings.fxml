@@ -4,26 +4,23 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="387.0" prefWidth="625.0" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
+<VBox spacing="15" style="-fx-padding: 20;"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
 
-    <Label style="-fx-font-size: 22;" text="Einstellungen" />
+    <Label text="%settings.title" style="-fx-font-size: 22;"/>
 
-<!--    fürs Laden-->
-    <Label style="-fx-font-size: 15;" text="Spracheinstellungen:" />
-    <ComboBox fx:id="cmbLanguage" prefHeight="0.0" prefWidth="171.0" promptText="Sprache auswählen" style="-fx-font-size: 14;" />
+    <Label text="%settings.language"/>
+    <ComboBox fx:id="cmbLanguage" promptText="%settings.selectLanguage"/>
 
+    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
 
-    <Label fx:id="lblLoading" style="-fx-font-size: 14; -fx-text-fill: #666666;" text="Laden..." visible="false" />
+    <CheckBox fx:id="chkDarkMode" text="%settings.darkmode"/>
+    <CheckBox fx:id="chkNotifications" text="%settings.notifications"/>
+    <CheckBox fx:id="chkStatistics" text="%settings.statistics"/>
 
-
-    <CheckBox fx:id="chkDarkMode" text="Dark Mode aktivieren" />
-    <CheckBox fx:id="chkNotifications" text="Benachrichtigungen aktivieren" />
-
-    <CheckBox fx:id="chkStatistics" text="Statistik anzeigen" />
-
-    <Button fx:id="btnSaveSettings" prefHeight="35.0" prefWidth="215.0" style="-fx-font-size: 14;" text="Einstellungen speichern" textFill="#d06500" onAction="#handleSaveSettings">
-      <font>
-         <Font name="System Bold" size="12.0" />
-      </font></Button>
-
+    <Button fx:id="btnSaveSettings"
+            text="%settings.save"
+            onAction="#handleSaveSettings"/>
 </VBox>

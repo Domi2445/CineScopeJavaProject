@@ -1,38 +1,47 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.util;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Language;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public final class LanguageUtil {
 
     private static Language currentLanguage = Language.DE;
-    private static ResourceBundle bundle = loadBundle();
+    private static ResourceBundle bundle;
 
-    private LanguageUtil() {}
-
-    private static ResourceBundle loadBundle() {
-        return ResourceBundle.getBundle(
+    public static void setLanguage(Language lang) {
+        currentLanguage = lang;
+        bundle = ResourceBundle.getBundle(
                 "i18n.messages",
                 getLocale()
         );
-    }
-
-    public static void setLanguage(Language lang) {
-        if (lang != null) {
-            currentLanguage = lang;
-            bundle = loadBundle();
-        }
     }
 
     public static Language getLanguage() {
         return currentLanguage;
     }
 
-    public static Locale getLocale() {
+    public static ResourceBundle getBundle() {
+        if (bundle == null) {
+            setLanguage(currentLanguage);
+        }
+        return bundle;
+    }
+
+    private static Locale getLocale() {
         return switch (currentLanguage) {
             case EN -> Locale.ENGLISH;
             case AR -> Locale.forLanguageTag("ar");
@@ -40,15 +49,4 @@ public final class LanguageUtil {
             default -> Locale.GERMAN;
         };
     }
-
-    public static String get(String key) {
-        return bundle.getString(key);
-    }
-
-    public static ResourceBundle getBundle() {
-        return bundle;
-    }
-
-
-
 }

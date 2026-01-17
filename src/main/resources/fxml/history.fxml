@@ -1,12 +1,12 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx"
+<VBox spacing="15" style="-fx-padding: 20;"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.HistoryController"
-      spacing="15" style="-fx-padding: 20;">
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.HistoryController">
 
-    <Label text="Suchverlauf" style="-fx-font-size: 22;"/>
-    <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
+    <Label text="%history.title"/>
+    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
     <ListView/>
 </VBox>

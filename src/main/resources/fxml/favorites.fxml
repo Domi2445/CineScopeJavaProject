@@ -5,32 +5,21 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
-<VBox xmlns="http://javafx.com/javafx"
+<VBox spacing="10" style="-fx-padding: 10;"
+      xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.FavoritesController"
-      prefHeight="400.0" prefWidth="600.0" spacing="10">
+      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.FavoritesController">
 
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
-
-    <HBox alignment="CENTER_LEFT" spacing="10">
-        <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Favoriten"/>
+    <HBox spacing="10">
+        <Label text="%favorites.title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label text="Bildgröße:"/>
-        <ComboBox fx:id="cmbImageSize" promptText="Standard"/>
+        <Label text="%favorites.imagesize"/>
+        <ComboBox fx:id="cmbImageSize" promptText="%general.default"/>
     </HBox>
 
-    <Label fx:id="lblLoading" text="Laden..." style="-fx-font-size: 14; -fx-text-fill: #666666;" visible="false"/>
+    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
 
-    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS">
-        <GridPane fx:id="gridFavorites" hgap="10" vgap="10" style="-fx-padding: 10;">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="33.33"/>
-                <ColumnConstraints percentWidth="33.33"/>
-                <ColumnConstraints percentWidth="33.33"/>
-            </columnConstraints>
-        </GridPane>
+    <ScrollPane fitToWidth="true">
+        <GridPane fx:id="gridFavorites"/>
     </ScrollPane>
-
 </VBox>

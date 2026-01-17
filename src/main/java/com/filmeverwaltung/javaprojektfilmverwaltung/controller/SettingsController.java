@@ -21,6 +21,9 @@ public class SettingsController
     private static final Logger LOGGER = Logger.getLogger(SettingsController.class.getName());
 
     @FXML
+    private CheckBox chkDarkMode;
+
+    @FXML
     private Button btnSaveSettings;
 
     @FXML
@@ -30,8 +33,6 @@ public class SettingsController
     @FXML
     private CheckBox chkStatistics;
 
-    @FXML
-    private CheckBox chkDarkMode;
 
     @FXML
     private Label lblLoading;
@@ -68,6 +69,7 @@ public class SettingsController
         // Einstellungen speichern (Statistiken, Dark Mode)
         boolean statsEnabled = chkStatistics.isSelected();
         boolean darkModeEnabled = chkDarkMode.isSelected();
+
 
        reloadViews();
     }

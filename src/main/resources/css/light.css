@@ -1,0 +1,12 @@
+.root {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+}
+
+.label, .check-box, .button {
+    -fx-text-fill: #000000;
+}
+
+.button {
+    -fx-background-color: #e0e0e0;
+}

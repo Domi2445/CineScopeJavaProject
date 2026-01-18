@@ -2,6 +2,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.service;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,11 +36,14 @@ public class TMDbService {
             System.out.println("🔍 Suche nach Film: " + title);
 
             String encoded = URLEncoder.encode(title, StandardCharsets.UTF_8);
+            
+            // Use current language setting from LanguageUtil
+            String currentLang = LanguageUtil.getTmdbLanguageCode();
 
-            // Versuche zuerst auf Deutsch
-            String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=de";
-            LOGGER.log(Level.INFO, "Suche URL (DE): " + url);
-            System.out.println("Suche URL (DE): " + url);
+            // Versuche zuerst mit der aktuellen Sprache
+            String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=" + currentLang;
+            LOGGER.log(Level.INFO, "Suche URL (" + currentLang + "): " + url);
+            System.out.println("Suche URL (" + currentLang + "): " + url);
 
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
@@ -47,28 +51,30 @@ public class TMDbService {
 
             if (results != null && results.size() > 0) {
                 String id = results.get(0).getAsJsonObject().get("id").getAsString();
-                LOGGER.log(Level.INFO, "✅ ID gefunden (DE): " + id);
-                System.out.println("✅ ID gefunden (DE): " + id);
+                LOGGER.log(Level.INFO, "✅ ID gefunden (" + currentLang + "): " + id);
+                System.out.println("✅ ID gefunden (" + currentLang + "): " + id);
                 return id;
             }
 
-            LOGGER.log(Level.INFO, "⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
-            System.out.println("⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
+            LOGGER.log(Level.INFO, "⚠️ Keine Ergebnisse in der aktuellen Sprache, versuche Englisch...");
+            System.out.println("⚠️ Keine Ergebnisse in der aktuellen Sprache, versuche Englisch...");
 
-            // Fallback auf Englisch
-            url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=en";
-            LOGGER.log(Level.INFO, "Suche URL (EN): " + url);
-            System.out.println("Suche URL (EN): " + url);
+            // Fallback auf Englisch wenn nicht bereits Englisch
+            if (!"en-US".equals(currentLang)) {
+                url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=en-US";
+                LOGGER.log(Level.INFO, "Suche URL (EN): " + url);
+                System.out.println("Suche URL (EN): " + url);
 
-            json = HttpUtil.get(url);
-            response = JsonParser.parseString(json).getAsJsonObject();
-            results = response.getAsJsonArray("results");
+                json = HttpUtil.get(url);
+                response = JsonParser.parseString(json).getAsJsonObject();
+                results = response.getAsJsonArray("results");
 
-            if (results != null && results.size() > 0) {
-                String id = results.get(0).getAsJsonObject().get("id").getAsString();
-                LOGGER.log(Level.INFO, "✅ ID gefunden (EN): " + id);
-                System.out.println("✅ ID gefunden (EN): " + id);
-                return id;
+                if (results != null && results.size() > 0) {
+                    String id = results.get(0).getAsJsonObject().get("id").getAsString();
+                    LOGGER.log(Level.INFO, "✅ ID gefunden (EN): " + id);
+                    System.out.println("✅ ID gefunden (EN): " + id);
+                    return id;
+                }
             }
 
             LOGGER.log(Level.WARNING, "❌ Keine Ergebnisse gefunden für: " + title);
@@ -172,7 +178,7 @@ public class TMDbService {
         List<Filmmodel> similarMovies = new ArrayList<>();
 
         try {
-            String url = BASE_URL + "/movie/" + tmdbId + "/similar?api_key=" + apiKey + "&language=de&page=1";
+            String url = BASE_URL + "/movie/" + tmdbId + "/similar?api_key=" + apiKey + "&language=" + LanguageUtil.getTmdbLanguageCode() + "&page=1";
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = response.getAsJsonArray("results");
@@ -212,7 +218,7 @@ public class TMDbService {
             String tmdbId = getMovieIdByTitle(movieTitle);
             if (tmdbId == null) return null;
 
-            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=" + LanguageUtil.getTmdbLanguageCode();
             String json = HttpUtil.get(url);
             JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
 
@@ -239,7 +245,7 @@ public class TMDbService {
                 return null;
             }
 
-            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=" + LanguageUtil.getTmdbLanguageCode();
             String json = HttpUtil.get(url);
             JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
 
@@ -268,7 +274,7 @@ public class TMDbService {
             String tmdbId = getMovieIdByTitle(movieTitle);
             if (tmdbId == null) return null;
 
-            String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=" + LanguageUtil.getTmdbLanguageCode();
             String json = HttpUtil.get(url);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = root.has("results") && root.get("results").isJsonArray() ? root.getAsJsonArray("results") : null;

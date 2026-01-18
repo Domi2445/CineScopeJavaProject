@@ -3,6 +3,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.db;
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.HttpUtil;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -104,10 +105,10 @@ public class FilmRepository
     public List<Filmmodel> getTopMovies(int limit) {
         List<Filmmodel> movies = new ArrayList<>();
 
-        // URL dynamisch mit API-Key und Sprache
+        // URL dynamisch mit API-Key und Sprache aus LanguageUtil
         String url = "https://api.themoviedb.org/3/movie/popular"
                 + "?api_key=" + ApiConfig.TMDB_API_KEY
-                + "&language=" + ApiConfig.TMDB_LANGUAGE
+                + "&language=" + LanguageUtil.getTmdbLanguageCode()
                 + "&page=1";
 
         try {

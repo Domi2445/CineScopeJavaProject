@@ -49,4 +49,17 @@ public final class LanguageUtil {
             default -> Locale.GERMAN;
         };
     }
+
+    /**
+     * Returns the TMDB API language code based on the current language setting
+     * @return TMDB language code (e.g., "en-US", "de-DE", "ar-SA", "pl-PL")
+     */
+    public static String getTmdbLanguageCode() {
+        return switch (currentLanguage) {
+            case EN -> "en-US";
+            case AR -> "ar-SA";
+            case PL -> "pl-PL";
+            default -> "de-DE";
+        };
+    }
 }

@@ -220,9 +220,19 @@ public class FavoritesController
     {
         try
         {
+            // Lade Root als Region, damit wir die Pref-Größe anpassen können (Platz für Trailer)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), LanguageUtil.getBundle());
-            Scene scene = new Scene(loader.load());
+            javafx.scene.layout.Region root = (javafx.scene.layout.Region) loader.load();
+            Scene scene = new Scene(root);
             Stage dialog = new Stage();
+            // Etwas breiter und höher öffnen, damit Trailer sichtbar ist
+            double preferredWidth = 1100;
+            double preferredHeight = 760;
+            root.setPrefWidth(preferredWidth);
+            root.setPrefHeight(preferredHeight);
+            dialog.setWidth(preferredWidth);
+            dialog.setHeight(preferredHeight);
+            dialog.setResizable(true);
             dialog.initModality(Modality.APPLICATION_MODAL);
 
             if (gridFavorites != null && gridFavorites.getScene() != null)
@@ -238,6 +248,7 @@ public class FavoritesController
             ctrl.setFilm(film);
 
             dialog.show();
+
 
             // Falls Daten unvollständig → nachladen
             if (film.getPlot() == null || film.getWriter() == null)

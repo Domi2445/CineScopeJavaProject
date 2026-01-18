@@ -1,12 +1,10 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
-import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
-import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
-import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,24 +17,26 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.scene.layout.Region;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Collections;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
-public class WatchlistController
-{
+public class WatchlistController {
+
     private static final Logger LOGGER = Logger.getLogger(WatchlistController.class.getName());
 
     @FXML
     private TableView<Filmmodel> tableWatchlist;
-
-    @FXML
-    private Label lblLoading;
 
     @FXML
     private TableColumn<Filmmodel, String> colTitle;
@@ -58,16 +58,14 @@ public class WatchlistController
 
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
     private final FavoritesHandler favoritesHandler = new FavoritesHandler();
-    private final LoadingOverlay loadingOverlay = new LoadingOverlay();
+
+    private volatile String lastOpenedId = null;
+    private volatile long lastOpenedAt = 0L;
+    // Map to keep track of currently open detail dialogs by id
+    private final Map<String, Stage> openDialogs = new ConcurrentHashMap<>();
 
     @FXML
-    private void initialize()
-    {
-        // Zeige Loading-Label
-        lblLoading.setVisible(true);
-        tableWatchlist.setVisible(false);
-        btnExport.setVisible(false);
-        if (cmbSize != null) cmbSize.setVisible(false);
+    private void initialize() {
 
         // Größenauswahl ComboBox initialisieren
         cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
@@ -79,21 +77,16 @@ public class WatchlistController
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
 
         // Button-Spalte für "Zu Favoriten hinzufügen"
-        colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>()
-        {
+        colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>() {
             @Override
-            public TableCell<Filmmodel, Void> call(TableColumn<Filmmodel, Void> param)
-            {
-                return new TableCell<Filmmodel, Void>()
-                {
+            public TableCell<Filmmodel, Void> call(TableColumn<Filmmodel, Void> param) {
+                return new TableCell<Filmmodel, Void>() {
                     private final Button btnAddToFavorites = new Button("Zu Favoriten");
 
                     {
-                        btnAddToFavorites.setOnAction(event ->
-                        {
+                        btnAddToFavorites.setOnAction(event -> {
                             Filmmodel film = getTableView().getItems().get(getIndex());
-                            if (film != null && film.getImdbID() != null)
-                            {
+                            if (film != null && film.getImdbID() != null) {
                                 favoritesHandler.fuegeFilmHinzu(film.getImdbID());
                                 // Button-Text ändern als Feedback
                                 btnAddToFavorites.setText("✓ Hinzugefügt");
@@ -103,22 +96,17 @@ public class WatchlistController
                     }
 
                     @Override
-                    protected void updateItem(Void item, boolean empty)
-                    {
+                    protected void updateItem(Void item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty)
-                        {
+                        if (empty) {
                             setGraphic(null);
-                        } else
-                        {
+                        } else {
                             Filmmodel film = getTableView().getItems().get(getIndex());
                             // Prüfen, ob bereits in Favoriten
-                            if (film != null && favoritesHandler.istFavorit(film.getImdbID()))
-                            {
+                            if (film != null && favoritesHandler.istFavorit(film.getImdbID())) {
                                 btnAddToFavorites.setText("✓ Hinzugefügt");
                                 btnAddToFavorites.setDisable(true);
-                            } else
-                            {
+                            } else {
                                 btnAddToFavorites.setText("Zu Favoriten");
                                 btnAddToFavorites.setDisable(false);
                             }
@@ -130,108 +118,82 @@ public class WatchlistController
         });
 
 
-        // -----------------------------------------
-        // WATCHLIST AUS JSON LADEN
-        // -----------------------------------------
+
+
         WatchlistHandler handler = new WatchlistHandler();
         List<String> ids = handler.lesen();
         ObservableList<Filmmodel> filme = observableArrayList();
         tableWatchlist.getColumns().setAll(observableArrayList(colTitle, colYear, colRating, colFavorites));
         tableWatchlist.setItems(filme);
-
-        loadingOverlay.show(tableWatchlist.getScene() == null ? null : tableWatchlist.getScene().getWindow(), "Watchlist wird geladen...");
-
-        Task<Void> loadTask = new Task<>()
-        {
-            @Override
-            protected Void call()
-            {
-                List<Filmmodel> allFilms = new ArrayList<>();
-                List<Filmmodel> desiredLanguageFilms = new ArrayList<>();
-
-                for (String id : ids)
-                {
-                    Filmmodel film = omdbService.getFilmById(id);
-                    if (film != null)
-                    {
-                        // Filtere nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
-                        String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
-                        boolean isInDesiredLanguage = film.getLanguage() != null &&
-                                                     film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase());
-
-                        // Sammle erst alle Filme und filtere später
-                        allFilms.add(film);
-                        if (isInDesiredLanguage) {
-                            desiredLanguageFilms.add(film);
-                        }
-                    }
-                }
-
-                // Wenn weniger als 3 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
-                List<Filmmodel> filmsToShow = desiredLanguageFilms.size() >= 3 ? desiredLanguageFilms : allFilms;
-
-                for (Filmmodel film : filmsToShow) {
-                    Platform.runLater(() -> filme.add(film));
-                }
-
-                return null;
+        for (String id : ids) {
+            Filmmodel film = omdbService.getFilmById(id);
+            if (film != null) {
+                filme.add(film);
             }
-        };
+        }
 
-        loadTask.setOnSucceeded(e ->
-        {
-            loadingOverlay.hide();
-            lblLoading.setVisible(false);
-            tableWatchlist.setVisible(true);
-            btnExport.setVisible(true);
-            if (cmbSize != null) cmbSize.setVisible(true);
-        });
+        tableWatchlist.setItems(filme);
 
-        loadTask.setOnFailed(e ->
-        {
-            LOGGER.log(Level.SEVERE, "Fehler beim Laden der Watchlist", loadTask.getException());
-            loadingOverlay.hide();
-            lblLoading.setText("Fehler beim Laden");
-            lblLoading.setVisible(true);
-            tableWatchlist.setVisible(true);
-            btnExport.setVisible(true);
-            if (cmbSize != null) cmbSize.setVisible(true);
-        });
 
-        Thread th = new Thread(loadTask, "watchlist-load");
-        th.setDaemon(true);
-        th.start();
 
-        // -----------------------------------------
-        // Doppelklick für Details
-        // -----------------------------------------
-        tableWatchlist.setRowFactory(tv ->
-        {
+        tableWatchlist.setRowFactory(tv -> {
             TableRow<Filmmodel> row = new TableRow<>();
-            row.setOnMouseClicked(event ->
-            {
-                if (event.getClickCount() == 2 && (!row.isEmpty()))
-                {
-                    Filmmodel rowData = row.getItem();
-                    openDetail(rowData);
+            // Ensure row is selected on mouse press so selection model is correct
+            row.setOnMousePressed(event -> {
+                if (!row.isEmpty()) {
+                    row.getTableView().getSelectionModel().select(row.getIndex());
                 }
             });
             return row;
         });
+
+        // Ein einziger EventFilter fängt Double-Clicks (Capture-Phase) und öffnet Details einmal
+        tableWatchlist.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getClickCount() == 2) {
+                Filmmodel sel = tableWatchlist.getSelectionModel().getSelectedItem();
+                LOGGER.log(Level.INFO, "TableView eventFilter double-click, selectedItem=" + (sel == null ? "null" : sel.getTitle()));
+                if (sel != null) {
+                    openDetail(sel);
+                    event.consume();
+                }
+            }
+        });
     }
 
-    // Film-Detailansicht öffnen
+   /**
+     * Öffnet das Detail-Fenster für den gegebenen Film.
+     * Verhindert Mehrfachöffnungen desselben Films innerhalb kurzer Zeit (1 Sekunde).
+     */
     private void openDetail(Filmmodel film)
     {
-        try
-        {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), LanguageUtil.getBundle());
-            Scene scene = new Scene(loader.load());
+        String idForDebounce = film == null ? "" : (film.getImdbID() != null ? film.getImdbID() : film.getTitle());
+        long now = System.currentTimeMillis();
+        if (idForDebounce != null && !idForDebounce.isEmpty()) {
+            if (idForDebounce.equals(lastOpenedId) && (now - lastOpenedAt) < 1000) {
+                LOGGER.log(Level.INFO, "Ignored duplicate openDetail for id=" + idForDebounce + " (debounced)");
+                return;
+            }
+        }
+
+        LOGGER.log(Level.INFO, "openDetail called with film=" + (film == null ? "null" : film.getTitle()));
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil.getBundle());
+            // Lade Root und Scene, setze bevorzugte Breite damit der Trailer Platz hat
+            Region root = (Region) loader.load();
+            Scene scene = new Scene(root);
             Stage dialog = new Stage();
+            // Für Watchlist-öffnungen etwas breiter und höher, damit Trailer bequem sichtbar ist
+            double preferredWidth = 1100; // Breiter als Standard
+            double preferredHeight = 760;
+            root.setPrefWidth(preferredWidth);
+            root.setPrefHeight(preferredHeight);
+            dialog.setWidth(preferredWidth);
+            dialog.setHeight(preferredHeight);
+            dialog.setResizable(true);
+
             dialog.initModality(Modality.APPLICATION_MODAL);
 
-            if (tableWatchlist != null && tableWatchlist.getScene() != null)
-            {
+            if (tableWatchlist != null && tableWatchlist.getScene() != null) {
                 dialog.initOwner(tableWatchlist.getScene().getWindow());
             }
 
@@ -242,55 +204,85 @@ public class WatchlistController
             ctrl.setDialogStage(dialog);
             ctrl.setFilm(film);
 
+            // Set debounce state
+            if (idForDebounce != null && !idForDebounce.isEmpty()) {
+                lastOpenedId = idForDebounce;
+                lastOpenedAt = System.currentTimeMillis();
+            }
+
+            // If a dialog for this id is already open, bring it to front and don't open new one
+            if (idForDebounce != null && !idForDebounce.isEmpty()) {
+                Stage existing = openDialogs.get(idForDebounce);
+                if (existing != null && existing.isShowing()) {
+                    LOGGER.log(Level.INFO, "Detail already open for id=" + idForDebounce + " - bringing to front");
+                    Platform.runLater(() -> {
+                        try {
+                            existing.toFront();
+                            existing.requestFocus();
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.FINE, "Error bringing existing dialog to front", ex);
+                        }
+                    });
+                    return;
+                }
+            }
+
+            dialog.setOnHidden(e -> {
+                try {
+                    if (idForDebounce != null && idForDebounce.equals(lastOpenedId)) {
+                        lastOpenedId = null;
+                        lastOpenedAt = 0L;
+                    }
+                    if (idForDebounce != null) {
+                        openDialogs.remove(idForDebounce);
+                    }
+                } catch (Exception ex) {
+                    LOGGER.log(Level.FINE, "Error clearing debounce state", ex);
+                }
+            });
+
+            // register dialog
+            if (idForDebounce != null && !idForDebounce.isEmpty()) {
+                openDialogs.put(idForDebounce, dialog);
+            }
+
+
             dialog.show();
 
             // Falls Daten unvollständig → nachladen
-            if (film.getPlot() == null || film.getWriter() == null)
-            {
-                Task<Filmmodel> task = new Task<>()
-                {
+            if (film.getPlot() == null || film.getWriter() == null) {
+                Task<Filmmodel> task = new Task<>() {
                     @Override
-                    protected Filmmodel call()
-                    {
-                        if (film.getImdbID() != null && !film.getImdbID().isBlank())
-                        {
+                    protected Filmmodel call() {
+                        if (film.getImdbID() != null && !film.getImdbID().isBlank()) {
                             return omdbService.getFilmById(film.getImdbID());
                         }
                         return omdbService.getFilmByTitle(film.getTitle());
                     }
                 };
 
-                task.setOnSucceeded(ev ->
-                {
+                task.setOnSucceeded(ev -> {
                     Filmmodel full = task.getValue();
-                    if (full != null)
-                    {
+                    if (full != null) {
                         Platform.runLater(() -> ctrl.setFilm(full));
                     }
                 });
 
-                task.setOnFailed(ev ->
-                {
-                    LOGGER.log(Level.SEVERE, "Fehler beim Nachladen der Filmdetails", task.getException());
-                });
+                task.setOnFailed(ev -> task.getException().printStackTrace());
 
                 Thread th = new Thread(task, "omdb-detail-watchlist");
                 th.setDaemon(true);
                 th.start();
             }
 
-        } catch (IOException e)
-        {
-            LOGGER.log(Level.SEVERE, "Fehler beim Öffnen des Detail-Dialogs", e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-
     @FXML
-    private void handleDeleteSelected()
-    {
+    private void handleDeleteSelected() {
         Filmmodel film = tableWatchlist.getSelectionModel().getSelectedItem();
-        if (film == null)
-        {
+        if (film == null) {
             return; // Nichts ausgewählt
         }
 
@@ -302,13 +294,11 @@ public class WatchlistController
         tableWatchlist.getItems().remove(film);
     }
 
-    private void anpasseTabellenschriftgroesse()
-    {
+    private void anpasseTabellenschriftgroesse() {
         String groesse = cmbSize.getValue();
         String style = "";
 
-        switch (groesse)
-        {
+        switch (groesse) {
             case "Klein":
                 style = "-fx-font-size: 10px;";
                 break;

@@ -5,6 +5,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandl
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.ImdbDescriptionProvider;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.TMDbService;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -57,6 +58,8 @@ public class DetailController implements Initializable {
     @FXML
     private Button btnSimilarMovies;
     @FXML
+    private Button btnTranslate;
+    @FXML
     private VBox similarMoviesSection;
     @FXML
     private TableView<Filmmodel> tableSimilarMovies;
@@ -70,6 +73,9 @@ public class DetailController implements Initializable {
     private TableColumn<Filmmodel, String> colSimilarPlot;
     @FXML
     private ProgressIndicator progressSimilar;
+
+    @FXML
+    private Button btnTrailer;
 
     private Stage dialogStage;
     private Filmmodel film;
@@ -149,6 +155,14 @@ public class DetailController implements Initializable {
             lnkTrailerExternal.setManaged(false);
             lnkTrailerExternal.setOnAction(null);
         }
+        if (btnTrailer != null) {
+            btnTrailer.setVisible(false);
+            btnTrailer.setManaged(false);
+        }
+
+        // Übersetzungsbutton-Sichtbarkeit basierend auf Datenquelle steuern
+        updateTranslateButtonVisibility();
+
         aktualisiereUI();
         ladePoster();
     }
@@ -308,6 +322,10 @@ public class DetailController implements Initializable {
                             lnkTrailerExternal.setVisible(true);
                             lnkTrailerExternal.setManaged(true);
 
+                            // Zeige auch den Trailer-Button
+                            btnTrailer.setVisible(true);
+                            btnTrailer.setManaged(true);
+
                             LOGGER.log(Level.INFO, "✓ Trailer-Anzeige erfolgreich erstellt");
                             System.out.println("✓ Trailer-Anzeige erfolgreich erstellt");
                         } catch (Exception ex) {
@@ -329,6 +347,8 @@ public class DetailController implements Initializable {
                         trailerContainer.setManaged(false);
                         lnkTrailerExternal.setVisible(false);
                         lnkTrailerExternal.setManaged(false);
+                        btnTrailer.setVisible(false);
+                        btnTrailer.setManaged(false);
                     }
                 });
             });
@@ -345,6 +365,8 @@ public class DetailController implements Initializable {
                 trailerContainer.setManaged(false);
                 lnkTrailerExternal.setVisible(false);
                 lnkTrailerExternal.setManaged(false);
+                btnTrailer.setVisible(false);
+                btnTrailer.setManaged(false);
             });
 
             Thread trailerThread = new Thread(trailerTask);
@@ -359,6 +381,8 @@ public class DetailController implements Initializable {
             trailerContainer.setManaged(false);
             lnkTrailerExternal.setVisible(false);
             lnkTrailerExternal.setManaged(false);
+            btnTrailer.setVisible(false);
+            btnTrailer.setManaged(false);
         }
 
         // Lade Streaming-Anbieter asynchron
@@ -599,8 +623,19 @@ public class DetailController implements Initializable {
     @FXML
     private void handleTranslatePlot() {
         if (film == null) return;
-        txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", "de"));
-        lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", "de"));
+
+        // Übersetze von Englisch in die aktuelle UI-Sprache
+        String targetLang = switch (LanguageUtil.getLanguage()) {
+            case DE -> "de";
+            case EN -> "en"; // Keine Übersetzung nötig
+            case AR -> "ar";
+            case PL -> "pl";
+        };
+
+        if (!targetLang.equals("en")) {
+            txtPlot.setText(new TranslationUtil().translate(txtPlot.getText(), "en", targetLang));
+            lblTitle.setText(new TranslationUtil().translate(lblTitle.getText(), "en", targetLang));
+        }
 
         // Wenn MyMemory API einen Fehler gemeldet hat, zeige einen Alert in der GUI
         String tmError = com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.getLastError();
@@ -642,5 +677,71 @@ public class DetailController implements Initializable {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    /**
+     * Steuert die Sichtbarkeit des Übersetzungsbuttons basierend auf der Datenquelle und Sprachverfügbarkeit
+     */
+    private void updateTranslateButtonVisibility() {
+        if (btnTranslate == null || film == null) return;
+
+        // Übersetzungsbutton anzeigen wenn:
+        // 1. Daten von OMDB kommen (erkennbar an englischem Text)
+        // 2. ODER TMDB-Daten nicht in der gewünschten Sprache verfügbar sind
+
+        boolean showTranslateButton = false;
+
+        // Prüfe ob Titel auf Englisch ist (wahrscheinlich von OMDB)
+        if (film.getTitle() != null && isEnglishText(film.getTitle())) {
+            showTranslateButton = true;
+        }
+
+        // Prüfe ob Plot auf Englisch ist (wahrscheinlich von OMDB oder TMDB hatte keine Übersetzung)
+        if (film.getPlot() != null && !film.getPlot().equals("N/A") && isEnglishText(film.getPlot())) {
+            showTranslateButton = true;
+        }
+
+        // Prüfe ob Writer auf Englisch ist
+        if (film.getWriter() != null && !film.getWriter().equals("N/A") && isEnglishText(film.getWriter())) {
+            showTranslateButton = true;
+        }
+
+        btnTranslate.setVisible(showTranslateButton);
+        btnTranslate.setManaged(showTranslateButton);
+    }
+
+    /**
+     * Prüft ob der Text wahrscheinlich auf Englisch ist
+     * Einfache Heuristik: Wenn mehr als 70% der Wörter englische Wörter sind
+     */
+    private boolean isEnglishText(String text) {
+        if (text == null || text.trim().isEmpty()) return false;
+
+        // Bekannte englische Wörter (könnte erweitert werden)
+        String[] englishWords = {
+            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
+            "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does",
+            "did", "will", "would", "could", "should", "may", "might", "must", "can", "shall"
+        };
+
+        String lowerText = text.toLowerCase();
+        String[] words = lowerText.split("\\s+");
+
+        int englishWordCount = 0;
+        for (String word : words) {
+            // Entferne Satzzeichen für bessere Erkennung
+            word = word.replaceAll("[^a-zA-Z]", "");
+            if (word.length() > 0) {
+                for (String englishWord : englishWords) {
+                    if (word.equals(englishWord)) {
+                        englishWordCount++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Wenn mehr als 30% der Wörter englische Stoppwörter sind, gilt der Text als Englisch
+        return words.length > 0 && (double) englishWordCount / words.length > 0.3;
     }
 }

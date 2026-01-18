@@ -55,4 +55,14 @@ public final class LanguageUtil {
             default -> Locale.GERMAN;
         };
     }
+
+    public static String getCurrentLanguageFilter() {
+        Language currentLang = getLanguage();
+        return switch (currentLang) {
+            case DE -> "German";
+            case EN -> "English";
+            case AR -> "Arabic";
+            case PL -> "Polish";
+        };
+    }
 }

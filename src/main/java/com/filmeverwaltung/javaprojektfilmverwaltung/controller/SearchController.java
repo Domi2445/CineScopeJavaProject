@@ -4,6 +4,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.db.FilmRepository;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
+import com.filmeverwaltung.javaprojektfilmverwaltung.model.Language;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
@@ -29,6 +30,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -193,6 +195,18 @@ public class SearchController {
         task.setOnSucceeded(e -> {
             List<Filmmodel> topMovies = new java.util.ArrayList<>(task.getValue());
 
+            // Filtere Filme nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
+            String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
+            List<Filmmodel> filteredMovies = topMovies.stream()
+                .filter(film -> film.getLanguage() != null &&
+                               film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase()))
+                .toList();
+
+            // Wenn weniger als 5 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
+            if (filteredMovies.size() < 5) {
+                filteredMovies = topMovies;
+            }
+
             // Format year and rating for all movies
             for (Filmmodel film : topMovies) {
                 // Extract year from date string (e.g., "2025-11-05" -> "2025")
@@ -226,8 +240,10 @@ public class SearchController {
                     }
                 });
 
+                final List<Filmmodel> finalTopMovies = new java.util.ArrayList<>(topMovies);
+
                 // Load OMDB posters for all top movies (fallback to TMDB if N/A)
-                final int[] pendingPosterTasks = {topMovies.size()};
+                final AtomicInteger pendingPosterTasks = new AtomicInteger(topMovies.size());
                 for (Filmmodel film : topMovies) {
                     Task<Void> posterTask = new Task<>() {
                         @Override
@@ -250,11 +266,10 @@ public class SearchController {
                     };
 
                     posterTask.setOnSucceeded(ev -> {
-                        pendingPosterTasks[0]--;
-                        if (pendingPosterTasks[0] == 0) {
+                        if (pendingPosterTasks.decrementAndGet() == 0) {
                             // Alle Poster geladen
                             colRating.setVisible(true);
-                            tableResults.setItems(FXCollections.observableArrayList(topMovies));
+                            tableResults.setItems(FXCollections.observableArrayList(finalTopMovies));
                             tableResults.setVisible(true);
                             setSearchControlsVisibility(true);
                             hideLoadingScreen();
@@ -262,11 +277,9 @@ public class SearchController {
                     });
 
                     posterTask.setOnFailed(ev -> {
-                        pendingPosterTasks[0]--;
-                        LOGGER.log(Level.WARNING, "Fehler beim Laden des Posters", posterTask.getException());
-                        if (pendingPosterTasks[0] == 0) {
+                        if (pendingPosterTasks.decrementAndGet() == 0) {
                             colRating.setVisible(true);
-                            tableResults.setItems(FXCollections.observableArrayList(topMovies));
+                            tableResults.setItems(FXCollections.observableArrayList(finalTopMovies));
                             tableResults.setVisible(true);
                             setSearchControlsVisibility(true);
                             hideLoadingScreen();
@@ -330,25 +343,11 @@ public class SearchController {
         task.setOnSucceeded(e -> {
             List<Filmmodel> list = new java.util.ArrayList<>(task.getValue());
 
-            // Format year and rating for all movies
-            for (Filmmodel film : list) {
-                // Extract year from date string (e.g., "2025-11-05" -> "2025")
-                if (film.getYear() != null && !film.getYear().isEmpty()) {
-                    String year = film.getYear();
-                    if (year.length() >= 4) {
-                        film.setYear(year.substring(0, 4));
-                    }
-                }
-                // Round rating to 2 decimal places
-                if (film.getImdbRating() != null && !film.getImdbRating().isEmpty() && !"N/A".equalsIgnoreCase(film.getImdbRating())) {
-                    try {
-                        double rating = Double.parseDouble(film.getImdbRating());
-                        film.setImdbRating(String.format("%.2f", rating));
-                    } catch (NumberFormatException ex) {
-                        // Keep original value if parsing fails
-                    }
-                }
-            }
+            // Hinweis: Vorher wurde hier nach der UI-Sprache vorgefiltert (z.B. Arabic),
+            // was dazu führte, dass englische Filme bei arabischer UI ausgeblendet wurden.
+            // Entferne dieses automatische Vorfilter, damit die tatsächlichen Suchergebnisse
+            // vollständig übernommen werden. Die sichtbaren Filter (ComboBox) werden
+            // weiterhin in updateSearchResults() angewendet.
 
             if (list.isEmpty()) {
                 hideLoadingScreen();
@@ -359,13 +358,13 @@ public class SearchController {
                 return;
             }
 
-            final int[] pendingTasks = {0};
+            final AtomicInteger pendingTasks = new AtomicInteger(0);
 
             for (Filmmodel film : list) {
                 if ((film.getWriter() == null || film.getWriter().isEmpty() || "N/A".equalsIgnoreCase(film.getWriter())) ||
                         (film.getImdbRating() == null || film.getImdbRating().isEmpty() || "N/A".equalsIgnoreCase(film.getImdbRating()))) {
 
-                    pendingTasks[0]++;
+                    pendingTasks.incrementAndGet();
 
                     Task<Void> detailsTask = new Task<>() {
                         @Override
@@ -399,17 +398,17 @@ public class SearchController {
                         }
                     };
 
+                    List<Filmmodel> finalList = list;
                     detailsTask.setOnSucceeded(ev -> {
-                        pendingTasks[0]--;
-                        if (pendingTasks[0] == 0) {
-                            updateSearchResults(list);
+                        if (pendingTasks.decrementAndGet() == 0) {
+                            updateSearchResults(finalList);
                         }
                     });
 
                     new Thread(detailsTask).start();
                 } else {
                     // Auch für Filme ohne fehlende Details: versuche OMDB-Poster zu laden
-                    pendingTasks[0]++;
+                    pendingTasks.incrementAndGet();
                     Task<Void> posterTask = new Task<>() {
                         @Override
                         protected Void call() {
@@ -427,17 +426,17 @@ public class SearchController {
                         }
                     };
 
+                    List<Filmmodel> finalList2 = list;
                     posterTask.setOnSucceeded(ev -> {
-                        pendingTasks[0]--;
-                        if (pendingTasks[0] == 0) {
-                            updateSearchResults(list);
+                        if (pendingTasks.decrementAndGet() == 0) {
+                            updateSearchResults(finalList2);
                         }
                     });
 
+                    List<Filmmodel> finalList1 = list;
                     posterTask.setOnFailed(ev -> {
-                        pendingTasks[0]--;
-                        if (pendingTasks[0] == 0) {
-                            updateSearchResults(list);
+                        if (pendingTasks.decrementAndGet() == 0) {
+                            updateSearchResults(finalList1);
                         }
                     });
 
@@ -445,7 +444,7 @@ public class SearchController {
                 }
             }
 
-            if (pendingTasks[0] == 0) {
+            if (pendingTasks.get() == 0) {
                 updateSearchResults(list);
             }
 

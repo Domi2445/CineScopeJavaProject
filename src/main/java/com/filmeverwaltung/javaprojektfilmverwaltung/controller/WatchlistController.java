@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -145,14 +146,34 @@ public class WatchlistController
             @Override
             protected Void call()
             {
+                List<Filmmodel> allFilms = new ArrayList<>();
+                List<Filmmodel> desiredLanguageFilms = new ArrayList<>();
+
                 for (String id : ids)
                 {
                     Filmmodel film = omdbService.getFilmById(id);
                     if (film != null)
                     {
-                        Platform.runLater(() -> filme.add(film));
+                        // Filtere nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
+                        String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
+                        boolean isInDesiredLanguage = film.getLanguage() != null &&
+                                                     film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase());
+
+                        // Sammle erst alle Filme und filtere später
+                        allFilms.add(film);
+                        if (isInDesiredLanguage) {
+                            desiredLanguageFilms.add(film);
+                        }
                     }
                 }
+
+                // Wenn weniger als 3 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
+                List<Filmmodel> filmsToShow = desiredLanguageFilms.size() >= 3 ? desiredLanguageFilms : allFilms;
+
+                for (Filmmodel film : filmsToShow) {
+                    Platform.runLater(() -> filme.add(film));
+                }
+
                 return null;
             }
         };

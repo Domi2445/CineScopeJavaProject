@@ -107,7 +107,7 @@ public class FilmRepository
         // URL dynamisch mit API-Key und Sprache
         String url = "https://api.themoviedb.org/3/movie/popular"
                 + "?api_key=" + ApiConfig.TMDB_API_KEY
-                + "&language=" + ApiConfig.TMDB_LANGUAGE
+                + "&language=" + ApiConfig.getTMDBLanguage()
                 + "&page=1";
 
         try {

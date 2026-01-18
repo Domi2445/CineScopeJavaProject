@@ -2,6 +2,7 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 import com.filmeverwaltung.javaprojektfilmverwaltung.db.UserRepository;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.User;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.PasswordUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.SessionManager;
 import javafx.fxml.FXML;
@@ -136,7 +137,7 @@ public class LoginController
                 return;
             }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/search.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/search.fxml"), LanguageUtil.getBundle());
             Parent searchView = loader.load();
 
             StackPane contentArea = (StackPane) currentRoot.lookup("#contentArea");
@@ -150,12 +151,6 @@ public class LoginController
             if (btnLoginLogout != null)
             {
                 btnLoginLogout.setText("👤 Abmelden");
-                btnLoginLogout.setVisible(false); // Verstecke den Button nach dem Login
-                Button btnLogout = (Button) currentRoot.lookup("#btnLogout");
-                if (btnLogout != null) {
-                    btnLogout.setVisible(true); // Zeige den Logout-Button
-                }
-
             }
         } catch (IOException e)
         {
@@ -201,7 +196,7 @@ public class LoginController
                 return;
             }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registration.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registration.fxml"), LanguageUtil.getBundle());
             Parent registrationView = loader.load();
 
             // Finde den contentArea (StackPane) im root-Layout

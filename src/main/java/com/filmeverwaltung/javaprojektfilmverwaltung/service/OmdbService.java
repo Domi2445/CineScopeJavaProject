@@ -35,11 +35,26 @@ public class OmdbService
 
         if (film == null || "False".equalsIgnoreCase(film.getResponse()))
         {
-            String translated = translationUtil.translate(title, "de", "en");
+            // Versuche eine Übersetzung in Englisch basierend auf der aktuellen UI-Sprache
+            String uiLangCode = "de"; // default
+            try {
+                uiLangCode = com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil.getLanguage() == null ? "de" :
+                        switch (com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil.getLanguage()) {
+                            case EN -> "en";
+                            case AR -> "ar";
+                            case PL -> "pl";
+                            default -> "de";
+                        };
+            } catch (Exception ex) {
+                // Falls LanguageUtil Probleme macht, verwende Default
+                uiLangCode = "de";
+            }
 
-            if (!translated.equalsIgnoreCase(title))
-            {
-                film = requestOmdb(translated);
+            if (!"en".equalsIgnoreCase(uiLangCode)) {
+                String translated = translationUtil.translate(title, uiLangCode, "en");
+                if (translated != null && !translated.equalsIgnoreCase(title)) {
+                    film = requestOmdb(translated);
+                }
             }
         }
 

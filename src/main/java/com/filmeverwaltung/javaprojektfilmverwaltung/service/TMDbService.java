@@ -36,10 +36,11 @@ public class TMDbService {
 
             String encoded = URLEncoder.encode(title, StandardCharsets.UTF_8);
 
-            // Versuche zuerst auf Deutsch
-            String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=de";
-            LOGGER.log(Level.INFO, "Suche URL (DE): " + url);
-            System.out.println("Suche URL (DE): " + url);
+            // Versuche zuerst in der aktuellen UI-Sprache
+            String currentLanguage = com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage();
+            String url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=" + currentLanguage;
+            LOGGER.log(Level.INFO, "Suche URL (" + currentLanguage + "): " + url);
+            System.out.println("Suche URL (" + currentLanguage + "): " + url);
 
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
@@ -47,13 +48,13 @@ public class TMDbService {
 
             if (results != null && results.size() > 0) {
                 String id = results.get(0).getAsJsonObject().get("id").getAsString();
-                LOGGER.log(Level.INFO, "✅ ID gefunden (DE): " + id);
-                System.out.println("✅ ID gefunden (DE): " + id);
+                LOGGER.log(Level.INFO, "ID gefunden (" + currentLanguage + "): " + id);
+                System.out.println("ID gefunden (" + currentLanguage + "): " + id);
                 return id;
             }
 
-            LOGGER.log(Level.INFO, "⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
-            System.out.println("⚠️ Keine deutschen Ergebnisse, versuche Englisch...");
+            LOGGER.log(Level.INFO, "⚠️ Keine Ergebnisse in " + currentLanguage + ", versuche Englisch...");
+            System.out.println("⚠️ Keine Ergebnisse in " + currentLanguage + ", versuche Englisch...");
 
             // Fallback auf Englisch
             url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=en";
@@ -172,7 +173,7 @@ public class TMDbService {
         List<Filmmodel> similarMovies = new ArrayList<>();
 
         try {
-            String url = BASE_URL + "/movie/" + tmdbId + "/similar?api_key=" + apiKey + "&language=de&page=1";
+            String url = BASE_URL + "/movie/" + tmdbId + "/similar?api_key=" + apiKey + "&language=" + com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage() + "&page=1";
             String json = HttpUtil.get(url);
             JsonObject response = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = response.getAsJsonArray("results");
@@ -212,7 +213,7 @@ public class TMDbService {
             String tmdbId = getMovieIdByTitle(movieTitle);
             if (tmdbId == null) return null;
 
-            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=" + com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage();
             String json = HttpUtil.get(url);
             JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
 
@@ -239,7 +240,7 @@ public class TMDbService {
                 return null;
             }
 
-            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=" + com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage();
             String json = HttpUtil.get(url);
             JsonObject movie = JsonParser.parseString(json).getAsJsonObject();
 
@@ -268,7 +269,7 @@ public class TMDbService {
             String tmdbId = getMovieIdByTitle(movieTitle);
             if (tmdbId == null) return null;
 
-            String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=de";
+            String url = BASE_URL + "/movie/" + tmdbId + "/videos?api_key=" + apiKey + "&language=" + com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage();
             String json = HttpUtil.get(url);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
             JsonArray results = root.has("results") && root.get("results").isJsonArray() ? root.getAsJsonArray("results") : null;

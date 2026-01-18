@@ -6,6 +6,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
@@ -103,6 +104,13 @@ public class RootController
             session.logout();
             updateLoginButtonText();
             loadView("/fxml/search.fxml");
+
+            // Zeige Benachrichtigung
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Abgemeldet");
+            alert.setHeaderText("Sie wurden erfolgreich abgemeldet");
+            alert.setContentText("Sie können sich jederzeit wieder anmelden.");
+            alert.showAndWait();
         }
         else
         {

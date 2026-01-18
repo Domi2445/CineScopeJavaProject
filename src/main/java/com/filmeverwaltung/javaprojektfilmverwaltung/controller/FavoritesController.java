@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,19 +96,38 @@ public class FavoritesController
         int column = 0;
         int row = 0;
 
+        List<Filmmodel> allFilms = new ArrayList<>();
+        List<Filmmodel> desiredLanguageFilms = new ArrayList<>();
+
         // Für jede Film-ID ein Card erstellen
         for (String id : ids)
         {
             Filmmodel film = omdbService.getFilmById(id);
             if (film != null)
             {
-                addMovieCard(film, column, row);
-                column++;
-                if (column == 3)
-                {
-                    column = 0;
-                    row++;
+                // Filtere nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
+                String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
+                boolean isInDesiredLanguage = film.getLanguage() != null &&
+                                             film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase());
+
+                // Sammle erst alle Filme und filtere später
+                allFilms.add(film);
+                if (isInDesiredLanguage) {
+                    desiredLanguageFilms.add(film);
                 }
+            }
+        }
+
+        // Wenn weniger als 3 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
+        List<Filmmodel> filmsToShow = desiredLanguageFilms.size() >= 3 ? desiredLanguageFilms : allFilms;
+
+        for (Filmmodel film : filmsToShow) {
+            addMovieCard(film, column, row);
+            column++;
+            if (column == 3)
+            {
+                column = 0;
+                row++;
             }
         }
 

@@ -4,23 +4,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox spacing="15" style="-fx-padding: 20;"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
+<VBox prefHeight="377.0" prefWidth="327.0" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
 
-    <Label text="%settings.title" style="-fx-font-size: 22;"/>
+    <Label style="-fx-font-size: 22;" text="%settings.title" />
 
-    <Label text="%settings.language"/>
-    <ComboBox fx:id="cmbLanguage" promptText="%settings.selectLanguage"/>
+    <Label text="%settings.language" />
+    <ComboBox fx:id="cmbLanguage" promptText="%settings.selectLanguage" />
 
-    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
+    <Label fx:id="lblLoading" text="%status.loading" visible="false" />
 
-    <CheckBox fx:id="chkDarkMode" text="%settings.darkmode"/>
-    <CheckBox fx:id="chkNotifications" text="%settings.notifications"/>
-    <CheckBox fx:id="chkStatistics" text="%settings.statistics"/>
+    <CheckBox fx:id="chkDarkMode" text="%settings.darkmode" />
+    <CheckBox fx:id="chkNotifications" text="%settings.notifications" />
+    <CheckBox fx:id="chkStatistics" text="%settings.statistics" />
 
-    <Button fx:id="btnSaveSettings"
-            text="%settings.save"
-            onAction="#handleSaveSettings"/>
+    <Button fx:id="btnSaveSettings" onAction="#handleSaveSettings" prefHeight="23.0" prefWidth="186.0" text="%settings.save" textAlignment="CENTER" textFill="#ff8400">
+      <font>
+         <Font size="15.0" />
+      </font></Button>
 </VBox>

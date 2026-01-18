@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
@@ -9,7 +8,7 @@
 
     <Label layoutX="16.0" layoutY="17.0" style="-fx-font-size: 22; -fx-text-fill: white;" text="%settings.title" />
 
-    <Label layoutX="300.0" layoutY="12.0" text="%settings.icon" style="-fx-font-size: 20;" />
+    <Label layoutX="300.0" layoutY="12.0" style="-fx-font-size: 20;" text="%settings.icon" />
 
     <Label layoutX="20.0" layoutY="93.0" prefHeight="20.0" prefWidth="84.0" text="%settings.language">
       <font>
@@ -24,7 +23,7 @@
          <Font size="14.0" />
       </font></CheckBox>
 
-    <Button fx:id="btnSaveSettings" layoutX="20.0" layoutY="222.0" onAction="#handleSaveSettings" prefHeight="23.0" prefWidth="186.0" text="%settings.save" textAlignment="CENTER" textFill="#ff8400">
+    <Button fx:id="btnSaveSettings" layoutX="20.0" layoutY="222.0" onAction="#handleSaveSettings" prefHeight="32.0" prefWidth="216.0" text="%settings.save" textAlignment="CENTER" textFill="#ff8400">
         <font>
             <Font size="15.0" />
         </font></Button>

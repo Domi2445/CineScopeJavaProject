@@ -1,43 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<VBox spacing="15" style="-fx-padding: 20;"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SearchController">
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SearchController">
 
     <HBox spacing="10">
-        <TextField fx:id="txtSearch" promptText="%search.placeholder"/>
-        <Button fx:id="btnSearch" text="%button.search" onAction="#handleSearch"/>
+        <TextField fx:id="txtSearch" promptText="%search.placeholder" />
+        <Button fx:id="btnSearch" onAction="#handleSearch" text="%button.search" />
     </HBox>
 
     <HBox spacing="10">
-        <Label text="%search.genre"/>
-        <ComboBox fx:id="cmbGenre" promptText="%search.all"/>
+        <Label text="%search.genre" />
+        <ComboBox fx:id="cmbGenre" promptText="%search.all" />
 
-        <Label text="%search.language"/>
-        <ComboBox fx:id="cmbLanguage" promptText="%search.all"/>
+        <Label text="%search.language" />
+        <ComboBox fx:id="cmbLanguage" promptText="%search.all" />
     </HBox>
 
     <HBox spacing="10">
-        <Label text="%search.rating"/>
-        <ComboBox fx:id="cmbMinRating"/>
+        <Label text="%search.rating" />
+        <ComboBox fx:id="cmbMinRating" />
 
-        <Label text="%search.runtime"/>
-        <ComboBox fx:id="cmbRuntime"/>
+        <Label text="%search.runtime" />
+        <ComboBox fx:id="cmbRuntime" />
     </HBox>
 
-    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
+    <Label fx:id="lblLoading" text="%status.loading" visible="false" />
 
     <TableView fx:id="tableResults">
         <columns>
-            <TableColumn fx:id="colTitle" text="%table.title"/>
-            <TableColumn fx:id="colYear" text="%table.year"/>
-            <TableColumn fx:id="colRating" text="%table.rating"/>
-            <TableColumn fx:id="colWriter" text="%table.author"/>
-            <TableColumn fx:id="colPlot" text="%table.plot"/>
+            <TableColumn fx:id="colTitle" minWidth="280.0" prefWidth="320.0" text="%table.title" />
+            <TableColumn fx:id="colYear" minWidth="50.0" prefWidth="100.0" text="%table.year" />
+            <TableColumn fx:id="colRating" minWidth="50.0" prefWidth="100.0" text="%table.rating" />
+            <TableColumn fx:id="colWriter" minWidth="100.0" prefWidth="160.0" text="%table.author" />
+            <TableColumn fx:id="colPlot" minWidth="280.0" prefWidth="320.0" text="%table.plot" />
         </columns>
     </TableView>
 </VBox>

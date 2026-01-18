@@ -1,8 +1,10 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class Config
@@ -51,5 +53,21 @@ public class Config
     {
         public String language;
         public boolean debug;
+        public boolean darkMode;
+    }
+
+    public void save() {
+        // Pfad muss identisch mit dem Pfad in load() sein
+        String path = "src/main/resources/config/config.json";
+
+        // setPrettyPrinting sorgt dafür, dass die JSON-Datei lesbar bleibt (mit Umbrüchen)
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        try (FileWriter writer = new FileWriter(path)) {
+            gson.toJson(this, writer);
+            System.out.println("Konfiguration erfolgreich gespeichert.");
+        } catch (IOException e) {
+            System.err.println("Fehler beim Speichern der Config: " + e.getMessage());
+        }
     }
 }

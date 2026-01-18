@@ -1,5 +1,6 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.Config;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Language;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import javafx.fxml.FXML;
@@ -36,21 +37,28 @@ public class SettingsController
 
 
     @FXML
-    private void initialize()
-    {
+    private void initialize() {
+
+        // 1️⃣ Config laden
+        Config aktuelleConfig = Config.load();
+
+        // 2️⃣ Sprache-ComboBox befüllen
         cmbLanguage.getItems().setAll(Language.values());
 
+        // 3️⃣ Sprache aus Config setzen
         cmbLanguage.getSelectionModel()
                 .select(LanguageUtil.getLanguage());
 
-        // Zeige Loading-Label
-        lblLoading.setVisible(true);
+        // 4️⃣ Dark Mode aus Config setzen
+        chkDarkMode.setSelected(aktuelleConfig.app.darkMode);
 
-        // TODO: Hier könnten Einstellungen geladen werden
-        // Für jetzt verstecke das Loading-Label sofort
+        // 5️⃣ Dark Mode anwenden
+        applyDarkMode(aktuelleConfig.app.darkMode);
+
+        // 6️⃣ Loading-Label aus
         lblLoading.setVisible(false);
-
     }
+
 
     @FXML
     private void handleSaveSettings()
@@ -68,8 +76,11 @@ public class SettingsController
         boolean darkModeEnabled = chkDarkMode.isSelected();
         applyDarkMode(darkModeEnabled);
 
+        Config aktuell = Config.load();
+        aktuell.app.darkMode=chkDarkMode.isSelected();
+        aktuell.save();
+        reloadViews();
 
-       reloadViews();
     }
 
     private void reloadViews()

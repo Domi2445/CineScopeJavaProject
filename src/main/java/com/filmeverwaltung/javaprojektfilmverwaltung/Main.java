@@ -13,6 +13,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.logging.LogManager;
 
 
@@ -71,8 +72,10 @@ public class Main extends Application
     @Override
     public void start(Stage stage) throws Exception
     {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages");
+        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/fxml/root.fxml")), bundle);
+        Parent root = loader.load();
 
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/root.fxml")));
         Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
         stage.setTitle("Filme Verwaltung");

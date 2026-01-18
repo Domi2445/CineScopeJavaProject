@@ -21,11 +21,12 @@
             <TableColumn fx:id="colTitle" text="%table.title"/>
             <TableColumn fx:id="colYear" text="%table.year"/>
             <TableColumn fx:id="colRating" text="%table.rating"/>
+            <TableColumn fx:id="colFavorites" text="%table.favorites"/>
         </columns>
     </TableView>
 
     <HBox spacing="10">
         <Button text="%button.remove" onAction="#handleDeleteSelected"/>
-        <Button text="%button.export"/>
+        <Button fx:id="btnExport" text="%button.export"/>
     </HBox>
 </VBox>

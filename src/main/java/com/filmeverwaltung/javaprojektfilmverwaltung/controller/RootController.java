@@ -1,6 +1,7 @@
 package com.filmeverwaltung.javaprojektfilmverwaltung.controller;
 
 
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,9 +10,9 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 /**
  * Controller für die Root-Ansicht der Anwendung.
@@ -82,7 +83,9 @@ public class RootController
     {
         try
         {
-            Parent view = FXMLLoader.load(getClass().getResource(path));
+            ResourceBundle bundle = LanguageUtil.getBundle();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(path), bundle);
+            Parent view = loader.load();
             contentArea.getChildren().setAll(view);
         } catch (IOException e)
         {
@@ -107,6 +110,4 @@ public class RootController
             loadView("/fxml/login.fxml");
         }
     }
-
-    
 }

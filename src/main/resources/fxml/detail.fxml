@@ -1,40 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.web.WebView?>
 
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.web.WebView?>
-
-<ScrollPane fitToWidth="true" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER" style="-fx-background: linear-gradient(#f7f9fc, #eef2f8); -fx-background-color: transparent;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<ScrollPane fitToWidth="true" vbarPolicy="AS_NEEDED" hbarPolicy="NEVER"
+            style="-fx-background: linear-gradient(#f7f9fc, #eef2f8); -fx-background-color: transparent;"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.DetailController">
+
     <VBox spacing="15" style="-fx-padding: 22; -fx-background-color: transparent;">
         <HBox spacing="22">
             <!-- Poster und Buttons -->
-            <VBox spacing="12" style="-fx-min-width: 200; -fx-background-color: white; -fx-padding: 12; -fx-border-color: #e3e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10,0,0,4);">
+            <VBox spacing="12"
+                  style="-fx-min-width: 200; -fx-background-color: white; -fx-padding: 12; -fx-border-color: #e3e8f0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10,0,0,4);">
                 <ImageView fx:id="imgPoster" fitHeight="300" fitWidth="200" preserveRatio="true" />
 
-                <Button fx:id="btnSimilarMovies" text="Ähnliche Filme anzeigen" onAction="#handleShowSimilarMovies"
+                <Button fx:id="btnSimilarMovies" text="%detail.similar.showButton" onAction="#handleShowSimilarMovies"
                         style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8;" />
-                <Button text="Zur Watchlist hinzufügen" onAction="#handleAddToWatchList"
+                <Button fx:id="btnAddToWatchlist" text="%detail.addWatchlist" onAction="#handleAddToWatchList"
                         style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 8;" />
-                <Button text="Übersetzen" onAction="#handleTranslatePlot"
+                <Button fx:id="btnTranslate" text="%detail.translate" onAction="#handleTranslatePlot"
                         style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #7c3aed; -fx-text-fill: white; -fx-background-radius: 8;" />
-                <Button text="Schließen" onAction="#handleClose"
+                <Button fx:id="btnClose" text="%detail.close" onAction="#handleClose"
                         style="-fx-padding: 10; -fx-font-size: 12; -fx-background-color: #e5e7eb; -fx-text-fill: #111827; -fx-background-radius: 8;" />
             </VBox>
 
             <!-- Film Details -->
-            <!--        hier werden die Filmdetails angezeigt -->
-            <VBox spacing="12" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e3e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,5);">
+            <VBox spacing="12" HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e3e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,5);">
                 <Label fx:id="lblTitle" style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
 
                 <!-- Trailer-Container mit WebView -->
@@ -42,36 +38,36 @@
                       style="-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #0f172a; -fx-border-radius: 12; -fx-background-radius: 12;">
                     <WebView fx:id="trailerWebView" prefHeight="400" minHeight="360" VBox.vgrow="ALWAYS" />
                     <HBox spacing="10" prefHeight="40" minHeight="40" alignment="CENTER_RIGHT">
-                        <Hyperlink fx:id="lnkTrailerExternal" text="" style="-fx-font-size: 12; -fx-text-fill: #2563eb;" visible="false" managed="false" />
+                        <Hyperlink fx:id="lnkTrailerExternal" text="%detail.trailer.external" style="-fx-font-size: 12; -fx-text-fill: #2563eb;" visible="false" managed="false" />
                     </HBox>
                 </VBox>
 
                 <HBox spacing="22">
                     <VBox spacing="5">
-                        <Label text="Jahr:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                        <Label text="%detail.year" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
                         <Label fx:id="lblYear" />
                     </VBox>
                     <VBox spacing="5">
-                        <Label text="Autor:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                        <Label text="%detail.author" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
                         <Label fx:id="lblWriter" />
                     </VBox>
                 </HBox>
 
                 <VBox spacing="6" VBox.vgrow="ALWAYS">
-                    <Label text="Handlung:" style="-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #0f172a;" />
+                    <Label text="%detail.plot" style="-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #0f172a;" />
                     <TextArea fx:id="txtPlot" wrapText="true" prefRowCount="15" minHeight="200" VBox.vgrow="ALWAYS" editable="false"
                               style="-fx-font-size: 13; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #e5e7eb;" />
                 </VBox>
 
                 <VBox spacing="6">
-                    <Label text="Streaming-Anbieter:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                    <Label text="%detail.streaming" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
                     <HBox fx:id="streamingProvidersBox" spacing="10" style="-fx-padding: 5;" />
                 </VBox>
 
                 <VBox spacing="5">
-                    <Label text="Trailer:" style="-fx-font-weight: bold;"/>
+                    <Label text="%detail.trailer.label" style="-fx-font-weight: bold;"/>
                     <HBox spacing="8">
-                        <Button fx:id="btnTrailer" text="Trailer anzeigen" onAction="#handleShowTrailer"/>
+                        <Button fx:id="btnTrailer" text="%detail.trailer.show" onAction="#handleShowTrailer"/>
                         <Label fx:id="lblTrailerStatus" text=""/>
                     </HBox>
                     <WebView fx:id="webTrailer" prefHeight="240" prefWidth="400" visible="false" managed="false"/>
@@ -82,19 +78,19 @@
         <Separator />
 
         <!-- Similar Movies Section -->
-        <!--    Für Ähnliche Filme-->
         <VBox fx:id="similarMoviesSection" spacing="10" visible="false">
-            <Label text="Ähnliche Filme" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+            <Label text="%detail.similar.title" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
             <ProgressIndicator fx:id="progressSimilar" visible="false" prefWidth="50" prefHeight="50" />
 
             <TableView fx:id="tableSimilarMovies" prefHeight="250">
                 <columns>
-                    <TableColumn fx:id="colSimilarTitle" text="Titel" prefWidth="250" />
-                    <TableColumn fx:id="colSimilarYear" text="Jahr" prefWidth="80" />
-                    <TableColumn fx:id="colSimilarRating" text="Bewertung" prefWidth="100" />
-                    <TableColumn fx:id="colSimilarPlot" text="Handlung" prefWidth="300" />
+                    <TableColumn fx:id="colSimilarTitle" text="%detail.similar.col.title" prefWidth="250" />
+                    <TableColumn fx:id="colSimilarYear" text="%detail.similar.col.year" prefWidth="80" />
+                    <TableColumn fx:id="colSimilarRating" text="%detail.similar.col.rating" prefWidth="100" />
+                    <TableColumn fx:id="colSimilarPlot" text="%detail.similar.col.plot" prefWidth="300" />
                 </columns>
             </TableView>
         </VBox>
     </VBox>
 </ScrollPane>
+        Pane>

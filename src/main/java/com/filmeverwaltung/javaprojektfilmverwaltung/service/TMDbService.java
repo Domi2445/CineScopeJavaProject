@@ -295,6 +295,46 @@ public class TMDbService {
     }
 
     /**
+     * Holt einen Film nach TMDb-ID und konvertiert ihn in ein Filmmodel
+     */
+    public Filmmodel getMovieById(String tmdbId) {
+        try {
+            String url = BASE_URL + "/movie/" + tmdbId + "?api_key=" + apiKey + "&language=" + com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig.getTMDBLanguage();
+            String json = HttpUtil.get(url);
+            JsonObject movieJson = JsonParser.parseString(json).getAsJsonObject();
+
+            Filmmodel film = convertTmdbToFilmmodel(movieJson);
+            if (film == null) return null;
+
+            // Versuche IMDb ID via external_ids abzurufen
+            try {
+                String extUrl = BASE_URL + "/movie/" + tmdbId + "/external_ids?api_key=" + apiKey;
+                String extJson = HttpUtil.get(extUrl);
+                JsonObject ext = JsonParser.parseString(extJson).getAsJsonObject();
+                if (ext.has("imdb_id") && !ext.get("imdb_id").isJsonNull()) {
+                    String imdb = ext.get("imdb_id").getAsString();
+                    if (imdb != null && !imdb.isBlank()) {
+                        film.setImdbID(imdb);
+                    }
+                }
+            } catch (Exception ex) {
+                LOGGER.log(Level.FINE, "Konnte external_ids nicht laden für TMDB ID: " + tmdbId, ex);
+            }
+
+            // Falls keine imdbID gesetzt, setze tmdb_ prefix
+            if (film.getImdbID() == null || film.getImdbID().isBlank()) {
+                film.setImdbID("tmdb_" + tmdbId);
+            }
+
+            film.setResponse("True");
+            return film;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Fehler beim Laden des TMDb-Films (ID=" + tmdbId + "): " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * Konvertiert ein TMDB JSON-Objekt zu einem Filmmodel
      */
     private Filmmodel convertTmdbToFilmmodel(JsonObject tmdbMovie) {

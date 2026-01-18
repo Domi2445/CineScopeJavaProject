@@ -3,183 +3,77 @@ package com.filmeverwaltung.javaprojektfilmverwaltung.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
-/**
- * Utility-Klasse für Übersetzungen mit der MyMemory Translation API
- * <a href="https://mymemory.translated.net/doc/spec.php">API-Dokumentation</a>
- */
-public class TranslationUtil
-{
+public class TranslationUtil {
 
     private static final Logger LOGGER = Logger.getLogger(TranslationUtil.class.getName());
-    private static final String TRANSLATE_URL = "https://api.mymemory.translated.net/get";
-    private static boolean apiAvailable = true;
-    private static long lastFailTime = 0;
-    private static final long RETRY_INTERVAL = 60000; // 1 Minute
+    private static final String MYMEMORY_URL = "https://api.mymemory.translated.net/get";
+    private static final String DEEPL_URL = "https://api-free.deepl.com/v2/translate";
+    private static final String DEEPL_KEY = "aa9c064d-a7e0-40ef-a726-6d14fc3c20b0:fx";
 
-    // Publicly accessible last error message from the MyMemory API (null when last call succeeded)
     private static volatile String lastErrorMessage = null;
 
-    /**
-     * Übersetzt einen Text von einer Sprache in eine andere
-     *
-     * @param text       Der zu übersetzende Text
-     * @param sourceLang Quellsprache (z.B. "en", "de") - kann null sein für Auto-Erkennung
-     * @param targetLang Zielsprache (z.B. "de", "en")
-     * @return Der übersetzte Text oder der Originaltext bei Fehlern
-     */
-    public String translate(String text, String sourceLang, String targetLang)
-    {
-        // Überprüfe auf leeren Text oder gleiche Sprachen
-        if (text == null || text.isBlank() || (sourceLang != null && sourceLang.equals(targetLang)))
-        {
-            return text;
+    public String translate(String text, String sourceLang, String targetLang) {
+        if (text == null || text.isBlank()) return text;
+
+        // 1. Versuch: MyMemory
+        String result = translateWithMyMemory(text, sourceLang, targetLang);
+
+        // 2. Failover: Wenn MyMemory das Original zurückgibt oder ein Fehler vorliegt
+        if (lastErrorMessage != null || result.equals(text)) {
+            LOGGER.info("MyMemory fehlgeschlagen oder Limit erreicht. Nutze DeepL Backup...");
+            result = translateWithDeepL(text, targetLang);
         }
 
-        if (!apiAvailable && (System.currentTimeMillis() - lastFailTime) < RETRY_INTERVAL)
-        {
-            return text;
-        }
-
-
-        String langPair = (sourceLang != null ? sourceLang : "en") + "|" + (targetLang != null ? targetLang : "de");
-        String url = TRANSLATE_URL + "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) + "&langpair=" + URLEncoder.encode(langPair, StandardCharsets.UTF_8);
-
-        String responseBody;
-        // Führe die HTTP-GET-Anfrage aus
-        try
-        {
-            responseBody = HttpUtil.get(url);
-            if (responseBody == null || responseBody.isBlank())
-            {
-                handleApiError("Leere API-Antwort");
-                return text;
-            }
-            apiAvailable = true;
-        } catch (Exception e)
-        {
-            handleApiError("HTTP-GET Fehler: " + e.getMessage());
-            return text;
-        }
-
-        // Parse die JSON-Antwort robust (MyMemory kann gelegentlich Felder in unterschiedlichem Typ zurückgeben)
-        String translatedText = null;
-        double matchValue = 0d;
-        try
-        {
-            JsonElement rootEl = JsonParser.parseString(responseBody);
-            if (!rootEl.isJsonObject())
-            {
-                handleApiError("Unerwartetes JSON-Format (root nicht Objekt)");
-                return text;
-            }
-
-            JsonObject root = rootEl.getAsJsonObject();
-
-            // responseStatus: kann numerisch oder String sein
-            boolean statusOk = true;
-            if (root.has("responseStatus") && !root.get("responseStatus").isJsonNull())
-            {
-                JsonElement statusEl = root.get("responseStatus");
-                try
-                {
-                    int statusInt = statusEl.getAsInt();
-                    statusOk = (statusInt == 200);
-                } catch (Exception ex)
-                {
-                    statusOk = "200".equals(statusEl.getAsString());
-                }
-            }
-
-            if (!statusOk)
-            {
-                handleApiError("API-Status ungleich 200");
-                return text;
-            }
-
-            if (root.has("responseData") && root.get("responseData").isJsonObject())
-            {
-                JsonObject rd = root.getAsJsonObject("responseData");
-                if (rd.has("translatedText") && !rd.get("translatedText").isJsonNull())
-                {
-                    translatedText = rd.get("translatedText").getAsString();
-                }
-                if (rd.has("match") && !rd.get("match").isJsonNull())
-                {
-                    try
-                    {
-                        matchValue = rd.get("match").getAsDouble();
-                    } catch (Exception ex)
-                    {
-                        try
-                        {
-                            matchValue = Double.parseDouble(rd.get("match").getAsString());
-                        } catch (Exception ignore)
-                        {
-                        }
-                    }
-                }
-            }
-
-            // `matches` kann Array oder String sein; wir loggen den Fall
-            if (root.has("matches") && !root.get("matches").isJsonNull())
-            {
-                JsonElement matchesEl = root.get("matches");
-                if (matchesEl.isJsonArray())
-                {
-                    LOGGER.fine(() -> "MyMemory: matches array size=" + matchesEl.getAsJsonArray().size());
-                } else
-                {
-                    LOGGER.fine(() -> "MyMemory: matches ist kein Array (type=" + matchesEl.getClass().getSimpleName() + ")");
-                }
-            }
-
-            // Ende des try-Blocks
-        } catch (JsonSyntaxException e)
-        {
-            handleApiError("Ungültiges JSON: " + e.getMessage());
-            return text;
-        } catch (Exception e)
-        {
-            handleApiError("Fehler beim Parsen der API-Antwort: " + e.getMessage());
-            return text;
-        }
-
-        if (translatedText == null || translatedText.isBlank())
-        {
-            handleApiError("Keine Übersetzung erhalten");
-            return text;
-        }
-
-        apiAvailable = true;
-        // Clear last error on success
-        lastErrorMessage = null;
-        final double match = matchValue;
-        LOGGER.fine(() -> "Übersetzung erfolgreich: Match=" + match);
-        return translatedText;
+        return result;
     }
 
-    // Behandle API-Fehler und setze den Status
-    private void handleApiError(String message)
-    {
-        LOGGER.warning("MyMemory API: " + message);
-        apiAvailable = false;
-        lastFailTime = System.currentTimeMillis();
-        lastErrorMessage = message;
+    private String translateWithMyMemory(String text, String sourceLang, String targetLang) {
+        try {
+            String effectiveSource = (sourceLang == null) ? "autodetect" : sourceLang;
+            String langPair = effectiveSource + "|" + targetLang;
+            String url = MYMEMORY_URL + "?q=" + URLEncoder.encode(text, StandardCharsets.UTF_8)
+                    + "&langpair=" + URLEncoder.encode(langPair, StandardCharsets.UTF_8);
 
+            String response = HttpUtil.get(url);
+            JsonObject root = JsonParser.parseString(response).getAsJsonObject();
+
+            if (root.get("responseStatus").getAsInt() == 200) {
+                lastErrorMessage = null;
+                return root.getAsJsonObject("responseData").get("translatedText").getAsString();
+            } else {
+                lastErrorMessage = "MyMemory Status: " + root.get("responseStatus").getAsInt();
+            }
+        } catch (Exception e) {
+            lastErrorMessage = "MyMemory Error: " + e.getMessage();
+        }
+        return text;
     }
 
-    // Public accessor for controllers to read and clear the last error
-    public static String getLastError() {
-        return lastErrorMessage;
+    private String translateWithDeepL(String text, String targetLang) {
+        try {
+            // DeepL braucht den Key im Header oder als Parameter
+            String url = DEEPL_URL + "?auth_key=" + DEEPL_KEY
+                    + "&text=" + URLEncoder.encode(text, StandardCharsets.UTF_8)
+                    + "&target_lang=" + targetLang.toUpperCase();
+
+            String response = HttpUtil.get(url);
+            JsonObject root = JsonParser.parseString(response).getAsJsonObject();
+
+            if (root.has("translations")) {
+                lastErrorMessage = null; // DeepL war erfolgreich
+                return root.getAsJsonArray("translations").get(0).getAsJsonObject().get("text").getAsString();
+            }
+        } catch (Exception e) {
+            LOGGER.severe("DeepL Failover ebenfalls gescheitert: " + e.getMessage());
+            lastErrorMessage = "Beide Dienste nicht verfügbar.";
+        }
+        return text;
     }
 
-    public static void clearLastError() {
-        lastErrorMessage = null;
-    }
+    public static String getLastError() { return lastErrorMessage; }
+    public static void clearLastError() { lastErrorMessage = null; }
 }

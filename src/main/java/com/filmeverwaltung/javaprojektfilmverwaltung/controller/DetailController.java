@@ -638,7 +638,7 @@ public class DetailController implements Initializable {
         }
 
         // Wenn MyMemory API einen Fehler gemeldet hat, zeige einen Alert in der GUI
-        String tmError = com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil.getLastError();
+        String tmError = TranslationUtil.getLastError();
         if (tmError != null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Übersetzungsfehler");
@@ -718,7 +718,7 @@ public class DetailController implements Initializable {
         String[] englishWords = {
             "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
             "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does",
-            "did", "will", "would", "could", "should", "may", "might", "must", "can", "shall"
+            "did", "will", "would", "could","should", "may", "might", "must", "can", "shall"
         };
 
         String lowerText = text.toLowerCase();

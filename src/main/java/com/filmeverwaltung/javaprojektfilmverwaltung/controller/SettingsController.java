@@ -30,9 +30,6 @@ public class SettingsController
     private ComboBox<Language> cmbLanguage;
 
 
-    @FXML
-    private CheckBox chkStatistics;
-
 
     @FXML
     private Label lblLoading;
@@ -67,7 +64,7 @@ public class SettingsController
         LanguageUtil.setLanguage(selectedLanguage);
         LOGGER.info("Sprache auf " + selectedLanguage + " gesetzt.");
         // Einstellungen speichern (Statistiken, Dark Mode)
-        boolean statsEnabled = chkStatistics.isSelected();
+
         boolean darkModeEnabled = chkDarkMode.isSelected();
 
 

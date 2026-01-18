@@ -4,21 +4,25 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="377.0" prefWidth="327.0" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
+<AnchorPane prefHeight="382.0" prefWidth="365.0" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
 
-    <Label style="-fx-font-size: 22;" text="%settings.title" />
+    <Label layoutX="16.0" layoutY="17.0" style="-fx-font-size: 22;" text="%settings.title" />
 
-    <Label text="%settings.language" />
-    <ComboBox fx:id="cmbLanguage" promptText="%settings.selectLanguage" />
+    <Label layoutX="20.0" layoutY="93.0" prefHeight="20.0" prefWidth="84.0" text="%settings.language">
+      <font>
+         <Font size="14.0" />
+      </font></Label>
+    <ComboBox fx:id="cmbLanguage" layoutX="104.0" layoutY="90.0" promptText="%settings.selectLanguage" />
 
     <Label fx:id="lblLoading" text="%status.loading" visible="false" />
 
-    <CheckBox fx:id="chkDarkMode" text="%settings.darkmode" />
-    <CheckBox fx:id="chkNotifications" text="%settings.notifications" />
-    <CheckBox fx:id="chkStatistics" text="%settings.statistics" />
-
-    <Button fx:id="btnSaveSettings" onAction="#handleSaveSettings" prefHeight="23.0" prefWidth="186.0" text="%settings.save" textAlignment="CENTER" textFill="#ff8400">
+    <CheckBox fx:id="chkDarkMode" layoutX="20.0" layoutY="134.0" prefHeight="20.0" prefWidth="160.0" text="%settings.darkmode">
       <font>
-         <Font size="15.0" />
-      </font></Button>
-</VBox>
+         <Font size="14.0" />
+      </font></CheckBox>
+
+    <Button fx:id="btnSaveSettings" layoutX="20.0" layoutY="222.0" onAction="#handleSaveSettings" prefHeight="23.0" prefWidth="186.0" text="%settings.save" textAlignment="CENTER" textFill="#ff8400">
+        <font>
+            <Font size="15.0" />
+        </font></Button>
+</AnchorPane>

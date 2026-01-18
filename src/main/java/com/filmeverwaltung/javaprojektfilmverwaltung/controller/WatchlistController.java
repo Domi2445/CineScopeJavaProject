@@ -5,6 +5,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandl
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.WatchlistHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -203,7 +204,7 @@ public class WatchlistController
     {
         try
         {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), LanguageUtil.getBundle());
             Scene scene = new Scene(loader.load());
             Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);

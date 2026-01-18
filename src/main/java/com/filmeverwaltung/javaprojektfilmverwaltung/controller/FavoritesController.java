@@ -4,6 +4,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.FavoritesHandler;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -199,7 +200,7 @@ public class FavoritesController
     {
         try
         {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), LanguageUtil.getBundle());
             Scene scene = new Scene(loader.load());
             Stage dialog = new Stage();
             dialog.initModality(Modality.APPLICATION_MODAL);

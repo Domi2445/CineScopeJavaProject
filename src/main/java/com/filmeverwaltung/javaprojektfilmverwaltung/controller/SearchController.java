@@ -5,6 +5,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.ApiConfig;
 import com.filmeverwaltung.javaprojektfilmverwaltung.db.FilmRepository;
 import com.filmeverwaltung.javaprojektfilmverwaltung.model.Filmmodel;
 import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
+import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
 import javafx.application.Platform;
@@ -517,7 +518,7 @@ public class SearchController {
      */
     private void openDetail(Filmmodel film) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/detail.fxml"), LanguageUtil.getBundle());
             Scene scene = new Scene(loader.load());
 
             Stage dialog = new Stage();

@@ -9,6 +9,7 @@ import com.filmeverwaltung.javaprojektfilmverwaltung.service.OmdbService;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.LoadingOverlay;
 import com.filmeverwaltung.javaprojektfilmverwaltung.util.TranslationUtil;
+import com.filmeverwaltung.javaprojektfilmverwaltung.Dateihandler.SearchHistoryHandler;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -38,7 +39,7 @@ public class SearchController {
 
     private static final Logger LOGGER = Logger.getLogger(SearchController.class.getName());
 
-
+    // FXML UI Components
     @FXML
     private TextField txtSearch;
     @FXML
@@ -66,15 +67,16 @@ public class SearchController {
     @FXML
     private TableColumn<Filmmodel, String> colPlot;
 
-
+    // Services and utilities
     private final OmdbService omdbService = new OmdbService(ApiConfig.OMDB_API_KEY);
     private final FilmRepository filmRepository = new FilmRepository();
     private final LoadingOverlay overlay = new LoadingOverlay();
     private final SearchFilterController filterController = new SearchFilterController();
+    private final SearchHistoryHandler historyHandler = new SearchHistoryHandler();
 
     @FXML
     private void initialize() {
-
+        // Configure table columns
         colTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
         colYear.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getYear()));
         colRating.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getImdbRating()));
@@ -82,7 +84,7 @@ public class SearchController {
         colPlot.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlot()));
         colRating.setVisible(false);
 
-
+        // Configure table row double-click to open detail view
         tableResults.setRowFactory(tv -> {
             TableRow<Filmmodel> row = new TableRow<>();
             row.setOnMouseClicked(e -> {
@@ -93,27 +95,27 @@ public class SearchController {
             return row;
         });
 
-
+        // Initialize Genre ComboBox
         cmbGenre.setItems(FXCollections.observableArrayList(filterController.getAvailableGenres()));
         cmbGenre.getSelectionModel().selectFirst();
         cmbGenre.setOnAction(event -> refilterCurrentTable());
 
-
+        // Initialize Language ComboBox
         cmbLanguage.setItems(FXCollections.observableArrayList(filterController.getAvailableLanguages()));
         cmbLanguage.getSelectionModel().selectFirst();
         cmbLanguage.setOnAction(event -> refilterCurrentTable());
 
-
+        // Initialize Minimum Rating ComboBox
         cmbMinRating.setItems(FXCollections.observableArrayList(filterController.getAvailableRatings()));
         cmbMinRating.getSelectionModel().selectFirst();
         cmbMinRating.setOnAction(event -> refilterCurrentTable());
 
-
+        // Initialize Runtime ComboBox
         cmbRuntime.setItems(FXCollections.observableArrayList(filterController.getAvailableRuntimes()));
         cmbRuntime.getSelectionModel().selectFirst();
         cmbRuntime.setOnAction(event -> refilterCurrentTable());
 
-
+        // Add Enter key listener to search field
         txtSearch.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 handleSearch();
@@ -121,10 +123,10 @@ public class SearchController {
             }
         });
 
-
+        // Initially hide search and filter controls
         setSearchControlsVisibility(false);
 
-
+        // Load top movies on startup (jetzt aus lokaler Access-DB / Repository)
         loadTopMovies();
     }
 
@@ -182,6 +184,8 @@ public class SearchController {
     private void loadTopMovies() {
         tableResults.setVisible(false);
         lblLoading.setVisible(false);
+        colWriter.setVisible(false);
+        colPlot.setPrefWidth(400);
         setSearchControlsVisibility(false);
 
         Task<List<Filmmodel>> task = new Task<>() {
@@ -195,19 +199,19 @@ public class SearchController {
         task.setOnSucceeded(e -> {
             List<Filmmodel> topMovies = new java.util.ArrayList<>(task.getValue());
 
-
+            // Filtere Filme nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
             String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
             List<Filmmodel> filteredMovies = topMovies.stream()
-                .filter(film -> film.getLanguage() != null &&
-                               film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase()))
-                .toList();
+                    .filter(film -> film.getLanguage() != null &&
+                            film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase()))
+                    .toList();
 
-
+            // Wenn weniger als 5 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
             if (filteredMovies.size() < 5) {
                 filteredMovies = topMovies;
             }
 
-
+            // Format year and rating for all movies
             for (Filmmodel film : topMovies) {
                 // Extract year from date string (e.g., "2025-11-05" -> "2025")
                 if (film.getYear() != null && !film.getYear().isEmpty()) {
@@ -216,13 +220,13 @@ public class SearchController {
                         film.setYear(year.substring(0, 4));
                     }
                 }
-
+                // Round rating to 2 decimal places
                 if (film.getImdbRating() != null && !film.getImdbRating().isEmpty() && !"N/A".equalsIgnoreCase(film.getImdbRating())) {
                     try {
                         double rating = Double.parseDouble(film.getImdbRating());
                         film.setImdbRating(String.format("%.2f", rating));
                     } catch (NumberFormatException ex) {
-
+                        // Keep original value if parsing fails
                     }
                 }
             }
@@ -242,7 +246,7 @@ public class SearchController {
 
                 final List<Filmmodel> finalTopMovies = new java.util.ArrayList<>(topMovies);
 
-
+                // Load OMDB posters for all top movies (fallback to TMDB if N/A)
                 final AtomicInteger pendingPosterTasks = new AtomicInteger(topMovies.size());
                 for (Filmmodel film : topMovies) {
                     Task<Void> posterTask = new Task<>() {
@@ -342,6 +346,15 @@ public class SearchController {
 
         task.setOnSucceeded(e -> {
             List<Filmmodel> list = new java.util.ArrayList<>(task.getValue());
+
+
+            if (!list.isEmpty()) {
+                try {
+                    historyHandler.fuegeEintragHinzu(query);
+                } catch (Exception ex) {
+                    LOGGER.log(Level.FINE, "Fehler beim Speichern in Suchverlauf", ex);
+                }
+            }
 
 
 
@@ -444,7 +457,7 @@ public class SearchController {
                 updateSearchResults(list);
             }
 
-
+            // Wenn Translation API einen Fehler gemeldet hat, zeige einen Alert
             String tmError = TranslationUtil.getLastError();
             if (tmError != null) {
                 Platform.runLater(() -> {
@@ -473,13 +486,13 @@ public class SearchController {
      * Update search results with all active filters applied
      */
     private void updateSearchResults(List<Filmmodel> list) {
-
+        // Get selected filter values
         final String selectedGenre = cmbGenre.getSelectionModel().getSelectedItem();
         final String selectedLanguage = cmbLanguage.getSelectionModel().getSelectedItem();
         final String selectedMinRating = cmbMinRating.getSelectionModel().getSelectedItem();
         final String selectedRuntime = cmbRuntime.getSelectionModel().getSelectedItem();
 
-
+        // Apply all filters in sequence
         List<Filmmodel> filteredList = list.stream()
                 .filter(f -> filterController.filterByGenre(f.getGenre(), selectedGenre))
                 .filter(f -> filterController.filterByLanguage(f.getLanguage(), selectedLanguage))
@@ -522,7 +535,7 @@ public class SearchController {
             dialog.setTitle(film.getTitle());
             dialog.setScene(scene);
 
-
+            // Setze maximale Höhe und Breite, damit die ScrollPane funktioniert
             dialog.setMaxHeight(900);
             dialog.setMaxWidth(1400);
             dialog.setMinHeight(600);
@@ -571,7 +584,7 @@ public class SearchController {
                         new Thread(saveTask).start();
                     }
 
-
+                    // Wenn MyMemory API Fehler hatte, zeige Alert
                     String tmError2 = TranslationUtil.getLastError();
                     if (tmError2 != null) {
                         Platform.runLater(() -> {
@@ -606,5 +619,14 @@ public class SearchController {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Fehler beim Öffnen des Detail-Dialogs", e);
         }
+    }
+
+    /**
+     * Public method to start a search with a given query (used by RootController)
+     */
+    public void startSearch(String query) {
+        if (query == null) return;
+        txtSearch.setText(query);
+        handleSearch();
     }
 }

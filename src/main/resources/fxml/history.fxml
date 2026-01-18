@@ -1,5 +1,7 @@
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox spacing="15" style="-fx-padding: 20;"
       xmlns="http://javafx.com/javafx"
@@ -8,5 +10,9 @@
 
     <Label text="%history.title"/>
     <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
-    <ListView/>
+    <HBox spacing="10">
+        <Button fx:id="btnOpenInSearch" text="%history.openInSearch" />
+        <Button fx:id="btnClearHistory" text="%history.clear" />
+    </HBox>
+    <ListView fx:id="listHistory" />
 </VBox>

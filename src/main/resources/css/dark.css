@@ -102,3 +102,15 @@
 .check-box .text {
     -fx-fill: white;
 }
+
+.scroll-pane {
+    -fx-background: #1f2933;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #1f2933;
+}
+
+.grid-pane {
+    -fx-background-color: #1f2933;
+}

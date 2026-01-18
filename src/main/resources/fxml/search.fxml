@@ -30,11 +30,11 @@
 
     <TableView fx:id="tableResults">
         <columns>
-            <TableColumn fx:id="colTitle" minWidth="280.0" prefWidth="320.0" text="%table.title" />
-            <TableColumn fx:id="colYear" minWidth="50.0" prefWidth="100.0" text="%table.year" />
+            <TableColumn fx:id="colTitle" minWidth="280.0" prefWidth="291.33335304260254" text="%table.title" />
+            <TableColumn fx:id="colYear" minWidth="42.0" prefWidth="130.0" text="%table.year" />
             <TableColumn fx:id="colRating" minWidth="50.0" prefWidth="100.0" text="%table.rating" />
-            <TableColumn fx:id="colWriter" minWidth="100.0" prefWidth="160.0" text="%table.author" />
-            <TableColumn fx:id="colPlot" minWidth="280.0" prefWidth="320.0" text="%table.plot" />
+            <TableColumn fx:id="colWriter" minWidth="100.0" prefWidth="144.0" text="%table.author" />
+            <TableColumn fx:id="colPlot" minWidth="280.0" prefWidth="343.33331298828125" text="%table.plot" />
         </columns>
     </TableView>
 </VBox>

@@ -56,10 +56,10 @@ public class FavoritesController
     @FXML
     public void initialize()
     {
-        // Zeige Loading-Label
+
         lblLoading.setVisible(true);
 
-        // Bildgrößen-ComboBox initialisieren
+
         cmbImageSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
         cmbImageSize.setValue("Standard");
         cmbImageSize.setOnAction(event ->
@@ -90,7 +90,7 @@ public class FavoritesController
 
     private void loadFavorites()
     {
-        // Favoriten-IDs laden
+
         List<String> ids = handler.lesen();
 
         int column = 0;
@@ -99,18 +99,18 @@ public class FavoritesController
         List<Filmmodel> allFilms = new ArrayList<>();
         List<Filmmodel> desiredLanguageFilms = new ArrayList<>();
 
-        // Für jede Film-ID ein Card erstellen
+
         for (String id : ids)
         {
             Filmmodel film = omdbService.getFilmById(id);
             if (film != null)
             {
-                // Filtere nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
+
                 String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
                 boolean isInDesiredLanguage = film.getLanguage() != null &&
                                              film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase());
 
-                // Sammle erst alle Filme und filtere später
+
                 allFilms.add(film);
                 if (isInDesiredLanguage) {
                     desiredLanguageFilms.add(film);
@@ -118,7 +118,7 @@ public class FavoritesController
             }
         }
 
-        // Wenn weniger als 3 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
+
         List<Filmmodel> filmsToShow = desiredLanguageFilms.size() >= 3 ? desiredLanguageFilms : allFilms;
 
         for (Filmmodel film : filmsToShow) {
@@ -131,7 +131,7 @@ public class FavoritesController
             }
         }
 
-        // Verstecke Loading-Label am Ende
+
         lblLoading.setVisible(false);
     }
 
@@ -140,32 +140,32 @@ public class FavoritesController
         VBox imageCard = new VBox(5);
         imageCard.setStyle("-fx-border-color: #ddd; -fx-padding: 10; -fx-alignment: center; -fx-cursor: hand;");
 
-        // ImageView erstellen mit variablen Größen
+
         ImageView imageView = new ImageView();
         imageView.setFitWidth(imageWidth);
         imageView.setFitHeight(imageHeight);
         imageView.setPreserveRatio(true);
 
-        // Titel-Label
+
         Label titleLabel = new Label(film.getTitle() != null ? film.getTitle() : "Unbekannt");
         titleLabel.setStyle("-fx-font-weight: bold; -fx-text-alignment: center;");
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(imageWidth);
 
-        // Poster asynchron laden (wie im DetailController)
+
         ladePoster(film, imageView);
 
-        // Entfernen-Button
+
         Button removeButton = new Button("Entfernen");
         removeButton.setOnAction(e ->
         {
-            // Film aus Datei entfernen
+
             handler.entferneFilm(film.getImdbID());
-            // Grid aktualisieren
+
             updateGrid();
         });
 
-        // Doppelklick für Details
+
         imageCard.setOnMouseClicked(event ->
         {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2)
@@ -182,7 +182,7 @@ public class FavoritesController
     {
         String url = film.getPoster();
 
-        // Fallback auf IMDb-Bild, wenn kein Poster vorhanden
+
         if ((url == null || url.isBlank() || url.equalsIgnoreCase("N/A")) && film.getImdbID() != null)
         {
             url = "https://img.omdbapi.com/?i=" + URLEncoder.encode(film.getImdbID(), StandardCharsets.UTF_8) + "&apikey=" + ApiConfig.OMDB_API_KEY;
@@ -192,7 +192,7 @@ public class FavoritesController
 
         final String posterUrl = url;
 
-        // Asynchron laden (wie im DetailController)
+
         Task<Image> task = new Task<>()
         {
             @Override
@@ -239,7 +239,7 @@ public class FavoritesController
 
             dialog.show();
 
-            // Falls Daten unvollständig → nachladen
+
             if (film.getPlot() == null || film.getWriter() == null)
             {
                 Task<Filmmodel> task = new Task<>()

@@ -97,10 +97,10 @@ public class RegistrationController
                 return;
             }
 
-            // Prüfe E-Mail falls angegeben
+
             if (!email.isBlank())
             {
-                // Einfache E-Mail-Validierung
+
                 if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
                 {
                     showError("Ungültige E-Mail-Adresse.");

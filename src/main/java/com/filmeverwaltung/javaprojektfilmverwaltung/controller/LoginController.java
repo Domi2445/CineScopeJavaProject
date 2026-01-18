@@ -79,7 +79,7 @@ public class LoginController
                 return;
             }
 
-            // Überprüfe ob der Account aktiv ist
+
             if (!user.isActive())
             {
                 showError("Dieser Account wurde deaktiviert.");
@@ -93,13 +93,13 @@ public class LoginController
                 return;
             }
 
-            // Update LAST_LOGIN
+
             updateLastLogin(user.getUserId());
 
-            // Speichere Session
+
             SessionManager.getInstance().login(user.getUserId(), user.getUsername());
 
-            // Login erfolgreich - navigiere zur Hauptanwendung
+
             navigateToMainApp();
         } catch (SQLException e)
         {
@@ -117,7 +117,7 @@ public class LoginController
             ps.executeUpdate();
         } catch (SQLException e)
         {
-            // Log, aber blockiere den Login nicht
+
             System.err.println("Fehler beim Aktualisieren von LAST_LOGIN: " + e.getMessage());
         }
     }
@@ -126,7 +126,7 @@ public class LoginController
     {
         try
         {
-            // Finde den contentArea parent über die root BorderPane
+
             Parent currentRoot = txtUsername.getScene() != null ?
                 txtUsername.getScene().getRoot() :
                 findRootPane();
@@ -146,7 +146,7 @@ public class LoginController
                 contentArea.getChildren().setAll(searchView);
             }
 
-            // Aktualisiere das Login-Button-Label
+
             Button btnLoginLogout = (Button) currentRoot.lookup("#btnLoginLogout");
             if (btnLoginLogout != null)
             {
@@ -163,7 +163,7 @@ public class LoginController
 
     private Parent findRootPane()
     {
-        // Versuche über den Parent des txtUsername zu gehen
+
         javafx.scene.Node node = txtUsername;
         while (node != null)
         {
@@ -201,7 +201,7 @@ public class LoginController
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registration.fxml"), LanguageUtil.getBundle());
             Parent registrationView = loader.load();
 
-            // Finde den contentArea (StackPane) im root-Layout
+
             StackPane contentArea = (StackPane) currentRoot.lookup("#contentArea");
             if (contentArea != null)
             {

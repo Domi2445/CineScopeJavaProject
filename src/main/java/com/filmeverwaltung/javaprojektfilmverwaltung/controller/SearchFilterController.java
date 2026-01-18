@@ -21,13 +21,13 @@ public class SearchFilterController {
             "Polish", "Danish", "Finnish", "Norwegian", "Czech"
     );
 
-    // NEW: Minimum ratings (0.0 - 10.0)
+
     public static final List<String> AVAILABLE_RATINGS = Arrays.asList(
             "Alle Bewertungen",
             "6.0", "6.5", "7.0", "7.5", "8.0", "8.5", "9.0"
     );
 
-    // NEW: Runtime options in minutes
+
     public static final List<String> AVAILABLE_RUNTIMES = Arrays.asList(
             "Alle Laufzeiten",
             "Unter 90 Min",
@@ -70,7 +70,7 @@ public class SearchFilterController {
         return false;
     }
 
-    // NEW: Filter by minimum rating based on ComboBox selection
+
     public boolean filterByMinRating(String imdbRating, String selectedRating) {
         if (selectedRating == null || "Alle Bewertungen".equalsIgnoreCase(selectedRating)) {
             return true;
@@ -87,13 +87,13 @@ public class SearchFilterController {
         }
     }
 
-    // NEW: Filter by runtime based on ComboBox selection
+
     public boolean filterByRuntime(int runtimeMinutes, String selectedRuntime) {
         if (selectedRuntime == null || "Alle Laufzeiten".equalsIgnoreCase(selectedRuntime)) {
             return true;
         }
         if (runtimeMinutes < 0) {
-            return false; // Invalid runtime
+            return false;
         }
 
         return switch (selectedRuntime) {

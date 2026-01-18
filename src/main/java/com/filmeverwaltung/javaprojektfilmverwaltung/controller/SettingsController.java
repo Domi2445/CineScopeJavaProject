@@ -64,13 +64,13 @@ public class SettingsController
     private void handleSaveSettings()
     {
 
-        // Sprache speichern
+
         Language selectedLanguage =
                 cmbLanguage.getSelectionModel().getSelectedItem();
 
         LanguageUtil.setLanguage(selectedLanguage);
         LOGGER.info("Sprache auf " + selectedLanguage + " gesetzt.");
-        // Einstellungen speichern (Statistiken, Dark Mode)
+
 
 
         boolean darkModeEnabled = chkDarkMode.isSelected();

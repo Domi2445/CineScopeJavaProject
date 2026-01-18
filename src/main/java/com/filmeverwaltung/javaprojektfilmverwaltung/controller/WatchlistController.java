@@ -63,22 +63,22 @@ public class WatchlistController
     @FXML
     private void initialize()
     {
-        // Zeige Loading-Label
+
         lblLoading.setVisible(true);
         tableWatchlist.setVisible(false);
         btnExport.setVisible(false);
         if (cmbSize != null) cmbSize.setVisible(false);
 
-        // Größenauswahl ComboBox initialisieren
+
         cmbSize.setItems(FXCollections.observableArrayList("Klein", "Standard", "Groß"));
         cmbSize.setValue("Standard");
         cmbSize.setOnAction(event -> anpasseTabellenschriftgroesse());
 
-        // Spalten binden
+
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colYear.setCellValueFactory(new PropertyValueFactory<>("year"));
 
-        // Button-Spalte für "Zu Favoriten hinzufügen"
+
         colFavorites.setCellFactory(new Callback<TableColumn<Filmmodel, Void>, TableCell<Filmmodel, Void>>()
         {
             @Override
@@ -130,9 +130,6 @@ public class WatchlistController
         });
 
 
-        // -----------------------------------------
-        // WATCHLIST AUS JSON LADEN
-        // -----------------------------------------
         WatchlistHandler handler = new WatchlistHandler();
         List<String> ids = handler.lesen();
         ObservableList<Filmmodel> filme = observableArrayList();
@@ -154,7 +151,7 @@ public class WatchlistController
                     Filmmodel film = omdbService.getFilmById(id);
                     if (film != null)
                     {
-                        // Filtere nach aktueller UI-Sprache, aber zeige auch andere Filme wenn zu wenige gefunden werden
+
                         String currentLanguageFilter = LanguageUtil.getCurrentLanguageFilter();
                         boolean isInDesiredLanguage = film.getLanguage() != null &&
                                                      film.getLanguage().toLowerCase().contains(currentLanguageFilter.toLowerCase());
@@ -167,7 +164,7 @@ public class WatchlistController
                     }
                 }
 
-                // Wenn weniger als 3 Filme in der gewünschten Sprache gefunden wurden, zeige alle Filme
+
                 List<Filmmodel> filmsToShow = desiredLanguageFilms.size() >= 3 ? desiredLanguageFilms : allFilms;
 
                 for (Filmmodel film : filmsToShow) {
@@ -202,9 +199,7 @@ public class WatchlistController
         th.setDaemon(true);
         th.start();
 
-        // -----------------------------------------
-        // Doppelklick für Details
-        // -----------------------------------------
+
         tableWatchlist.setRowFactory(tv ->
         {
             TableRow<Filmmodel> row = new TableRow<>();
@@ -220,7 +215,7 @@ public class WatchlistController
         });
     }
 
-    // Film-Detailansicht öffnen
+
     private void openDetail(Filmmodel film)
     {
         try
@@ -244,7 +239,7 @@ public class WatchlistController
 
             dialog.show();
 
-            // Falls Daten unvollständig → nachladen
+
             if (film.getPlot() == null || film.getWriter() == null)
             {
                 Task<Filmmodel> task = new Task<>()
@@ -291,14 +286,14 @@ public class WatchlistController
         Filmmodel film = tableWatchlist.getSelectionModel().getSelectedItem();
         if (film == null)
         {
-            return; // Nichts ausgewählt
+            return;
         }
 
-        // Aus Datei entfernen
+
         WatchlistHandler handler = new WatchlistHandler();
         handler.entferneFilm(film.getImdbID());
 
-        // Aus Tabelle entfernen
+
         tableWatchlist.getItems().remove(film);
     }
 

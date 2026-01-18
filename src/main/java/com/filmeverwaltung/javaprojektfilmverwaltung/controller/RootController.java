@@ -100,12 +100,12 @@ public class RootController
         SessionManager session = SessionManager.getInstance();
         if (session.isLoggedIn())
         {
-            // Logout
+
             session.logout();
             updateLoginButtonText();
             loadView("/fxml/search.fxml");
 
-            // Zeige Benachrichtigung
+
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Abgemeldet");
             alert.setHeaderText("Sie wurden erfolgreich abgemeldet");
@@ -114,7 +114,7 @@ public class RootController
         }
         else
         {
-            // Login
+
             loadView("/fxml/login.fxml");
         }
     }

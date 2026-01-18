@@ -57,10 +57,10 @@ public class Config
     }
 
     public void save() {
-        // Pfad muss identisch mit dem Pfad in load() sein
+
         String path = "src/main/resources/config/config.json";
 
-        // setPrettyPrinting sorgt dafür, dass die JSON-Datei lesbar bleibt (mit Umbrüchen)
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         try (FileWriter writer = new FileWriter(path)) {

@@ -18,11 +18,11 @@ public class HistoryController
     @FXML
     private void initialize()
     {
-        // Zeige Loading-Label
+
         lblLoading.setVisible(true);
 
-        // TODO: Hier könnten Verlauf-Daten geladen werden
-        // Für jetzt verstecke das Loading-Label sofort
+
+
         lblLoading.setVisible(false);
     }
 }

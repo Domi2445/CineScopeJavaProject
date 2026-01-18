@@ -92,7 +92,7 @@ public class DetailController implements Initializable {
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
 
-        // Lade Custom-Theme CSS nur für diesen Dialog
+
         if (stage != null && stage.getScene() != null) {
             try {
                 var themeUrl = getClass().getResource("/styles/theme.css");
@@ -107,7 +107,7 @@ public class DetailController implements Initializable {
             }
         }
 
-        // Füge Event-Handler hinzu, um Video beim Schließen zu stoppen
+        //
         if (stage != null) {
             stage.setOnCloseRequest(event -> stopVideo());
         }
@@ -131,7 +131,7 @@ public class DetailController implements Initializable {
      * @param film Der anzuzeigende Film
      */
     public void setFilm(Filmmodel film) {
-        // Stoppe das aktuell laufende Video
+
         stopVideo();
 
         this.film = film;
@@ -169,11 +169,11 @@ public class DetailController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Starte lokalen Webserver
+
         com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.start();
 
 
-        // Initialisiere Similar Movies Tabelle
+
         if (colSimilarTitle != null) {
             colSimilarTitle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
             colSimilarYear.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getYear()));
@@ -198,7 +198,7 @@ public class DetailController implements Initializable {
         lblYear.setText(valueOrDash(film.getYear()));
         lblWriter.setText(valueOrDash(film.getWriter()));
 
-        // Trailer-Link asynchron laden
+
         if (film.getTitle() != null && !film.getTitle().isBlank()) {
             LOGGER.log(Level.INFO, "🎬 Starte Trailer-Laden für: " + film.getTitle());
             System.out.println("🎬 Starte Trailer-Laden für: " + film.getTitle());
@@ -254,14 +254,14 @@ public class DetailController implements Initializable {
                         System.out.println("Embed URL: " + youtubeEmbedUrl);
 
                         try {
-                            // Konfiguriere WebView für anschauliche Anzeige
+
                             javafx.scene.web.WebEngine engine = trailerWebView.getEngine();
                             engine.setJavaScriptEnabled(true);
 
                             LOGGER.log(Level.INFO, "WebView-Engine konfiguriert");
                             System.out.println("WebView-Engine konfiguriert");
 
-                            // Erzeuge HTML mit eingebettetem Player (ohne zusätzlichen Button)
+
                             String htmlContent = "<!DOCTYPE html>" +
                                     "<html>" +
                                     "<head>" +
@@ -289,7 +289,7 @@ public class DetailController implements Initializable {
                             LOGGER.log(Level.INFO, "HTML wird registriert. Länge: " + htmlContent.length());
                             System.out.println("HTML wird registriert. Länge: " + htmlContent.length());
 
-                            // Registriere HTML im lokalen Webserver
+
                             String trailerRoute = "trailer_" + videoId;
                             com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.setContent(trailerRoute, htmlContent);
                             String serverUrl = com.filmeverwaltung.javaprojektfilmverwaltung.util.LocalWebServer.getUrl(trailerRoute);
@@ -297,7 +297,7 @@ public class DetailController implements Initializable {
                             LOGGER.log(Level.INFO, "Lade HTML von Webserver: " + serverUrl);
                             System.out.println("Lade HTML von Webserver: " + serverUrl);
 
-                            // Lade HTML vom lokalen Webserver
+
                             engine.load(serverUrl);
 
                             trailerWebView.setVisible(true);
@@ -305,7 +305,7 @@ public class DetailController implements Initializable {
                             trailerContainer.setVisible(true);
                             trailerContainer.setManaged(true);
 
-                            // Zeige Fallback-Link außerhalb der WebView
+
                             lnkTrailerExternal.setText("🎬 Im Browser öffnen");
                             lnkTrailerExternal.setTooltip(new Tooltip("Öffnet den Trailer auf YouTube"));
 
@@ -322,7 +322,7 @@ public class DetailController implements Initializable {
                             lnkTrailerExternal.setVisible(true);
                             lnkTrailerExternal.setManaged(true);
 
-                            // Zeige auch den Trailer-Button
+
                             btnTrailer.setVisible(true);
                             btnTrailer.setManaged(true);
 
@@ -385,10 +385,10 @@ public class DetailController implements Initializable {
             btnTrailer.setManaged(false);
         }
 
-        // Lade Streaming-Anbieter asynchron
+
         ladeStreamingAnbieter();
 
-        // Wenn Plot fehlt, zuerst Platzhalter setzen und asynchron nachladen
+
         if ("N/A".equals(film.getPlot()) || film.getPlot() == null || film.getPlot().isBlank()) {
             txtPlot.setText("No Description Available");
 
@@ -446,7 +446,7 @@ public class DetailController implements Initializable {
                 streamingProvidersBox.getChildren().clear();
                 streamingProvidersBox.getChildren().add(new Label("Keine Streaming-Anbieter gefunden"));
             } else {
-                // Lade ALLE Logos ZUERST, bevor sie angezeigt werden
+
                 List<Image> loadedImages = new java.util.ArrayList<>();
                 final int[] loadedCount = {0};
 
@@ -466,7 +466,7 @@ public class DetailController implements Initializable {
                         loadedImages.add(logoTask.getValue());
                         loadedCount[0]++;
 
-                        // Wenn ALLE Logos geladen sind, DANN anzeigen
+
                         if (loadedCount[0] == providers.size()) {
                             displayStreamingLogos(providers, loadedImages);
                         }
@@ -510,7 +510,7 @@ public class DetailController implements Initializable {
                 logoView.setPreserveRatio(true);
                 logoView.setStyle("-fx-border-color: #ccc; -fx-padding: 3;");
 
-                // Tooltip mit Provider-Namen
+
                 Tooltip tooltip = new Tooltip(providers.get(i).name);
                 Tooltip.install(logoView, tooltip);
 
@@ -600,7 +600,7 @@ public class DetailController implements Initializable {
                             }
                         }
                     }
-                    throw e; // Wenn auch TMDB fehlschlägt, werfe Exception
+                    throw e;
                 }
             }
         };
@@ -685,23 +685,20 @@ public class DetailController implements Initializable {
     private void updateTranslateButtonVisibility() {
         if (btnTranslate == null || film == null) return;
 
-        // Übersetzungsbutton anzeigen wenn:
-        // 1. Daten von OMDB kommen (erkennbar an englischem Text)
-        // 2. ODER TMDB-Daten nicht in der gewünschten Sprache verfügbar sind
 
         boolean showTranslateButton = false;
 
-        // Prüfe ob Titel auf Englisch ist (wahrscheinlich von OMDB)
+
         if (film.getTitle() != null && isEnglishText(film.getTitle())) {
             showTranslateButton = true;
         }
 
-        // Prüfe ob Plot auf Englisch ist (wahrscheinlich von OMDB oder TMDB hatte keine Übersetzung)
+
         if (film.getPlot() != null && !film.getPlot().equals("N/A") && isEnglishText(film.getPlot())) {
             showTranslateButton = true;
         }
 
-        // Prüfe ob Writer auf Englisch ist
+
         if (film.getWriter() != null && !film.getWriter().equals("N/A") && isEnglishText(film.getWriter())) {
             showTranslateButton = true;
         }
@@ -741,7 +738,7 @@ public class DetailController implements Initializable {
             }
         }
 
-        // Wenn mehr als 30% der Wörter englische Stoppwörter sind, gilt der Text als Englisch
+
         return words.length > 0 && (double) englishWordCount / words.length > 0.3;
     }
 }

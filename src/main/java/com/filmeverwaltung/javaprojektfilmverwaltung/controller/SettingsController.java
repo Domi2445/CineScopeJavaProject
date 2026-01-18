@@ -30,7 +30,6 @@ public class SettingsController
     private ComboBox<Language> cmbLanguage;
 
 
-
     @FXML
     private Label lblLoading;
 
@@ -65,7 +64,9 @@ public class SettingsController
         LOGGER.info("Sprache auf " + selectedLanguage + " gesetzt.");
         // Einstellungen speichern (Statistiken, Dark Mode)
 
+
         boolean darkModeEnabled = chkDarkMode.isSelected();
+        applyDarkMode(darkModeEnabled);
 
 
        reloadViews();
@@ -92,6 +93,25 @@ public class SettingsController
         }
 
     }
+
+    private void applyDarkMode(boolean darkMode) {
+
+        var scene = chkDarkMode.getScene();
+        if (scene == null) return;
+
+        scene.getStylesheets().clear();
+
+        if (darkMode) {
+            scene.getStylesheets().add(
+                    getClass().getResource("/css/dark.css").toExternalForm()
+            );
+        } else {
+            scene.getStylesheets().add(
+                    getClass().getResource("/css/light.css").toExternalForm()
+            );
+        }
+    }
+
 
 }
 

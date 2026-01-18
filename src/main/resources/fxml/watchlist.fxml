@@ -2,31 +2,29 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox spacing="15" style="-fx-padding: 20;"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.WatchlistController">
+
+<VBox spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.WatchlistController">
 
     <HBox spacing="10">
-        <Label text="%watchlist.title"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Label text="%general.size"/>
-        <ComboBox fx:id="cmbSize" promptText="%general.default"/>
+        <Label text="%watchlist.title" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="%general.size" />
+        <ComboBox fx:id="cmbSize" promptText="%general.default" />
     </HBox>
 
-    <Label fx:id="lblLoading" text="%status.loading" visible="false"/>
+    <Label fx:id="lblLoading" text="%status.loading" visible="false" />
 
     <TableView fx:id="tableWatchlist">
         <columns>
-            <TableColumn fx:id="colTitle" text="%table.title"/>
-            <TableColumn fx:id="colYear" text="%table.year"/>
-            <TableColumn fx:id="colRating" text="%table.rating"/>
-            <TableColumn fx:id="colFavorites" text="%table.favorites"/>
+            <TableColumn fx:id="colTitle" text="%table.title" />
+            <TableColumn fx:id="colYear" text="%table.year" />
+            <TableColumn fx:id="colRating" text="%table.rating" />
+            <TableColumn fx:id="colFavorites" prefWidth="103.33332316080731" text="%table.favorites" />
         </columns>
     </TableView>
 
     <HBox spacing="10">
-        <Button text="%button.remove" onAction="#handleDeleteSelected"/>
-        <Button fx:id="btnExport" text="%button.export"/>
+        <Button onAction="#handleDeleteSelected" text="%button.remove" />
+        <Button fx:id="btnExport" text="%button.export" />
     </HBox>
 </VBox>

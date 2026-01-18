@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="382.0" prefWidth="365.0" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.SettingsController">
 
-    <Label layoutX="16.0" layoutY="17.0" style="-fx-font-size: 22;" text="%settings.title" />
+    <Label layoutX="16.0" layoutY="17.0" style="-fx-font-size: 22; -fx-text-fill: white;" text="%settings.title" />
+
+    <Label layoutX="300.0" layoutY="12.0" text="%settings.icon" style="-fx-font-size: 20;" />
 
     <Label layoutX="20.0" layoutY="93.0" prefHeight="20.0" prefWidth="84.0" text="%settings.language">
       <font>

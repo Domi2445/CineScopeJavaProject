@@ -150,7 +150,9 @@ public class LoginController
             Button btnLoginLogout = (Button) currentRoot.lookup("#btnLoginLogout");
             if (btnLoginLogout != null)
             {
-                btnLoginLogout.setText("👤 Abmelden");
+                java.util.ResourceBundle bundle = com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil.getBundle();
+                String logoutLabel = bundle.containsKey("button.logout") ? bundle.getString("button.logout") : "Abmelden";
+                btnLoginLogout.setText(logoutLabel);
             }
         } catch (IOException e)
         {

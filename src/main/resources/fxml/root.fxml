@@ -10,15 +10,15 @@
             fx:controller="com.filmeverwaltung.javaprojektfilmverwaltung.controller.RootController">
 
     <left>
-        <VBox spacing="10" style="-fx-background-color: #2b2b2b; -fx-padding: 20;">
-            <Label text="%menu.title"/>
+        <VBox spacing="10" styleClass="left-sidebar" style="-fx-background-color: #2b2b2b; -fx-padding: 20;">
+            <Label text="%menu.title" style="-fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold;"/>
 
-            <Button text="%menu.search" onAction="#onSearch"/>
-            <Button text="%menu.watchlist" onAction="#onWatchlist"/>
-            <Button text="%menu.favorites" onAction="#onFavorites"/>
-            <Button text="%menu.history" onAction="#onHistory"/>
-            <Button text="%menu.settings" onAction="#onSettings"/>
-            <Button fx:id="btnLoginLogout" text="%menu.login" onAction="#onLoginLogout"/>
+            <Button text="%menu.search" onAction="#onSearch" />
+            <Button text="%menu.watchlist" onAction="#onWatchlist" />
+            <Button text="%menu.favorites" onAction="#onFavorites" />
+            <Button text="%menu.history" onAction="#onHistory" />
+            <Button text="%menu.settings" onAction="#onSettings" />
+            <Button fx:id="btnLoginLogout" text="%menu.login" onAction="#onLoginLogout" />
         </VBox>
     </left>
 

@@ -40,13 +40,13 @@ public class RootController
     private void updateLoginButtonText()
     {
         SessionManager session = SessionManager.getInstance();
-        if (session.isLoggedIn())
-        {
-            btnLoginLogout.setText("👤 Abmelden");
-        }
-        else
-        {
-            btnLoginLogout.setText("🔒 Anmelden");
+        java.util.ResourceBundle bundle = com.filmeverwaltung.javaprojektfilmverwaltung.util.LanguageUtil.getBundle();
+        String logoutLabel = bundle.containsKey("button.logout") ? bundle.getString("button.logout") : "Abmelden";
+        String loginLabel = bundle.containsKey("button.login") ? bundle.getString("button.login") : "Anmelden";
+        if (session.isLoggedIn()) {
+            btnLoginLogout.setText(logoutLabel);
+        } else {
+            btnLoginLogout.setText(loginLabel);
         }
     }
 

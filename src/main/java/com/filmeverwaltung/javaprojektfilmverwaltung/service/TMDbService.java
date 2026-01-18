@@ -21,6 +21,7 @@ public class TMDbService {
 
     private static final Logger LOGGER = Logger.getLogger(TMDbService.class.getName());
     private static final String BASE_URL = "https://api.themoviedb.org/3";
+    private static final String FALLBACK_LANGUAGE = "en-US"; // Fallback language for API calls
     private final String apiKey;
 
     public TMDbService(String apiKey) {
@@ -60,8 +61,8 @@ public class TMDbService {
             System.out.println("⚠️ Keine Ergebnisse in der aktuellen Sprache, versuche Englisch...");
 
             // Fallback auf Englisch wenn nicht bereits Englisch
-            if (!"en-US".equals(currentLang)) {
-                url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=en-US";
+            if (!FALLBACK_LANGUAGE.equals(currentLang)) {
+                url = BASE_URL + "/search/movie?api_key=" + apiKey + "&query=" + encoded + "&language=" + FALLBACK_LANGUAGE;
                 LOGGER.log(Level.INFO, "Suche URL (EN): " + url);
                 System.out.println("Suche URL (EN): " + url);
 
